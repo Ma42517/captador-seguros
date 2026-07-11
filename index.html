@@ -167,7 +167,7 @@
               <h2 class="text-xl sm:text-2xl font-bold text-navy-900">Cuéntame sobre ti</h2>
               <p class="text-sm text-navy-400 mt-1 mb-6">Todos los campos son obligatorios. Toma menos de 2 minutos.</p>
 
-              <form id="preRegisterForm" action="" method="POST" novalidate class="space-y-5">
+              <form id="preRegisterForm" action="https://formspree.io/f/meebywra" method="POST" novalidate class="space-y-5">
 
                 <!-- Nombre Completo -->
                 <div>
@@ -263,7 +263,7 @@
                   <svg id="submitIcon" class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 10-8 0v2"/>
                   </svg>
-                  <span id="submitLabel">Enviar mis datos de forma segura</span>
+                  <span id="submitLabel">Enviar</span>
                 </button>
 
                 <p class="text-center text-[11px] text-navy-300 flex items-center justify-center gap-1.5">
@@ -315,20 +315,6 @@
       maxAge: 99,
       whatsappMinDigits: 10,
       goalMaxLength: 300,
-
-      // Punto único de integración con el backend / servicio de correo.
-      // Sustituye el cuerpo de esta función por tu llamada real, por ejemplo:
-      //   const res = await fetch('https://formspree.io/f/xxxxx', {
-      //     method: 'POST',
-      //     headers: { 'Content-Type': 'application/json' },
-      //     body: JSON.stringify(data),
-      //   });
-      //   return { ok: res.ok };
-      submitToServer: async function (data) {
-        console.log('[PreRegisterForm] Datos listos para enviar:', data);
-        await new Promise((resolve) => setTimeout(resolve, 900));
-        return { ok: true };
-      },
     };
 
     document.addEventListener('DOMContentLoaded', init);
@@ -450,7 +436,7 @@
 
       function setLoading(isLoading) {
         submitBtn.disabled = isLoading;
-        submitLabel.textContent = isLoading ? 'Enviando...' : 'Enviar mis datos de forma segura';
+        submitLabel.textContent = isLoading ? 'Enviando...' : 'Enviar';
         submitIcon.classList.toggle('animate-spin', isLoading);
       }
 
@@ -471,39 +457,47 @@
       // ------------------------------------------------------------
       // 5. ENVÍO DEL FORMULARIO
       // ------------------------------------------------------------
+      // Estrategia:
+      // 1) Validamos en el cliente para dar feedback inmediato. Si hay
+      //    errores, usamos preventDefault() y NO se envía nada (correcto:
+      //    nunca debemos enviar datos incompletos/invalidos).
+      // 2) Si todo es válido, usamos preventDefault() únicamente para
+      //    poder enviar los datos por AJAX (fetch) a Formspree y mostrar
+      //    la vista de confirmación sin recargar la página.
+      // 3) Si ese fetch falla por cualquier motivo (red, CORS, bloqueo del
+      //    navegador, etc.), el catch llama a form.submit() como envío
+      //    NATIVO de respaldo directo a Formspree, para garantizar que la
+      //    información del cliente nunca se pierda.
       form.addEventListener('submit', async function (event) {
-        event.preventDefault();
-
         const results = Object.keys(fields).map((name) => validateField(name));
         const isValid = results.every(Boolean);
+
         if (!isValid) {
-          const firstInvalid = Object.keys(fields).find((name) => !VALIDATORS[name] ? false : VALIDATORS[name](fields[name].value));
+          event.preventDefault();
+          const firstInvalid = Object.keys(fields).find((name) => VALIDATORS[name](fields[name].value));
           if (firstInvalid) fields[firstInvalid].focus();
           return;
         }
 
-        const data = {
-          fullName: fields.fullName.value.trim(),
-          age: fields.age.value.trim(),
-          whatsapp: fields.whatsapp.value.trim(),
-          priority: fields.priority.value,
-          goal: fields.goal.value.trim(),
-          submittedAt: new Date().toISOString(),
-        };
-
+        event.preventDefault();
         setLoading(true);
+
         try {
-          const result = await CONFIG.submitToServer(data);
-          if (result && result.ok) {
-            showSuccess(data.fullName);
-          } else {
-            throw new Error('El servidor rechazó la solicitud.');
-          }
-        } catch (err) {
-          console.error('[PreRegisterForm] Error al enviar:', err);
-          alert('Hubo un problema al enviar tu información. Por favor intenta de nuevo.');
-        } finally {
+          const response = await fetch(form.action, {
+            method: form.method || 'POST',
+            body: new FormData(form),
+            headers: { Accept: 'application/json' },
+          });
+
+          if (!response.ok) throw new Error('Formspree respondió con un error.');
+
           setLoading(false);
+          showSuccess(fields.fullName.value.trim());
+        } catch (err) {
+          console.error('[PreRegisterForm] Envío por AJAX falló, se usa envío nativo de respaldo:', err);
+          // Red de seguridad: garantizamos que el formulario SIEMPRE
+          // termine enviándose a Formspree, aunque falle el fetch.
+          form.submit();
         }
       });
 

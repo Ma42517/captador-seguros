@@ -182,7 +182,8 @@
     transition: opacity 400ms ease;
   }
 
-  /* Botón "Iniciar": grande y prominente, con animación de latido (heartBeat) */
+  /* Botón "Iniciar": grande y prominente, con un reflejo tipo brillo
+     que recorre suavemente su contorno (sin latido). */
   .welcome-start {
     position: relative;
     display: inline-flex;
@@ -192,18 +193,44 @@
     border-radius: 9999px;
     background: #152540; /* navy-800, azul marino corporativo */
     color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.55);
     box-shadow: 0 20px 46px -12px rgba(12, 23, 41, 0.6);
     font-size: clamp(1.35rem, 3.2vw, 1.9rem);
     font-weight: 700;
     letter-spacing: 0.02em;
     cursor: pointer;
-    animation: heartBeat 2.2s ease-in-out infinite;
     transition: box-shadow 300ms ease, background-color 300ms ease;
-    will-change: transform;
   }
   .welcome-start:hover { background: #0c1729; box-shadow: 0 24px 54px -10px rgba(12, 23, 41, 0.75); }
   .welcome-start:focus-visible { outline: 3px solid #dca23a; outline-offset: 5px; }
+
+  /* Reflejo/brillo leve que orbita el borde del botón (reemplaza el latido).
+     Se usa @property para animar suavemente el ángulo del degradado cónico
+     y una máscara para limitar el brillo únicamente al contorno. */
+  @property --shine-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+  .welcome-start::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2px; /* grosor del brillo del contorno */
+    background: conic-gradient(from var(--shine-angle),
+      transparent 0deg,
+      transparent 290deg,
+      rgba(255, 255, 255, 0.9) 330deg,
+      transparent 360deg);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    animation: shineOrbit 4.5s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes shineOrbit { to { --shine-angle: 360deg; } }
 
   /* Texto con efecto "ola": cada letra sube y baja de forma secuencial */
   .welcome-start__text { display: inline-flex; }
@@ -227,16 +254,6 @@
   @keyframes welcomeWave {
     0%, 60%, 100% { transform: translateY(0); }
     30%           { transform: translateY(-0.28em); }
-  }
-
-  /* Latido: expansión/contracción suave del botón, en bucle infinito */
-  @keyframes heartBeat {
-    0%   { transform: scale(1); }
-    14%  { transform: scale(1.06); }
-    28%  { transform: scale(1); }
-    42%  { transform: scale(1.06); }
-    70%  { transform: scale(1); }
-    100% { transform: scale(1); }
   }
 
   /* --- Fondo de "ondas de agua" (.bg-wave-decorator) en la parte inferior --- */
@@ -326,7 +343,7 @@
 
   /* Accesibilidad: sin pulso continuo y apertura simplificada */
   @media (prefers-reduced-motion: reduce) {
-    .welcome-start { animation: none; }
+    .welcome-start::after { animation: none; }
     .welcome-start__text span { animation: none; }
     .bg-wave-decorator .wave-track { animation: none; }
     .welcome-signature { animation: none; }
@@ -1709,9 +1726,9 @@
 
   <!-- ============================================================ -->
   <!-- NAVEGACIÓN DE LA PANTALLA 2 (DASHBOARD DE SELECCIÓN)          -->
-  <!-- "Prospección rápida" (Flujo Exprés) enlaza con el resto de la -->
-  <!-- página: oculta el dashboard y revela el diagnóstico existente.-->
-  <!-- "Asesoría completa" (Flujo Profundo) queda preparado, pero su -->
+  <!-- "Asesoría completa" (Flujo Profundo) enlaza con el resto de la -->
+  <!-- página: oculta el dashboard y revela el diagnóstico completo.  -->
+  <!-- "Prospección rápida" (Flujo Exprés) queda preparado, pero su   -->
   <!-- ruta aún no está conectada (se construirá en una fase futura). -->
   <!-- ============================================================ -->
   <script>
@@ -1737,13 +1754,13 @@
         btn.addEventListener('click', function () {
           const flow = btn.dataset.flow;
 
-          if (flow === 'express') {
-            // Flujo Exprés → conecta con todo el resto de la página.
+          if (flow === 'full') {
+            // "Asesoría completa" → conecta con todo el resto de la página (diagnóstico completo).
             revealMainExperience();
-          } else if (flow === 'full') {
-            // Flujo Profundo "Asesoría completa": ruta pendiente (fase futura).
+          } else if (flow === 'express') {
+            // Flujo Exprés "Prospección rápida": ruta pendiente (fase futura).
             // Por ahora sin acción para no romper la experiencia.
-            console.info('[Dashboard] "Asesoría completa" aún no está conectada.');
+            console.info('[Dashboard] "Prospección rápida" aún no está conectada.');
           }
         });
       });

@@ -268,9 +268,12 @@
   /* ============================================================ */
   /* PANTALLA 2 — DASHBOARD DE SELECCIÓN (layout horizontal)      */
   /* Se revela al abrir las puertas del Welcome Overlay. Menú de   */
-  /* dos vías pensado para tablet. Solo UI: rutas aún no conectadas.*/
+  /* dos vías pensado para tablet.                                 */
   /* ============================================================ */
-  #selectionDashboard { z-index: 500; }
+  #selectionDashboard { z-index: 500; transition: opacity 0.4s ease; }
+  /* Salida: al elegir un flujo, el dashboard se desvanece y revela */
+  /* el resto de la página (el diagnóstico existente) por debajo.   */
+  #selectionDashboard.is-leaving { opacity: 0; pointer-events: none; }
 
   .dashboard-options {
     display: flex;
@@ -1700,6 +1703,50 @@
           window.setTimeout(finish, 1100); // respaldo (> 900ms de la transición)
         });
       }
+    });
+  })();
+  </script>
+
+  <!-- ============================================================ -->
+  <!-- NAVEGACIÓN DE LA PANTALLA 2 (DASHBOARD DE SELECCIÓN)          -->
+  <!-- "Prospección rápida" (Flujo Exprés) enlaza con el resto de la -->
+  <!-- página: oculta el dashboard y revela el diagnóstico existente.-->
+  <!-- "Asesoría completa" (Flujo Profundo) queda preparado, pero su -->
+  <!-- ruta aún no está conectada (se construirá en una fase futura). -->
+  <!-- ============================================================ -->
+  <script>
+  (function () {
+    'use strict';
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const dashboard = document.getElementById('selectionDashboard');
+      if (!dashboard) return;
+
+      const buttons = dashboard.querySelectorAll('.dash-btn');
+
+      // Revela el resto de la página (diagnóstico) ocultando el dashboard.
+      function revealMainExperience() {
+        dashboard.classList.add('is-leaving');           // fundido de salida (opacidad)
+        window.setTimeout(function () {
+          dashboard.classList.add('hidden');              // se retira del layout
+        }, 420);                                          // > 400ms de la transición CSS
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      Array.prototype.forEach.call(buttons, function (btn) {
+        btn.addEventListener('click', function () {
+          const flow = btn.dataset.flow;
+
+          if (flow === 'express') {
+            // Flujo Exprés → conecta con todo el resto de la página.
+            revealMainExperience();
+          } else if (flow === 'full') {
+            // Flujo Profundo "Asesoría completa": ruta pendiente (fase futura).
+            // Por ahora sin acción para no romper la experiencia.
+            console.info('[Dashboard] "Asesoría completa" aún no está conectada.');
+          }
+        });
+      });
     });
   })();
   </script>

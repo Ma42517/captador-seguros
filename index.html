@@ -91,20 +91,15 @@
   }
 
   /* ============================================================ */
-  /* CAPA 1 — welcomeOverlay: pantalla de "alianza estratégica".   */
-  /* Dos mitades de marca (izquierda / derecha) con sus logos como  */
-  /* protagonistas absolutos, unidas por un emblema central, con un */
-  /* kicker superior y una tarjeta flotante inferior compacta que    */
-  /* NUNCA se superpone a los logos. Al presionar "Avanzar", todo    */
-  /* el overlay se desvanece con opacidad + leve zoom antes de        */
-  /* ocultarse y revelar la Capa 2.                                   */
+  /* CAPA 1 — welcomeOverlay: concepto "Premium Dark Glassmorphism" */
+  /* Fondo inmersivo con degradado oscuro, navbar institucional      */
+  /* arriba y una tarjeta de cristal esmerilado centrada con el       */
+  /* mensaje y el CTA. Al presionar "Avanzar", todo el overlay se     */
+  /* desvanece con opacidad + leve zoom antes de ocultarse y revelar  */
+  /* la Capa 2.                                                        */
   /* ============================================================ */
   #institutionalOverlay {
     transition: opacity 600ms ease, transform 600ms ease;
-  }
-
-  .welcome-divider-line {
-    background: linear-gradient(to bottom, transparent, rgba(12, 23, 41, 0.12) 15%, rgba(12, 23, 41, 0.12) 85%, transparent);
   }
 </style>
 </head>
@@ -112,67 +107,57 @@
 <body class="bg-gray-50 text-navy-900 antialiased min-h-screen">
 
   <!-- ================================================================ -->
-  <!-- CAPA 1 — BIENVENIDA INSTITUCIONAL / "welcomeOverlay" (z-[100])    -->
-  <!-- Pantalla de "alianza estratégica": dos mitades de marca, cada     -->
-  <!-- una con su logotipo como protagonista absoluto, unidas por un     -->
-  <!-- emblema central. Un kicker discreto arriba y una tarjeta flotante -->
-  <!-- compacta al pie de página presentan el mensaje y el CTA, sin       -->
-  <!-- tocar jamás el espacio de ninguno de los dos logos. Al hacer clic  -->
-  <!-- en "Avanzar", todo el overlay se desvanece (opacidad + leve zoom)  -->
-  <!-- y se oculta, revelando la Capa 2.                                  -->
+  <!-- CAPA 1 — BIENVENIDA INSTITUCIONAL / "welcomeOverlay" (z-[9999])   -->
+  <!-- Concepto "Premium Dark Glassmorphism": fondo inmersivo con        -->
+  <!-- degradado oscuro, navbar institucional limpio arriba (ambos       -->
+  <!-- logos dentro de pastillas blancas translúcidas para resaltar      -->
+  <!-- sobre el fondo oscuro) y una tarjeta de cristal esmerilado         -->
+  <!-- centrada con el mensaje y el botón "Avanzar". Al hacer clic,       -->
+  <!-- todo el overlay se desvanece (opacidad + leve zoom) y se oculta,   -->
+  <!-- revelando la Capa 2 que espera debajo.                              -->
   <!-- ================================================================ -->
-  <div id="institutionalOverlay" class="fixed inset-0 z-[100] overflow-hidden flex flex-col">
+  <div id="institutionalOverlay" class="fixed inset-0 z-[9999] overflow-y-auto flex flex-col bg-gradient-to-br from-navy-900 via-[#0a1128] to-navy-900">
 
-    <!-- Kicker superior: alianza estratégica, discreto y elegante -->
-    <div class="relative z-20 flex-shrink-0 pt-6 sm:pt-8 pb-3 text-center animate-in">
-      <span class="inline-flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-sm border border-navy-900/10 px-4 py-1.5 text-[11px] sm:text-xs font-semibold tracking-widest text-navy-600 uppercase shadow-sm">
-        <svg class="w-3.5 h-3.5 text-gold-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        Alianza estratégica
-      </span>
-    </div>
-
-    <!-- Las dos mitades de marca: cada logo es el protagonista absoluto -->
-    <div class="relative flex-1 flex min-h-0">
-      <div class="w-1/2 h-full bg-white flex items-center justify-center px-6 sm:px-10">
+    <!-- Header institucional: navbar limpio con ambos logos -->
+    <header class="w-full max-w-6xl mx-auto flex justify-between items-center px-6 py-8 animate-in">
+      <div class="bg-white/95 rounded-xl px-4 py-2.5 shadow-lg">
         <img
           src="logo-mcs.png"
           alt="M. Aceves y Consultores S.C."
-          class="w-full h-full max-w-[420px] object-contain" />
+          class="h-10 sm:h-12 w-auto object-contain" />
       </div>
-      <div class="w-1/2 h-full bg-[#0070c0] flex items-center justify-center px-6 sm:px-10">
+      <div class="bg-white/95 rounded-xl px-4 py-2.5 shadow-lg">
         <img
           src="logo-smnyl.png"
           alt="Seguros Monterrey New York Life"
-          class="w-full h-full max-w-[420px] object-contain" />
+          class="h-10 sm:h-12 w-auto object-contain" />
       </div>
+    </header>
 
-      <!-- Emblema central: une visualmente ambas mitades de la alianza -->
-      <div class="welcome-divider-line absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2"></div>
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white shadow-xl border border-navy-900/10 flex items-center justify-center">
-        <svg class="w-5 h-5 text-navy-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      </div>
-    </div>
+    <!-- El centro de atención: tarjeta de cristal esmerilado -->
+    <div class="flex-1 flex items-center justify-center px-6 py-10">
+      <div class="backdrop-blur-md bg-white/5 border border-white/10 shadow-2xl rounded-3xl p-10 max-w-2xl mx-auto text-center animate-in">
 
-    <!-- Tarjeta flotante inferior: mensaje + CTA, compacta y separada  -->
-    <!-- del área de los logos por su propio espacio en el footer.       -->
-    <div class="relative z-20 flex-shrink-0 px-4 pb-6 sm:pb-8 pt-4 animate-in">
-      <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-premium px-6 py-4 sm:py-5 text-center">
-        <h1 class="text-sm sm:text-base font-bold leading-snug text-navy-900">
+        <span class="inline-flex items-center gap-2 rounded-full bg-gold-400/10 border border-gold-400/30 px-4 py-1.5 text-xs font-semibold tracking-widest text-gold-400 uppercase">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Alianza estratégica
+        </span>
+
+        <h1 class="mt-6 text-4xl md:text-5xl font-extrabold leading-tight text-white">
           El primer paso hacia tu tranquilidad financiera comienza con el respaldo correcto.
         </h1>
-        <p class="mt-1 text-xs text-navy-400 font-light">
+
+        <p class="mt-4 text-navy-200">
           Descubre cómo diseñamos tu futuro en menos de 2 minutos.
         </p>
 
         <button
           id="advanceBtn" type="button"
-          class="group mt-3 inline-flex items-center justify-center gap-2 rounded-full bg-navy-900 hover:bg-navy-800 text-white font-semibold text-sm px-6 py-2.5 shadow-lg shadow-navy-900/20 transition-all duration-300 hover:scale-105 disabled:opacity-70 disabled:hover:scale-100 disabled:pointer-events-none">
+          class="group mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-gold-600 to-gold-400 text-navy-900 font-bold px-12 py-4 transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_20px_rgba(220,162,58,0.4)] disabled:opacity-70 disabled:hover:scale-100 disabled:pointer-events-none">
           Avanzar
-          <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg class="w-4.5 h-4.5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
         </button>

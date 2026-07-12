@@ -133,30 +133,36 @@
   .welcome-signature {
     position: absolute;
     top: max(22px, 4vh);
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
     z-index: 30;
     margin: 0;
+    display: flex;
+    align-items: center;
     text-transform: uppercase;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.18em;
     font-size: clamp(8px, 1.4vw, 12px);
-    font-weight: 600;
-    color: rgba(12, 23, 41, 0.55);
+    font-weight: 700;
     white-space: nowrap;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
     transition: opacity 400ms ease;
     /* Entrada suave fade-in-down tras cargar la estructura principal */
     animation: welcomeSignatureDown 600ms ease both;
     animation-delay: 400ms;
   }
-  /* Contraste diferenciado según la división de color del fondo */
-  .welcome-signature .sig-mcs   { color: #0891b2; }                 /* cyan/turquesa institucional sobre blanco */
-  .welcome-signature .sig-x     { color: #888888; }                 /* gris neutro medio */
-  .welcome-signature .sig-smnyl { color: #ffffff; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); } /* blanco sobre azul */
+  /* Alineación asimétrica: "X" absolutamente centrada, textos hacia el eje */
+  .welcome-signature .sig-left  { flex: 1; text-align: right; padding-right: 26px; color: #0A3D62; }              /* azul corporativo sobre el lado blanco */
+  .welcome-signature .sig-right { flex: 1; text-align: left;  padding-left: 26px;  color: #000000 !important; }   /* negro sólido sobre el lado azul */
+  .welcome-signature .sig-x {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #000000;
+    font-weight: 800;
+  }
 
   @keyframes welcomeSignatureDown {
-    from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
-    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   /* Al abrir las puertas, la firma se desvanece con su transición (no con la animación de entrada) */
@@ -368,6 +374,48 @@
   @media (prefers-reduced-motion: no-preference) {
     .dx-aside-panel:not(.hidden) { animation: dxStageIn 400ms cubic-bezier(0.22, 1, 0.36, 1) both; }
   }
+
+  /* ============================================================ */
+  /* BOTÓN "OLA": letras con escala secuencial (animation-delay)  */
+  /* ============================================================ */
+  .dx-wave span { display: inline-block; will-change: transform; }
+  @media (prefers-reduced-motion: no-preference) {
+    .dx-wave span { animation: dxWave 1.8s ease-in-out infinite; }
+  }
+  @keyframes dxWave {
+    0%, 55%, 100% { transform: translateY(0) scale(1); }
+    25%           { transform: translateY(-2px) scale(1.18); }
+  }
+
+  /* ============================================================ */
+  /* FONDOS LÍQUIDOS decorativos en las esquinas inferiores        */
+  /* (sin texto, opacidad muy baja, rotación lenta infinita)       */
+  /* ============================================================ */
+  .dx-liquid {
+    position: absolute;
+    bottom: -70px;
+    width: 340px;
+    height: 340px;
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 0;
+    color: #152540;
+  }
+  .dx-liquid--left  { left: -80px; }
+  .dx-liquid--right { right: -80px; }
+  @media (prefers-reduced-motion: no-preference) {
+    .dx-liquid        { animation: dxLiquidSpin 42s linear infinite; }
+    .dx-liquid--right { animation-duration: 58s; animation-direction: reverse; }
+  }
+  @keyframes dxLiquidSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* ============================================================ */
+  /* ILUSTRACIONES REACTIVAS DE PROTECCIÓN                         */
+  /* ============================================================ */
+  .dx-family { transition: filter .3s ease, opacity .3s ease, color .3s ease; }
+  .dx-family.is-off { filter: grayscale(1); opacity: 0.4; color: #8ca4c2; }
+  .dx-family.is-on  { filter: none; opacity: 1; color: #14b8a6; } /* turquesa */
+  .dx-cov, .dx-cov__icon, .dx-cov__badge { transition: opacity .3s ease, background-color .3s ease, color .3s ease; }
 </style>
 </head>
 
@@ -399,11 +447,11 @@
         class="welcome-logo welcome-logo--right" />
     </div>
 
-    <!-- Firma institucional de la alianza (contraste diferenciado por marca) -->
+    <!-- Firma institucional de la alianza (alineación asimétrica) -->
     <p class="welcome-signature">
-      <span class="sig-mcs">M. Aceves y Consultores</span>
-      <span class="sig-x">&times;</span>
-      <span class="sig-smnyl">Seguros Monterrey New York Life</span>
+      <span class="sig-left">M. Aceves y Consultores</span>
+      <span class="sig-x">X</span>
+      <span class="sig-right">Seguros Monterrey New York Life</span>
     </p>
 
     <!-- Centro de la experiencia: botón circular + etiqueta -->
@@ -426,8 +474,17 @@
   <!-- Flujo por etapas dentro de un único <form> conectado a Formspree. -->
   <!-- Se revela automáticamente cuando el Welcome Overlay se oculta.    -->
   <!-- ================================================================ -->
-  <main class="relative z-0 min-h-screen bg-slate-50 flex items-start xl:items-center justify-center px-4 py-8 sm:py-14">
-    <div class="w-full flex flex-col xl:flex-row xl:items-stretch xl:justify-center gap-6 xl:gap-7">
+  <main class="relative z-0 min-h-screen bg-slate-50 flex items-start xl:items-center justify-center px-4 py-8 sm:py-14 overflow-hidden">
+
+    <!-- Fondos líquidos decorativos (esquinas inferiores, sin texto) -->
+    <svg class="dx-liquid dx-liquid--left" viewBox="0 0 200 200" fill="currentColor" aria-hidden="true">
+      <path d="M45.6,-63.7C58.3,-55.6,66.7,-40.9,70.9,-25.3C75.1,-9.7,75.1,6.8,69.8,21.1C64.5,35.4,53.9,47.5,40.8,56.6C27.7,65.7,12.1,71.8,-3.9,76.1C-19.9,80.4,-39.8,82.9,-53.3,74.4C-66.8,65.9,-73.9,46.4,-77.1,27.7C-80.3,9,-79.6,-8.9,-73.1,-24.3C-66.6,-39.7,-54.3,-52.6,-40.4,-60.4C-26.5,-68.2,-11,-70.9,3.9,-76.2C18.8,-81.5,32.9,-71.8,45.6,-63.7Z" transform="translate(100 100)" />
+    </svg>
+    <svg class="dx-liquid dx-liquid--right" viewBox="0 0 200 200" fill="currentColor" aria-hidden="true">
+      <path d="M52.4,-68.1C67.1,-59.3,77.6,-43.5,80.8,-26.7C84,-9.9,79.9,7.9,72.3,23.9C64.7,39.9,53.6,54.1,39.4,63.5C25.2,72.9,7.9,77.5,-9.6,79.1C-27.1,80.7,-44.8,79.3,-57.6,70.1C-70.4,60.9,-78.3,43.9,-81.2,26.4C-84.1,8.9,-82,-9.1,-75.3,-24.9C-68.6,-40.7,-57.3,-54.3,-43.5,-63.3C-29.7,-72.3,-13.4,-76.7,2.6,-80.3C18.6,-83.9,37.7,-76.9,52.4,-68.1Z" transform="translate(100 100)" />
+    </svg>
+
+    <div class="relative z-10 w-full flex flex-col xl:flex-row xl:items-stretch xl:justify-center gap-6 xl:gap-7">
 
       <!-- ===== Lateral IZQUIERDO (contextual por etapa) ===== -->
       <aside id="dxAsideLeft" class="hidden xl:flex xl:flex-col xl:justify-center xl:w-60 xl:flex-shrink-0">
@@ -441,6 +498,22 @@
             En México, la inflación promedio anual devora entre el <strong class="text-navy-700">4% y 5%</strong> del valor de tu dinero.
             Ahorrar en pesos nominales en cuentas bancarias comunes garantiza una pérdida de poder adquisitivo a largo plazo.
           </p>
+        </div>
+
+        <!-- Protección: ilustración line-art de familia reactiva a dependientes -->
+        <div data-lateral="protection" class="dx-aside-panel hidden rounded-2xl border border-navy-100 bg-white p-6 shadow-sm text-center">
+          <svg id="dxFamilyArt" class="dx-family is-off w-40 h-40 mx-auto" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <!-- Adulto 1 -->
+            <circle cx="38" cy="34" r="11" />
+            <path d="M22 86 V70 a16 16 0 0 1 32 0 V86" />
+            <!-- Adulto 2 -->
+            <circle cx="82" cy="34" r="11" />
+            <path d="M66 86 V70 a16 16 0 0 1 32 0 V86" />
+            <!-- Hijo -->
+            <circle cx="60" cy="58" r="8" />
+            <path d="M48 96 V86 a12 12 0 0 1 24 0 V96" />
+          </svg>
+          <p class="mt-3 text-xs font-semibold text-navy-500">Quienes dependen de tu protección</p>
         </div>
       </aside>
 
@@ -503,7 +576,7 @@
 
             <button type="button" id="dxStartBtn"
               class="mt-9 inline-flex items-center justify-center gap-2 rounded-full bg-navy-800 hover:bg-navy-900 active:scale-[.98] text-white font-semibold px-9 py-3.5 shadow-lg shadow-navy-900/20 transition-all duration-300">
-              Comenzar diagnóstico
+              <span id="dxStartLabel" class="dx-wave">Comenzar diagnóstico</span>
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -545,7 +618,7 @@
 
           <!-- ===================== ETAPA 2: PRIORIDADES ===================== -->
           <section id="dxStagePriorities" class="dx-stage" data-stage="priorities">
-            <h2 class="text-xl sm:text-2xl font-bold text-navy-900">Tus prioridades</h2>
+            <h2 class="text-xl sm:text-2xl font-bold text-navy-900 dx-personalize" data-base="Tus prioridades">Tus prioridades</h2>
             <p class="text-sm text-navy-400 mt-1 mb-6">Selecciona hasta <strong class="text-navy-700">3</strong> áreas que más te importan hoy.</p>
 
             <div id="dxPriorityGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
@@ -578,6 +651,7 @@
                   <span id="dxRetirementAgeVal" class="text-sm font-bold text-navy-900">60 años</span>
                 </div>
                 <input type="range" id="dxRetirementAge" name="retirementAge" class="dx-range" min="50" max="80" step="1" value="60" />
+                <p id="dxRetAgeHint" class="mt-3 text-xs leading-relaxed rounded-lg bg-navy-50 border border-navy-100 px-3 py-2.5 text-navy-600"></p>
               </div>
               <div>
                 <div class="flex items-center justify-between mb-2">
@@ -592,6 +666,7 @@
                   <span id="dxMonthlySavingsVal" class="text-sm font-bold text-navy-900">$3,000</span>
                 </div>
                 <input type="range" id="dxMonthlySavings" name="monthlySavings" class="dx-range" min="0" max="60000" step="500" value="3000" />
+                <p id="dxSavingsHint" class="mt-3 text-xs leading-relaxed rounded-lg bg-navy-50 border border-navy-100 px-3 py-2.5 text-navy-600"></p>
               </div>
             </div>
 
@@ -649,7 +724,7 @@
 
           <!-- ===================== ETAPA 4: PROTECCIÓN ===================== -->
           <section id="dxStageProtection" class="dx-stage" data-stage="protection">
-            <h2 class="text-xl sm:text-2xl font-bold text-navy-900">Tu protección</h2>
+            <h2 class="text-xl sm:text-2xl font-bold text-navy-900 dx-personalize" data-base="Tu protección">Tu protección</h2>
             <p class="text-sm text-navy-400 mt-1 mb-6">Cuatro preguntas rápidas sobre tu cobertura actual.</p>
 
             <div class="space-y-6">
@@ -696,25 +771,48 @@
 
           <!-- ===================== ETAPA 5: RESULTADO ===================== -->
           <section id="dxStageResult" class="dx-stage" data-stage="result">
-            <h2 class="text-xl sm:text-2xl font-bold text-navy-900">Tu diagnóstico inicial</h2>
+            <h2 class="text-xl sm:text-2xl font-bold text-navy-900 dx-personalize" data-base="Tu diagnóstico inicial">Tu diagnóstico inicial</h2>
             <p class="text-sm text-navy-400 mt-1 mb-6">Basado únicamente en la información que compartiste.</p>
 
             <ul id="dxSummary" class="space-y-2.5 text-sm text-navy-700"></ul>
 
-            <!-- Nivel de preparación (orientativo) -->
-            <div class="mt-8 rounded-xl border border-navy-100 bg-navy-50/50 p-5">
-              <div class="flex items-center justify-between">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.15em] text-navy-500">Nivel de preparación actual</p>
-                <p id="dxLevelValue" class="text-2xl font-extrabold text-navy-900">0<span class="text-sm text-navy-400">/100</span></p>
+            <!-- Diagnóstico por áreas: 3 barras de progreso -->
+            <div class="mt-8 rounded-xl border border-navy-100 bg-navy-50/50 p-5 space-y-5">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.15em] text-navy-500">Tu diagnóstico por área</p>
+
+              <div>
+                <div class="flex items-center justify-between text-sm font-semibold text-navy-700 mb-1.5">
+                  <span>Resiliencia en Salud</span>
+                  <span id="dxBarHealthVal" class="text-navy-900">—</span>
+                </div>
+                <div class="h-3 w-full rounded-full bg-navy-100 overflow-hidden">
+                  <div id="dxBarHealth" class="dx-bar-fill h-full rounded-full bg-navy-300" style="width:0%"></div>
+                </div>
               </div>
-              <div class="mt-3 h-3 w-full rounded-full bg-navy-100 overflow-hidden">
-                <div id="dxLevelBar" class="dx-bar-fill h-full rounded-full bg-gradient-to-r from-navy-700 to-gold-500" style="width:0%"></div>
+
+              <div>
+                <div class="flex items-center justify-between text-sm font-semibold text-navy-700 mb-1.5">
+                  <span>Protección Familiar</span>
+                  <span id="dxBarFamilyVal" class="text-navy-900">—</span>
+                </div>
+                <div class="h-3 w-full rounded-full bg-navy-100 overflow-hidden">
+                  <div id="dxBarFamily" class="dx-bar-fill h-full rounded-full bg-navy-300" style="width:0%"></div>
+                </div>
               </div>
-              <p class="mt-3 text-[11px] leading-relaxed text-navy-400">
-                Indicador orientativo interno de esta herramienta. No constituye una evaluación
-                financiera certificada. Estos son los factores considerados:
+
+              <div>
+                <div class="flex items-center justify-between text-sm font-semibold text-navy-700 mb-1.5">
+                  <span>Acumulación Inteligente</span>
+                  <span id="dxBarAccVal" class="text-navy-900">—</span>
+                </div>
+                <div class="h-3 w-full rounded-full bg-navy-100 overflow-hidden">
+                  <div id="dxBarAcc" class="dx-bar-fill h-full rounded-full bg-navy-300" style="width:0%"></div>
+                </div>
+              </div>
+
+              <p class="text-[11px] leading-relaxed text-navy-400">
+                Indicador orientativo interno de esta herramienta. No constituye una evaluación financiera certificada.
               </p>
-              <ul id="dxFactors" class="mt-3 space-y-1.5 text-xs text-navy-600"></ul>
             </div>
 
             <p class="mt-5 text-[11px] leading-relaxed text-navy-400">
@@ -735,99 +833,31 @@
         </div>
         <!-- FIN #dxStages -->
 
-        <!-- ===================== VISTA: CONFIRMACIÓN ===================== -->
-        <div id="dxSuccess" class="hidden">
+        <!-- ===================== VISTA: CONFIRMACIÓN (HOOK EN FRÍO) ===================== -->
+        <div id="dxSuccess" class="hidden text-center">
 
           <!-- Mensaje de éxito -->
-          <div class="text-center">
-            <div class="mx-auto w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center animate-pop">
-              <svg class="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h2 class="mt-5 text-xl sm:text-2xl font-bold text-navy-900">¡Listo, <span id="dxSuccessName">amigo(a)</span>!</h2>
-            <p class="mt-2 text-sm text-navy-500 max-w-sm mx-auto">
-              Recibí tu diagnóstico. Estoy preparando una propuesta pensada para ti y te
-              contactaré muy pronto por WhatsApp.
+          <div class="mx-auto w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center animate-pop">
+            <svg class="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 class="mt-5 text-xl sm:text-2xl font-bold text-navy-900">¡Listo, <span id="dxSuccessName">amigo(a)</span>!</h2>
+
+          <!-- Tarjeta central de alerta patrimonial (borde ámbar) -->
+          <div class="mt-6 rounded-2xl border-2 border-amber-400 bg-amber-50 p-5 text-left max-w-lg mx-auto">
+            <p class="text-sm font-semibold text-amber-800 leading-relaxed">
+              <span class="mr-1">⚠️</span> Alerta Patrimonial: Tu dinero está expuesto. Al ritmo actual, tu estrategia se encuentra
+              vulnerable ante la devaluación acumulada en México.
             </p>
           </div>
 
-          <!-- ===== Simulador de blindaje inflacionario (UDIs vs Pesos vs USD) ===== -->
-          <div class="mt-10 pt-8 border-t border-navy-100">
-            <h3 class="text-center text-base sm:text-lg font-bold text-navy-900">El valor real de tu dinero a los 65 años</h3>
-            <p class="mt-1.5 text-center text-xs text-navy-400 max-w-md mx-auto">
-              Proyección ilustrativa con un ahorro anual de $50,000 durante <span id="dxSimYears" class="font-semibold text-navy-600">—</span> años.
-            </p>
-
-            <div class="mt-5 grid gap-3 sm:grid-cols-3">
-              <!-- Bloque 1: Pesos -->
-              <div class="rounded-xl border border-red-100 bg-red-50/60 p-4 text-center">
-                <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-red-500">
-                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6 9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0 3.182-5.511m-3.182 5.51-5.511-3.181" /></svg>
-                  Pesos en banco
-                </span>
-                <p id="dxSimPesos" class="mt-2 text-lg font-extrabold text-navy-900">—</p>
-                <p class="mt-1 text-[11px] leading-snug text-red-600">Tu dinero pierde valor (≈50% de poder adquisitivo por la inflación).</p>
-              </div>
-              <!-- Bloque 2: UDIs -->
-              <div class="rounded-xl border border-navy-800 bg-navy-800 p-4 text-center text-white">
-                <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-gold-300">
-                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  Ahorro en UDIs
-                </span>
-                <p id="dxSimUdis" class="mt-2 text-lg font-extrabold text-white">—</p>
-                <p class="mt-1 text-[11px] leading-snug text-navy-100">Poder adquisitivo blindado: conserva el 100% de su capacidad de compra.</p>
-              </div>
-              <!-- Bloque 3: USD -->
-              <div class="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4 text-center">
-                <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-600">
-                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0-5.94-2.28m5.94 2.28-2.28 5.941" /></svg>
-                  Ahorro en Dólares
-                </span>
-                <p id="dxSimUsd" class="mt-2 text-lg font-extrabold text-navy-900">—</p>
-                <p class="mt-1 text-[11px] leading-snug text-emerald-700">Protección cambiaria: crecimiento en una divisa global fuerte.</p>
-              </div>
-            </div>
-            <p class="mt-3 text-[10px] leading-relaxed text-navy-300 text-center">
-              Simulación ilustrativa. Los resultados no representan una garantía de rendimiento ni una recomendación financiera.
-            </p>
-          </div>
-
-          <!-- ===== Módulo activo de captura de referidos ===== -->
-          <div class="mt-8 pt-8 border-t border-navy-100">
-            <h3 class="text-center text-lg sm:text-xl font-bold text-navy-900 leading-snug max-w-xl mx-auto">
-              ¿Crees que a alguien más le serviría blindar su futuro y medir su preparación financiera?
-            </h3>
-            <p class="mt-2.5 text-center text-sm text-navy-500 max-w-lg mx-auto leading-relaxed">
-              Ayuda a tus familiares o amigos cercanos a proteger su patrimonio contra la devaluación.
-              Ingresa sus datos y les enviaremos una invitación exclusiva de tu parte para realizar este diagnóstico sin costo alguno.
-            </p>
-
-            <div class="mt-6 max-w-md mx-auto space-y-3">
-              <input type="text" id="dxRefName" class="dx-input" placeholder="Nombre completo del referido" />
-              <input type="tel" id="dxRefWhatsapp" inputmode="tel" class="dx-input" placeholder="WhatsApp de contacto" />
-              <select id="dxRefRelation" class="dx-input">
-                <option value="" disabled selected>Parentesco / Relación</option>
-                <option value="Amigo">Amigo</option>
-                <option value="Familiar">Familiar</option>
-                <option value="Colega">Colega</option>
-              </select>
-
-              <p id="dxRefError" class="hidden text-sm text-red-600"></p>
-              <p id="dxRefOk" class="hidden text-sm font-medium text-emerald-700">¡Gracias! Enviaremos la invitación de tu parte muy pronto.</p>
-
-              <button type="button" id="dxRefSubmit"
-                class="w-full inline-flex items-center justify-center gap-2 rounded-full bg-navy-800 hover:bg-navy-900 text-white font-semibold px-6 py-3.5 shadow-lg shadow-navy-900/20 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed">
-                <span id="dxRefSubmitLabel">Compartir Diagnóstico de Seguridad con mis Referidos</span>
-              </button>
-
-              <button type="button" id="dxRefWhatsAppBtn"
-                class="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#1ebe5b] text-white font-semibold px-6 py-3.5 shadow-lg shadow-emerald-600/20 transition-all duration-200">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
-                Compartir link directo por WhatsApp
-              </button>
-            </div>
-          </div>
+          <!-- Copy de cierre -->
+          <p class="mt-6 text-sm text-navy-500 max-w-lg mx-auto leading-relaxed">
+            Tu Diagnóstico Inicial ha sido registrado con éxito. Te contactaré en las próximas
+            <strong class="text-navy-700">24 horas por WhatsApp</strong> para agendar una sesión express de 10 minutos
+            y entregarte tu plan de rescate financiero.
+          </p>
         </div>
       </div>
 
@@ -845,6 +875,9 @@
       <input type="hidden" name="yearsToRetirement" id="dxHiddenYears" />
       <input type="hidden" name="estimatedCapital" id="dxHiddenCapital" />
       <input type="hidden" name="preparednessLevel" id="dxHiddenLevel" />
+      <input type="hidden" name="scoreSalud" id="dxHiddenHealth" />
+      <input type="hidden" name="scoreProteccionFamiliar" id="dxHiddenFamily" />
+      <input type="hidden" name="scoreAcumulacion" id="dxHiddenAcc" />
       <input type="hidden" name="submittedAt" id="dxHiddenSubmittedAt" />
       </form>
 
@@ -868,6 +901,43 @@
             Las estrategias de Seguros Monterrey New York Life utilizan <strong>UDIs</strong> (Unidades de Inversión)
             y <strong>Dólares</strong> para garantizar que tu dinero mantenga su valor real y crezca por encima de la inflación con el paso de los años.
           </p>
+        </div>
+
+        <!-- Protección: 3 iconos de cobertura reactivos a las respuestas Sí/No -->
+        <div data-lateral="protection" class="dx-aside-panel hidden rounded-2xl border border-navy-100 bg-white p-5 shadow-sm">
+          <p class="text-[10px] font-bold uppercase tracking-widest text-navy-400">Tu cobertura actual</p>
+          <div class="mt-4 space-y-3">
+            <!-- Salud (gastos médicos) -->
+            <div id="dxCovMedical" class="dx-cov flex items-center gap-2.5 opacity-40">
+              <span class="dx-cov__icon w-9 h-9 rounded-xl bg-navy-50 text-navy-400 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
+              </span>
+              <span class="text-xs font-semibold text-navy-600 flex-1">Salud</span>
+              <span class="dx-cov__badge w-5 h-5 rounded-full bg-navy-100 text-navy-400 flex items-center justify-center flex-shrink-0">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 0h10.5a2.25 2.25 0 012.25 2.25v6a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18.75v-6a2.25 2.25 0 012.25-2.25z" /></svg>
+              </span>
+            </div>
+            <!-- Vida (escudo) -->
+            <div id="dxCovLife" class="dx-cov flex items-center gap-2.5 opacity-40">
+              <span class="dx-cov__icon w-9 h-9 rounded-xl bg-navy-50 text-navy-400 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
+              </span>
+              <span class="text-xs font-semibold text-navy-600 flex-1">Vida</span>
+              <span class="dx-cov__badge w-5 h-5 rounded-full bg-navy-100 text-navy-400 flex items-center justify-center flex-shrink-0">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 0h10.5a2.25 2.25 0 012.25 2.25v6a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18.75v-6a2.25 2.25 0 012.25-2.25z" /></svg>
+              </span>
+            </div>
+            <!-- Retiro (reloj de arena) -->
+            <div id="dxCovRetire" class="dx-cov flex items-center gap-2.5 opacity-40">
+              <span class="dx-cov__icon w-9 h-9 rounded-xl bg-navy-50 text-navy-400 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </span>
+              <span class="text-xs font-semibold text-navy-600 flex-1">Retiro</span>
+              <span class="dx-cov__badge w-5 h-5 rounded-full bg-navy-100 text-navy-400 flex items-center justify-center flex-shrink-0">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 0h10.5a2.25 2.25 0 012.25 2.25v6a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18.75v-6a2.25 2.25 0 012.25-2.25z" /></svg>
+              </span>
+            </div>
+          </div>
         </div>
       </aside>
 
@@ -967,6 +1037,9 @@
       const hidYears = document.getElementById('dxHiddenYears');
       const hidCapital = document.getElementById('dxHiddenCapital');
       const hidLevel = document.getElementById('dxHiddenLevel');
+      const hidHealth = document.getElementById('dxHiddenHealth');
+      const hidFamily = document.getElementById('dxHiddenFamily');
+      const hidAcc = document.getElementById('dxHiddenAcc');
       const hidSubmittedAt = document.getElementById('dxHiddenSubmittedAt');
 
       // Envío
@@ -1020,6 +1093,7 @@
         }
 
         updateLaterals(stageKey);
+        if (stageKey === 'protection') updateProtectionIllustration();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
@@ -1039,6 +1113,38 @@
       Array.prototype.forEach.call(document.querySelectorAll('.dx-next'), function (btn) {
         btn.addEventListener('click', function () { nextFrom(btn.closest('.dx-stage').dataset.stage); });
       });
+
+      // ------------------------------------------------------------
+      // BOTÓN "OLA": divide la etiqueta en <span> indexados con
+      // animation-delay secuencial (efecto de ola continua).
+      // ------------------------------------------------------------
+      (function buildWaveButton() {
+        const label = document.getElementById('dxStartLabel');
+        if (!label) return;
+        const text = label.textContent;
+        label.textContent = '';
+        Array.prototype.forEach.call(text, function (ch, i) {
+          const span = document.createElement('span');
+          span.textContent = ch === ' ' ? '\u00A0' : ch;
+          span.style.animationDelay = (i * 0.06) + 's';
+          label.appendChild(span);
+        });
+      })();
+
+      // ------------------------------------------------------------
+      // HIPER-PERSONALIZACIÓN: primer nombre concatenado en los
+      // encabezados de las etapas siguientes ("Tus prioridades, Carlos").
+      // ------------------------------------------------------------
+      const personalizeEls = document.querySelectorAll('.dx-personalize');
+      function applyPersonalization() {
+        const first = (inFullName.value.trim().split(/\s+/)[0] || '').trim();
+        Array.prototype.forEach.call(personalizeEls, function (el) {
+          const base = el.dataset.base || el.textContent;
+          el.textContent = first ? base + ', ' + first : base;
+        });
+      }
+      inFullName.addEventListener('input', applyPersonalization);
+      inFullName.addEventListener('blur', applyPersonalization);
       Array.prototype.forEach.call(document.querySelectorAll('.dx-back'), function (btn) {
         btn.addEventListener('click', function () { backFrom(btn.closest('.dx-stage').dataset.stage); });
       });
@@ -1211,6 +1317,20 @@
           calcMessage.textContent = 'Tu ritmo de ahorro actual es sólido y consistente.';
           calcMessage.className = 'mt-5 text-sm font-semibold text-emerald-700';
         }
+
+        // Textos empáticos dinámicos bajo los sliders (UI reactiva).
+        const retHint = document.getElementById('dxRetAgeHint');
+        if (retHint) {
+          retHint.textContent = c.retAge < 60
+            ? 'Retiro Joven: Buscar un retiro temprano es ideal, pero requiere duplicar la velocidad de acumulación. Cada año cuenta.'
+            : 'Contexto de Retiro: En México, las afores tradicionales suelen cubrir solo una fracción de tu último sueldo. Blindar tu estrategia asegura tu calidad de vida.';
+        }
+        const savHint = document.getElementById('dxSavingsHint');
+        if (savHint) {
+          savHint.textContent = c.savings <= 3500
+            ? '🌱 Excelente primer paso: Lo más difícil es romper la inercia. Indexar esto a herramientas estructuradas mantendrá su valor real.'
+            : '🚀 Aceleración Patrimonial: Tienes una capacidad de previsión sólida. Estás pavimentando un camino seguro para tus metas futuras.';
+        }
       }
 
       [rRetAge, rIncome, rSavings].forEach(function (el) {
@@ -1232,39 +1352,89 @@
               b.setAttribute('aria-pressed', on ? 'true' : 'false');
             });
             stageError('protection', '');
+            updateProtectionIllustration();
           });
         });
       });
 
+      // --- Ilustraciones reactivas del lateral de Protección ---
+      const CHECK_SVG = '<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>';
+      const LOCK_SVG  = '<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 0h10.5a2.25 2.25 0 012.25 2.25v6a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18.75v-6a2.25 2.25 0 012.25-2.25z" /></svg>';
+
+      function setCoverageIcon(rowId, answer) {
+        const row = document.getElementById(rowId);
+        if (!row) return;
+        const icon = row.querySelector('.dx-cov__icon');
+        const badge = row.querySelector('.dx-cov__badge');
+        if (answer === 'Sí') {
+          // Iluminado + checkmark verde
+          row.classList.remove('opacity-40');
+          icon.className = 'dx-cov__icon w-9 h-9 rounded-xl bg-teal-50 text-teal-500 flex items-center justify-center flex-shrink-0';
+          badge.className = 'dx-cov__badge w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0';
+          badge.innerHTML = CHECK_SVG;
+        } else {
+          // "No" o sin responder: atenuado + candado gris
+          row.classList.add('opacity-40');
+          icon.className = 'dx-cov__icon w-9 h-9 rounded-xl bg-navy-50 text-navy-400 flex items-center justify-center flex-shrink-0';
+          badge.className = 'dx-cov__badge w-5 h-5 rounded-full bg-navy-100 text-navy-400 flex items-center justify-center flex-shrink-0';
+          badge.innerHTML = LOCK_SVG;
+        }
+      }
+
+      function updateProtectionIllustration() {
+        // Familia: iluminada en turquesa si hay dependientes, en gris si no.
+        const dep = Math.max(0, Number(inDependents.value) || 0);
+        const art = document.getElementById('dxFamilyArt');
+        if (art) {
+          art.classList.toggle('is-on', dep > 0);
+          art.classList.toggle('is-off', dep === 0);
+        }
+        // Iconos de cobertura segun respuestas booleanas.
+        setCoverageIcon('dxCovMedical', state.answers.hasMedicalInsurance);
+        setCoverageIcon('dxCovLife', state.answers.hasLifeInsurance);
+        setCoverageIcon('dxCovRetire', state.answers.hasRetirementPlan);
+      }
+
+      inDependents.addEventListener('input', updateProtectionIllustration);
+
       // ------------------------------------------------------------
-      // 6) NIVEL DE PREPARACIÓN (reglas simples y transparentes, 0-100)
+      // 6) DIAGNÓSTICO POR ÁREAS (3 barras, reglas simples y transparentes)
       // ------------------------------------------------------------
       // Herramienta orientativa interna de la experiencia. No es una
-      // evaluación financiera certificada.
-      function computePreparednessLevel(d) {
-        let score = 0;
-        const factors = [];
-        // Existencia de ahorro actual
-        if (d.savings > 0) { score += 20; factors.push({ ok: true, text: 'Destinas un ahorro mensual a tu futuro.' }); }
-        else { factors.push({ ok: false, text: 'Aún no destinas un ahorro mensual a tu futuro.' }); }
-        // Existencia de plan de retiro formal
-        if (d.hasRetirementPlan === 'Sí') { score += 25; factors.push({ ok: true, text: 'Cuentas con un plan formal de retiro.' }); }
-        else { factors.push({ ok: false, text: 'No cuentas con un plan formal de retiro.' }); }
-        // Cobertura de vida cuando existen dependientes
-        if (d.dependents > 0) {
-          if (d.hasLifeInsurance === 'Sí') { score += 20; factors.push({ ok: true, text: 'Tienes cobertura de vida con dependientes económicos.' }); }
-          else { factors.push({ ok: false, text: 'Tienes dependientes, pero sin cobertura de vida.' }); }
-        } else {
-          score += 10; factors.push({ ok: true, text: 'Sin dependientes económicos declarados.' });
-        }
-        // Cobertura de gastos médicos
-        if (d.hasMedicalInsurance === 'Sí') { score += 20; factors.push({ ok: true, text: 'Cuentas con seguro de gastos médicos.' }); }
-        else { factors.push({ ok: false, text: 'No cuentas con seguro de gastos médicos.' }); }
-        // Claridad de prioridades
-        if (d.mainPriority) { score += 15; factors.push({ ok: true, text: 'Tienes clara tu prioridad principal.' }); }
-        else { factors.push({ ok: false, text: 'Aún no defines una prioridad principal.' }); }
+      // evaluación financiera certificada. Cada barra 0-100.
+      function computeDiagnosisBars(d) {
+        // Resiliencia en Salud: depende de la cobertura de gastos médicos.
+        const health = d.hasMedicalInsurance === 'Sí' ? 100 : 10;
 
-        return { level: Math.max(0, Math.min(100, score)), factors: factors };
+        // Protección Familiar: cobertura de vida ponderada por dependientes.
+        let family;
+        if (d.dependents > 0) family = d.hasLifeInsurance === 'Sí' ? 100 : 10;
+        else family = d.hasLifeInsurance === 'Sí' ? 100 : 55; // sin dependientes, menor urgencia
+
+        // Acumulación Inteligente: ahorro activo + plan formal de retiro.
+        let acc = 0;
+        if (d.savings > 0) acc += 45;
+        if (d.hasRetirementPlan === 'Sí') acc += 55;
+
+        return {
+          health: Math.max(0, Math.min(100, health)),
+          family: Math.max(0, Math.min(100, family)),
+          acc: Math.max(0, Math.min(100, acc)),
+        };
+      }
+
+      // Color de barra según el nivel: rojo / naranja / verde.
+      function barColorClass(v) {
+        if (v < 34) return 'bg-red-500';
+        if (v < 67) return 'bg-amber-500';
+        return 'bg-emerald-500';
+      }
+
+      function paintBar(fillId, valId, v) {
+        const fill = document.getElementById(fillId);
+        const val = document.getElementById(valId);
+        if (fill) { fill.className = 'dx-bar-fill h-full rounded-full ' + barColorClass(v); fill.style.width = v + '%'; }
+        if (val) { val.textContent = v + '%'; }
       }
 
       // ------------------------------------------------------------
@@ -1281,7 +1451,7 @@
           hasRetirementPlan: state.answers.hasRetirementPlan,
           mainPriority: state.mainPriority,
         };
-        const prep = computePreparednessLevel(data);
+        const bars = computeDiagnosisBars(data);
 
         // Resumen dinámico
         const summary = document.getElementById('dxSummary');
@@ -1290,23 +1460,15 @@
         if (state.priorities.length > 1) lines.push('También te interesan: ' + state.priorities.filter(function (p) { return p !== state.mainPriority; }).join(', ') + '.');
         lines.push('Te gustaría retirarte a los <strong>' + c.retAge + ' años</strong> (faltan ' + c.years + ' años).');
         lines.push('Actualmente destinas <strong>' + money(c.savings) + '</strong> mensuales a tu futuro.');
-        lines.push('Capital estimado ilustrativo al ritmo actual: <strong>' + money(c.currentCapital) + '</strong>.');
         lines.push('Tienes <strong>' + dependents + '</strong> dependiente(s) económico(s).');
         summary.innerHTML = lines.map(function (t) {
           return '<li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-navy-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75" /></svg><span>' + t + '</span></li>';
         }).join('');
 
-        // Gauge del nivel de preparación
-        document.getElementById('dxLevelValue').innerHTML = prep.level + '<span class="text-sm text-navy-400">/100</span>';
-        document.getElementById('dxLevelBar').style.width = prep.level + '%';
-
-        // Factores considerados
-        document.getElementById('dxFactors').innerHTML = prep.factors.map(function (f) {
-          const icon = f.ok
-            ? '<svg class="w-3.5 h-3.5 mt-0.5 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>'
-            : '<svg class="w-3.5 h-3.5 mt-0.5 text-gold-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>';
-          return '<li class="flex items-start gap-2">' + icon + '<span>' + f.text + '</span></li>';
-        }).join('');
+        // Pintar las 3 barras de diagnóstico (ancho % + color)
+        paintBar('dxBarHealth', 'dxBarHealthVal', bars.health);
+        paintBar('dxBarFamily', 'dxBarFamilyVal', bars.family);
+        paintBar('dxBarAcc', 'dxBarAccVal', bars.acc);
 
         // Escribir campos ocultos para Formspree
         hidPriorities.value = state.priorities.join(', ');
@@ -1316,7 +1478,10 @@
         hidRetirePlan.value = state.answers.hasRetirementPlan;
         hidYears.value = String(c.years);
         hidCapital.value = String(Math.round(c.currentCapital));
-        hidLevel.value = String(prep.level);
+        hidHealth.value = String(bars.health);
+        hidFamily.value = String(bars.family);
+        hidAcc.value = String(bars.acc);
+        hidLevel.value = String(Math.round((bars.health + bars.family + bars.acc) / 3));
       }
 
       // ------------------------------------------------------------
@@ -1355,92 +1520,14 @@
         stagesWrap.classList.add('hidden');
         progressWrap.classList.add('hidden');
         updateLaterals('success'); // ninguna coincidencia -> oculta todos los laterales
-        renderInflationSimulator();
         successView.classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
       // ------------------------------------------------------------
-      // 9) SIMULADOR DE BLINDAJE INFLACIONARIO (UDIs vs Pesos vs USD)
-      // ------------------------------------------------------------
-      // Proyección ILUSTRATIVA al llegar a los 65 años, con un ahorro
-      // anual hipotético de $50,000 MXN. No es una garantía financiera.
-      const SIM_ANNUAL_SAVING = 50000; // MXN aportados por año (hipótesis)
-      const SIM_TARGET_AGE = 65;        // meta de edad de retiro fija del simulador
-      const SIM_USD_ANNUAL_EDGE = 0.03; // ventaja cambiaria ilustrativa anual
-
-      function renderInflationSimulator() {
-        const age = Number(inAge.value) || 0;
-        const years = Math.max(0, SIM_TARGET_AGE - age);
-        const contributed = SIM_ANNUAL_SAVING * years;      // capital aportado nominal
-        const pesos = contributed * 0.5;                     // pierde ~50% de poder adquisitivo
-        const udis = contributed;                            // poder adquisitivo blindado (100%)
-        const usd = contributed * (1 + SIM_USD_ANNUAL_EDGE * years); // protección cambiaria
-
-        document.getElementById('dxSimYears').textContent = years;
-        document.getElementById('dxSimPesos').textContent = money(pesos);
-        document.getElementById('dxSimUdis').textContent = money(udis);
-        document.getElementById('dxSimUsd').textContent = money(usd);
-      }
-
-      // ------------------------------------------------------------
-      // 10) MÓDULO DE REFERIDOS (envío real a Formspree + WhatsApp API)
-      // ------------------------------------------------------------
-      const refName = document.getElementById('dxRefName');
-      const refWa = document.getElementById('dxRefWhatsapp');
-      const refRel = document.getElementById('dxRefRelation');
-      const refError = document.getElementById('dxRefError');
-      const refOk = document.getElementById('dxRefOk');
-      const refSubmit = document.getElementById('dxRefSubmit');
-      const refSubmitLabel = document.getElementById('dxRefSubmitLabel');
-      const refWhatsBtn = document.getElementById('dxRefWhatsAppBtn');
-
-      refSubmit.addEventListener('click', async function () {
-        const name = refName.value.trim();
-        const wa = digits(refWa.value);
-        refOk.classList.add('hidden');
-        if (name.length < 3 || wa.length < 10 || !refRel.value) {
-          refError.textContent = 'Ingresa nombre, WhatsApp válido (10 dígitos) y el parentesco.';
-          refError.classList.remove('hidden');
-          return;
-        }
-        refError.classList.add('hidden');
-        refSubmit.disabled = true;
-        refSubmitLabel.textContent = 'Enviando...';
-        try {
-          // FormData independiente: no interfiere con el diagnóstico ya enviado.
-          const fd = new FormData();
-          fd.append('_subject', 'Nuevo referido desde el Diagnóstico Patrimonial');
-          fd.append('tipo', 'Referido');
-          fd.append('referidoNombre', name);
-          fd.append('referidoWhatsApp', refWa.value.trim());
-          fd.append('referidoParentesco', refRel.value);
-          fd.append('referidoPor', inFullName.value.trim() || '(sin nombre)');
-          fd.append('submittedAt', new Date().toISOString());
-          const res = await fetch(form.action, { method: 'POST', body: fd, headers: { Accept: 'application/json' } });
-          if (!res.ok) throw new Error('Formspree respondió con un error.');
-          refOk.classList.remove('hidden');
-          refName.value = ''; refWa.value = ''; refRel.selectedIndex = 0;
-        } catch (err) {
-          console.error('[Referidos] Error al enviar:', err);
-          refError.textContent = 'No pudimos enviar el referido. Intenta de nuevo.';
-          refError.classList.remove('hidden');
-        } finally {
-          refSubmit.disabled = false;
-          refSubmitLabel.textContent = 'Compartir Diagnóstico de Seguridad con mis Referidos';
-        }
-      });
-
-      // Compartir link directo por WhatsApp con mensaje precargado.
-      refWhatsBtn.addEventListener('click', function () {
-        const url = window.location.href;
-        const msg = '¡Hola! Acabo de hacer un Diagnóstico Patrimonial interactivo para ver qué tan preparado está mi retiro y mi protección contra la devaluación. Me dio datos súper útiles de cómo influyen las UDIs y los Dólares. Te paso el link para que midas tu puntaje, toma solo 2 minutos: ' + url;
-        window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
-      });
-
-      // ------------------------------------------------------------
       // Inicialización de vistas dinámicas
       // ------------------------------------------------------------
+      applyPersonalization();
       renderPriorities();
       renderCalc();
     }

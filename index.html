@@ -91,15 +91,156 @@
   }
 
   /* ============================================================ */
-  /* CAPA 1 — welcomeOverlay: concepto "Premium Dark Glassmorphism" */
-  /* Fondo inmersivo con degradado oscuro, navbar institucional      */
-  /* arriba y una tarjeta de cristal esmerilado centrada con el       */
-  /* mensaje y el CTA. Al presionar "Avanzar", todo el overlay se     */
-  /* desvanece con opacidad + leve zoom antes de ocultarse y revelar  */
-  /* la Capa 2.                                                        */
+  /* CAPA 1 — welcomeOverlay: concepto "Alianza que abre el       */
+  /* diagnóstico". Dos puertas de marca (50vw × 100vh cada una)    */
+  /* con sus logotipos reales, y un único botón circular central   */
+  /* que, al hacer clic, abre las puertas hacia los lados y revela  */
+  /* la Capa 2. Toda la coreografía de salida se dispara con una    */
+  /* sola clase de estado: ".is-opening".                          */
   /* ============================================================ */
   #institutionalOverlay {
-    transition: opacity 600ms ease, transform 600ms ease;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  /* --- Las dos puertas de marca --- */
+  .welcome-door {
+    position: absolute;
+    top: 0;
+    width: 50vw;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 900ms cubic-bezier(0.76, 0, 0.24, 1);
+    will-change: transform;
+  }
+  .welcome-door--left  { left: 0;  background: #ffffff; }
+  .welcome-door--right { right: 0; background: #0070c0; }
+
+  /* Logos: escala individual según la proporción real de cada     */
+  /* archivo (mcs 1:1 · smnyl 1.28:1) buscando equilibrio visual.  */
+  .welcome-logo { object-fit: contain; max-height: 60vh; }
+  .welcome-logo--left  { width: clamp(150px, 25vw, 320px); }
+  .welcome-logo--right { width: clamp(175px, 30vw, 380px); }
+
+  /* Anticipación sutil de "puertas" al pasar el cursor por el botón */
+  #institutionalOverlay:not(.is-opening):has(.welcome-cta:hover) .welcome-door--left  { transform: translateX(-6px); }
+  #institutionalOverlay:not(.is-opening):has(.welcome-cta:hover) .welcome-door--right { transform: translateX(6px); }
+
+  /* --- Firma institucional superior --- */
+  .welcome-signature {
+    position: absolute;
+    top: max(22px, 4vh);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-size: clamp(8px, 1.4vw, 12px);
+    font-weight: 600;
+    color: rgba(12, 23, 41, 0.55);
+    white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+    transition: opacity 400ms ease;
+  }
+
+  /* --- Centro: botón circular + etiqueta --- */
+  .welcome-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .welcome-cta {
+    position: relative;
+    width: clamp(66px, 9vw, 92px);
+    height: clamp(66px, 9vw, 92px);
+    border-radius: 9999px;
+    background: #152540; /* navy-800, azul marino corporativo */
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 18px 40px -12px rgba(12, 23, 41, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 300ms ease;
+  }
+  .welcome-cta svg {
+    width: 42%;
+    height: 42%;
+    color: #ffffff;
+    transition: transform 300ms ease;
+  }
+  .welcome-cta:hover { transform: scale(1.05); }
+  .welcome-cta:hover svg { transform: translateX(4px); }
+  .welcome-cta:focus-visible { outline: 2px solid #dca23a; outline-offset: 5px; }
+
+  /* Aro exterior: pulso ambiental lento + intensificación en hover */
+  .welcome-cta::after {
+    content: "";
+    position: absolute;
+    inset: -9px;
+    border-radius: 9999px;
+    border: 2px solid rgba(21, 37, 64, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    animation: welcomePulse 3s ease-out infinite;
+  }
+  .welcome-cta:hover::after { border-color: rgba(21, 37, 64, 0.6); }
+
+  @keyframes welcomePulse {
+    0%   { transform: scale(0.92); opacity: 0.55; }
+    70%  { transform: scale(1.28); opacity: 0; }
+    100% { transform: scale(1.28); opacity: 0; }
+  }
+
+  .welcome-cta-label {
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    font-size: clamp(9px, 1.4vw, 12px);
+    font-weight: 600;
+    color: #152540;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+    transition: opacity 400ms ease;
+  }
+
+  /* --- Coreografía de apertura (clic): una sola clase de estado --- */
+  #institutionalOverlay.is-opening .welcome-door--left  { transform: translateX(-100%); }
+  #institutionalOverlay.is-opening .welcome-door--right { transform: translateX(100%); }
+  #institutionalOverlay.is-opening .welcome-signature,
+  #institutionalOverlay.is-opening .welcome-cta-label { opacity: 0; }
+  #institutionalOverlay.is-opening .welcome-center { pointer-events: none; }
+  #institutionalOverlay.is-opening .welcome-cta {
+    animation: welcomeCtaExit 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  @keyframes welcomeCtaExit {
+    0%   { transform: scale(1);    opacity: 1; }
+    30%  { transform: scale(0.86); opacity: 1; }
+    100% { transform: scale(0.86); opacity: 0; }
+  }
+
+  @media (max-width: 480px) {
+    .welcome-signature { letter-spacing: 0.14em; font-size: 8px; }
+  }
+
+  /* Accesibilidad: sin pulso continuo y apertura simplificada */
+  @media (prefers-reduced-motion: reduce) {
+    .welcome-cta::after { animation: none; }
+    .welcome-cta { transition: none; }
+    #institutionalOverlay { transition: opacity 400ms ease; }
+    #institutionalOverlay.is-opening { opacity: 0; }
+    #institutionalOverlay.is-opening .welcome-door--left,
+    #institutionalOverlay.is-opening .welcome-door--right { transform: none; }
+    #institutionalOverlay.is-opening .welcome-cta { animation: none; opacity: 0; }
   }
 </style>
 </head>
@@ -108,60 +249,43 @@
 
   <!-- ================================================================ -->
   <!-- CAPA 1 — BIENVENIDA INSTITUCIONAL / "welcomeOverlay" (z-[9999])   -->
-  <!-- Concepto "Premium Dark Glassmorphism": fondo inmersivo con        -->
-  <!-- degradado oscuro, navbar institucional limpio arriba (ambos       -->
-  <!-- logos dentro de pastillas blancas translúcidas para resaltar      -->
-  <!-- sobre el fondo oscuro) y una tarjeta de cristal esmerilado         -->
-  <!-- centrada con el mensaje y el botón "Avanzar". Al hacer clic,       -->
-  <!-- todo el overlay se desvanece (opacidad + leve zoom) y se oculta,   -->
-  <!-- revelando la Capa 2 que espera debajo.                              -->
+  <!-- Concepto "Alianza que abre el diagnóstico": dos puertas de marca  -->
+  <!-- (50vw × 100vh) con los logos reales, firma institucional arriba   -->
+  <!-- y un único botón circular central. Al hacer clic, las puertas se  -->
+  <!-- abren hacia los lados y se revela la Capa 2. Toda la coreografía  -->
+  <!-- de salida se controla con la clase ".is-opening".                 -->
   <!-- ================================================================ -->
-  <div id="institutionalOverlay" class="fixed inset-0 z-[9999] overflow-y-auto flex flex-col bg-gradient-to-br from-navy-900 via-[#0a1128] to-navy-900">
+  <div id="institutionalOverlay" class="fixed inset-0 z-[9999]">
 
-    <!-- Header institucional: navbar limpio con ambos logos -->
-    <header class="w-full max-w-6xl mx-auto flex justify-between items-center px-6 py-8 animate-in">
-      <div class="bg-white/95 rounded-xl px-4 py-2.5 shadow-lg">
-        <img
-          src="logo-mcs.png"
-          alt="M. Aceves y Consultores S.C."
-          class="h-10 sm:h-12 w-auto object-contain" />
-      </div>
-      <div class="bg-white/95 rounded-xl px-4 py-2.5 shadow-lg">
-        <img
-          src="logo-smnyl.png"
-          alt="Seguros Monterrey New York Life"
-          class="h-10 sm:h-12 w-auto object-contain" />
-      </div>
-    </header>
+    <!-- Puerta izquierda: M. Aceves y Consultores S.C. -->
+    <div id="leftDoor" class="welcome-door welcome-door--left">
+      <img
+        src="logo-mcs.png"
+        alt="M. Aceves y Consultores S.C."
+        class="welcome-logo welcome-logo--left" />
+    </div>
 
-    <!-- El centro de atención: tarjeta de cristal esmerilado -->
-    <div class="flex-1 flex items-center justify-center px-6 py-10">
-      <div class="backdrop-blur-md bg-white/5 border border-white/10 shadow-2xl rounded-3xl p-10 max-w-2xl mx-auto text-center animate-in">
+    <!-- Puerta derecha: Seguros Monterrey New York Life -->
+    <div id="rightDoor" class="welcome-door welcome-door--right">
+      <img
+        src="logo-smnyl.png"
+        alt="Seguros Monterrey New York Life"
+        class="welcome-logo welcome-logo--right" />
+    </div>
 
-        <span class="inline-flex items-center gap-2 rounded-full bg-gold-400/10 border border-gold-400/30 px-4 py-1.5 text-xs font-semibold tracking-widest text-gold-400 uppercase">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Alianza estratégica
-        </span>
+    <!-- Firma institucional de la alianza -->
+    <p class="welcome-signature">M. Aceves y Consultores &times; Seguros Monterrey New York Life</p>
 
-        <h1 class="mt-6 text-4xl md:text-5xl font-extrabold leading-tight text-white">
-          El primer paso hacia tu tranquilidad financiera comienza con el respaldo correcto.
-        </h1>
-
-        <p class="mt-4 text-navy-200">
-          Descubre cómo diseñamos tu futuro en menos de 2 minutos.
-        </p>
-
-        <button
-          id="advanceBtn" type="button"
-          class="group mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-gold-600 to-gold-400 text-navy-900 font-bold px-12 py-4 transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_20px_rgba(220,162,58,0.4)] disabled:opacity-70 disabled:hover:scale-100 disabled:pointer-events-none">
-          Avanzar
-          <svg class="w-4.5 h-4.5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-        </button>
-      </div>
+    <!-- Centro de la experiencia: botón circular + etiqueta -->
+    <div class="welcome-center">
+      <button
+        id="advanceBtn" type="button" class="welcome-cta"
+        aria-label="Iniciar diagnóstico: abrir el formulario de pre-registro">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </button>
+      <span class="welcome-cta-label">Iniciar diagnóstico</span>
     </div>
   </div>
   <!-- FIN CAPA 1 -->
@@ -658,32 +782,44 @@
 
     document.addEventListener('DOMContentLoaded', function () {
 
-      // ---------- Evento 1: Capa 1 → Capa 2 (fundido elegante de los logos) ----------
+      // ---------- Evento 1: Capa 1 → Capa 2 (apertura de puertas) ----------
       const institutionalOverlay = document.getElementById('institutionalOverlay');
       const advanceBtn = document.getElementById('advanceBtn');
-      const INSTITUTIONAL_FADE_DURATION_MS = 600; // debe coincidir con "#institutionalOverlay" en el CSS
+      const leftDoor = document.getElementById('leftDoor'); // puerta principal para transitionend
 
       if (institutionalOverlay && advanceBtn) {
         advanceBtn.addEventListener('click', function () {
+          // Evita doble ejecución si ya está abriéndose.
+          if (institutionalOverlay.classList.contains('is-opening')) return;
+
           // 0) Se deshabilita el botón de inmediato para evitar doble clic.
           advanceBtn.disabled = true;
 
-          // 1) Los dos logos y el texto flotante desaparecen juntos, como
-          //    un único grupo visual, con un efecto elegante de opacidad
-          //    + leve zoom (scale). Sin setTimeout intermedio ni
-          //    animaciones desacopladas: todo ocurre en el mismo clic.
-          institutionalOverlay.style.opacity = '0';
-          institutionalOverlay.style.transform = 'scale(1.04)';
-          institutionalOverlay.style.pointerEvents = 'none';
+          // 1) En el MISMO frame se activa una única clase de estado. El
+          //    CSS coordina toda la coreografía: las puertas se deslizan
+          //    hacia afuera, el botón se comprime y desaparece, y la firma
+          //    + etiqueta se desvanecen simultáneamente. Sin setTimeout
+          //    por elemento; una sola clase controla todo.
+          institutionalOverlay.classList.add('is-opening');
 
-          // 2) Cuando termina el fundido, se llama exactamente a la
-          //    misma lógica original que ocultaba el overlay y revelaba
-          //    la siguiente pantalla: se agrega "hidden" (display: none)
-          //    a la Capa 1, dejando visible la Capa 2 (la demás
-          //    información) que ya esperaba debajo (z-[50] < z-[100]).
-          window.setTimeout(function () {
+          // 2) Cuando termina de verdad la transición de las puertas
+          //    (transitionend sobre la puerta principal), se oculta el
+          //    overlay con "hidden" (display: none), revelando la Capa 2.
+          //    Un temporizador de respaldo cubre el caso de que el evento
+          //    no se dispare (p. ej. reduced-motion o pestaña inactiva).
+          let finished = false;
+          const finish = function () {
+            if (finished) return;
+            finished = true;
             institutionalOverlay.classList.add('hidden');
-          }, INSTITUTIONAL_FADE_DURATION_MS);
+          };
+
+          if (leftDoor) {
+            leftDoor.addEventListener('transitionend', function (event) {
+              if (event.propertyName === 'transform') finish();
+            });
+          }
+          window.setTimeout(finish, 1100); // respaldo (> 900ms de la transición)
         });
       }
 

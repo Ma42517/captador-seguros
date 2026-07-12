@@ -126,8 +126,8 @@
   .welcome-logo--right { width: clamp(175px, 30vw, 380px); }
 
   /* Anticipación sutil de "puertas" al pasar el cursor por el botón */
-  #institutionalOverlay:not(.is-opening):has(.welcome-cta:hover) .welcome-door--left  { transform: translateX(-6px); }
-  #institutionalOverlay:not(.is-opening):has(.welcome-cta:hover) .welcome-door--right { transform: translateX(6px); }
+  #institutionalOverlay:not(.is-opening):has(.welcome-start:hover) .welcome-door--left  { transform: translateX(-6px); }
+  #institutionalOverlay:not(.is-opening):has(.welcome-start:hover) .welcome-door--right { transform: translateX(6px); }
 
   /* --- Firma institucional superior --- */
   .welcome-signature {
@@ -168,7 +168,7 @@
   /* Al abrir las puertas, la firma se desvanece con su transición (no con la animación de entrada) */
   #institutionalOverlay.is-opening .welcome-signature { animation: none; }
 
-  /* --- Centro: botón circular + etiqueta --- */
+  /* --- Centro: botón grande "Iniciar" (efecto ola + latido) --- */
   .welcome-center {
     position: absolute;
     top: 50%;
@@ -179,75 +179,143 @@
     flex-direction: column;
     align-items: center;
     gap: 18px;
+    transition: opacity 400ms ease;
   }
 
-  .welcome-cta {
+  /* Botón "Iniciar": grande y prominente, con animación de latido (heartBeat) */
+  .welcome-start {
     position: relative;
-    width: clamp(66px, 9vw, 92px);
-    height: clamp(66px, 9vw, 92px);
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 22px 52px;
     border-radius: 9999px;
     background: #152540; /* navy-800, azul marino corporativo */
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    box-shadow: 0 18px 40px -12px rgba(12, 23, 41, 0.55);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 300ms ease;
-  }
-  .welcome-cta svg {
-    width: 42%;
-    height: 42%;
     color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 20px 46px -12px rgba(12, 23, 41, 0.6);
+    font-size: clamp(1.35rem, 3.2vw, 1.9rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    animation: heartBeat 2.2s ease-in-out infinite;
+    transition: box-shadow 300ms ease, background-color 300ms ease;
+    will-change: transform;
+  }
+  .welcome-start:hover { background: #0c1729; box-shadow: 0 24px 54px -10px rgba(12, 23, 41, 0.75); }
+  .welcome-start:focus-visible { outline: 3px solid #dca23a; outline-offset: 5px; }
+
+  /* Texto con efecto "ola": cada letra sube y baja de forma secuencial */
+  .welcome-start__text { display: inline-flex; }
+  .welcome-start__text span {
+    display: inline-block;
+    will-change: transform;
+    animation: welcomeWave 1.6s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.07s);
+  }
+
+  /* Icono de flecha: acompaña al texto y se desplaza en hover */
+  .welcome-start__arrow {
+    display: inline-block;
+    font-size: 1.05em;
+    line-height: 1;
     transition: transform 300ms ease;
   }
-  .welcome-cta:hover { transform: scale(1.05); }
-  .welcome-cta:hover svg { transform: translateX(4px); }
-  .welcome-cta:focus-visible { outline: 2px solid #dca23a; outline-offset: 5px; }
+  .welcome-start:hover .welcome-start__arrow { transform: translateX(6px); }
 
-  /* Aro exterior: pulso ambiental lento + intensificación en hover */
-  .welcome-cta::after {
-    content: "";
+  /* Ola: las letras se elevan y regresan en secuencia */
+  @keyframes welcomeWave {
+    0%, 60%, 100% { transform: translateY(0); }
+    30%           { transform: translateY(-0.28em); }
+  }
+
+  /* Latido: expansión/contracción suave del botón, en bucle infinito */
+  @keyframes heartBeat {
+    0%   { transform: scale(1); }
+    14%  { transform: scale(1.06); }
+    28%  { transform: scale(1); }
+    42%  { transform: scale(1.06); }
+    70%  { transform: scale(1); }
+    100% { transform: scale(1); }
+  }
+
+  /* --- Fondo de "ondas de agua" (.bg-wave-decorator) en la parte inferior --- */
+  .bg-wave-decorator {
     position: absolute;
-    inset: -9px;
-    border-radius: 9999px;
-    border: 2px solid rgba(21, 37, 64, 0.35);
-    opacity: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 30vh;
+    min-height: 150px;
+    z-index: 20;
+    overflow: hidden;
     pointer-events: none;
-    animation: welcomePulse 3s ease-out infinite;
+    transition: opacity 500ms ease;
   }
-  .welcome-cta:hover::after { border-color: rgba(21, 37, 64, 0.6); }
+  .bg-wave-decorator .wave-track {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    display: flex;
+  }
+  .bg-wave-decorator .wave-track svg { width: 50%; height: 100%; display: block; }
+  .bg-wave-decorator .wave-track--back  { opacity: 0.55; animation: waveDrift 16s linear infinite; }
+  .bg-wave-decorator .wave-track--front { animation: waveDrift 10s linear infinite; }
+  @keyframes waveDrift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-  @keyframes welcomePulse {
-    0%   { transform: scale(0.92); opacity: 0.55; }
-    70%  { transform: scale(1.28); opacity: 0; }
-    100% { transform: scale(1.28); opacity: 0; }
+  /* ============================================================ */
+  /* PANTALLA 2 — DASHBOARD DE SELECCIÓN (layout horizontal)      */
+  /* Se revela al abrir las puertas del Welcome Overlay. Menú de   */
+  /* dos vías pensado para tablet. Solo UI: rutas aún no conectadas.*/
+  /* ============================================================ */
+  #selectionDashboard { z-index: 500; }
+
+  .dashboard-options {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 30px;
   }
 
-  .welcome-cta-label {
-    text-transform: uppercase;
-    letter-spacing: 0.28em;
-    font-size: clamp(9px, 1.4vw, 12px);
-    font-weight: 600;
-    color: #152540;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
-    transition: opacity 400ms ease;
+  .dash-btn {
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    padding: 30px 40px;
+    font-size: 1.15rem;
+    min-width: 220px;
+    cursor: pointer;
+    box-shadow: 0 14px 32px -12px rgba(12, 23, 41, 0.35);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .dash-btn:hover { transform: scale(1.05); box-shadow: 0 20px 42px -12px rgba(12, 23, 41, 0.45); }
+  .dash-btn:focus-visible { outline: 3px solid #dca23a; outline-offset: 4px; }
+
+  /* Botón 1 — Flujo Exprés: Azul Rey, texto blanco */
+  .dash-btn--express { background: #0047AB; color: #ffffff; }
+
+  /* Botón 2 — Flujo Profundo: Azul Cielo, texto azul oscuro */
+  .dash-btn--full { background: #87CEEB; color: #0A2540; }
+
+  /* En pantallas muy pequeñas (teléfono) apilamos los botones */
+  @media (max-width: 600px) {
+    .dashboard-options { flex-direction: column; gap: 18px; }
+    .dash-btn { width: 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dash-btn { transition: none; }
+    .dash-btn:hover { transform: none; }
   }
 
   /* --- Coreografía de apertura (clic): una sola clase de estado --- */
   #institutionalOverlay.is-opening .welcome-door--left  { transform: translateX(-100%); }
   #institutionalOverlay.is-opening .welcome-door--right { transform: translateX(100%); }
-  #institutionalOverlay.is-opening .welcome-signature,
-  #institutionalOverlay.is-opening .welcome-cta-label { opacity: 0; }
-  #institutionalOverlay.is-opening .welcome-center { pointer-events: none; }
-  #institutionalOverlay.is-opening .welcome-cta {
-    animation: welcomeCtaExit 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  }
-  @keyframes welcomeCtaExit {
-    0%   { transform: scale(1);    opacity: 1; }
-    30%  { transform: scale(0.86); opacity: 1; }
-    100% { transform: scale(0.86); opacity: 0; }
-  }
+  #institutionalOverlay.is-opening .welcome-signature { opacity: 0; }
+  #institutionalOverlay.is-opening .welcome-center { opacity: 0; pointer-events: none; }
+  #institutionalOverlay.is-opening .bg-wave-decorator { opacity: 0; }
 
   @media (max-width: 480px) {
     .welcome-signature { letter-spacing: 0.14em; font-size: 8px; }
@@ -255,14 +323,15 @@
 
   /* Accesibilidad: sin pulso continuo y apertura simplificada */
   @media (prefers-reduced-motion: reduce) {
-    .welcome-cta::after { animation: none; }
-    .welcome-cta { transition: none; }
+    .welcome-start { animation: none; }
+    .welcome-start__text span { animation: none; }
+    .bg-wave-decorator .wave-track { animation: none; }
     .welcome-signature { animation: none; }
     #institutionalOverlay { transition: opacity 400ms ease; }
     #institutionalOverlay.is-opening { opacity: 0; }
     #institutionalOverlay.is-opening .welcome-door--left,
     #institutionalOverlay.is-opening .welcome-door--right { transform: none; }
-    #institutionalOverlay.is-opening .welcome-cta { animation: none; opacity: 0; }
+    #institutionalOverlay.is-opening .welcome-center { animation: none; opacity: 0; }
   }
 
   /* ============================================================ */
@@ -454,19 +523,66 @@
       <span class="sig-right">Seguros Monterrey New York Life</span>
     </p>
 
-    <!-- Centro de la experiencia: botón circular + etiqueta -->
+    <!-- Fondo de "ondas de agua" (dos capas que se desplazan en bucle) -->
+    <div class="bg-wave-decorator" aria-hidden="true">
+      <div class="wave-track wave-track--back">
+        <svg viewBox="0 0 1440 200" preserveAspectRatio="none"><path fill="rgba(21,37,64,0.16)" d="M0,96 C288,180 576,20 720,96 C864,172 1152,20 1440,96 L1440,200 L0,200 Z" /></svg>
+        <svg viewBox="0 0 1440 200" preserveAspectRatio="none"><path fill="rgba(21,37,64,0.16)" d="M0,96 C288,180 576,20 720,96 C864,172 1152,20 1440,96 L1440,200 L0,200 Z" /></svg>
+      </div>
+      <div class="wave-track wave-track--front">
+        <svg viewBox="0 0 1440 200" preserveAspectRatio="none"><path fill="rgba(21,37,64,0.28)" d="M0,120 C288,60 576,190 720,120 C864,50 1152,190 1440,120 L1440,200 L0,200 Z" /></svg>
+        <svg viewBox="0 0 1440 200" preserveAspectRatio="none"><path fill="rgba(21,37,64,0.28)" d="M0,120 C288,60 576,190 720,120 C864,50 1152,190 1440,120 L1440,200 L0,200 Z" /></svg>
+      </div>
+    </div>
+
+    <!-- Centro de la experiencia: botón grande "Iniciar" (ola + latido) -->
     <div class="welcome-center">
-      <button
-        id="advanceBtn" type="button" class="welcome-cta"
-        aria-label="Iniciar diagnóstico: abrir el formulario de pre-registro">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-        </svg>
+      <button id="advanceBtn" type="button" class="welcome-start" aria-label="Iniciar">
+        <!-- Cada letra en un <span> con variable indexada --i para el efecto ola -->
+        <span class="welcome-start__text" aria-hidden="true">
+          <span style="--i:0">I</span><span style="--i:1">n</span><span style="--i:2">i</span><span style="--i:3">c</span><span style="--i:4">i</span><span style="--i:5">a</span><span style="--i:6">r</span>
+        </span>
+        <span class="welcome-start__arrow" aria-hidden="true">&#10148;</span>
       </button>
-      <span class="welcome-cta-label">Iniciar diagnóstico</span>
     </div>
   </div>
   <!-- FIN CAPA 1 -->
+
+  <!-- ================================================================ -->
+  <!-- PANTALLA 2 — DASHBOARD DE SELECCIÓN                              -->
+  <!-- Menú de dos vías (Flujo Exprés / Flujo Profundo). Se encuentra   -->
+  <!-- por debajo del Welcome Overlay (z-500 < z-9999) y queda a la      -->
+  <!-- vista cuando las puertas se abren. Interfaz visual únicamente:    -->
+  <!-- las rutas aún no están conectadas (Fase 1).                       -->
+  <!-- ================================================================ -->
+  <section id="selectionDashboard" class="fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-white to-navy-50 px-6">
+
+    <!-- Cabecera con los dos logos posicionados -->
+    <header class="absolute top-0 left-0 right-0 flex items-center justify-between px-6 sm:px-10 py-5">
+      <img src="logo-mcs.png" alt="M. Aceves y Consultores S.C." class="h-10 sm:h-12 w-auto object-contain" />
+      <img src="logo-smnyl.png" alt="Seguros Monterrey New York Life" class="h-9 sm:h-11 w-auto object-contain" />
+    </header>
+
+    <div class="text-center max-w-2xl">
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-navy-900">
+        ¿Cómo quieres comenzar?
+      </h1>
+      <p class="mt-3 text-sm sm:text-base text-navy-500">
+        Elige el tipo de experiencia que prefieres para tu diagnóstico patrimonial.
+      </p>
+
+      <!-- Menú de selección de dos vías (layout horizontal) -->
+      <div class="dashboard-options mt-10">
+        <button type="button" class="dash-btn dash-btn--express" data-flow="express">
+          Prospección rápida
+        </button>
+        <button type="button" class="dash-btn dash-btn--full" data-flow="full">
+          Asesoría completa
+        </button>
+      </div>
+    </div>
+  </section>
+  <!-- FIN PANTALLA 2 -->
 
   <!-- ================================================================ -->
   <!-- EXPERIENCIA POSTERIOR — DIAGNÓSTICO PATRIMONIAL INTERACTIVO       -->

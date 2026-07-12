@@ -168,7 +168,7 @@
   /* Al abrir las puertas, la firma se desvanece con su transición (no con la animación de entrada) */
   #institutionalOverlay.is-opening .welcome-signature { animation: none; }
 
-  /* --- Centro: botón grande "Iniciar" (efecto ola + latido) --- */
+  /* --- Centro: botón grande "Iniciar" (estático; se ilumina en hover) --- */
   .welcome-center {
     position: absolute;
     top: 50%;
@@ -182,8 +182,8 @@
     transition: opacity 400ms ease;
   }
 
-  /* Botón "Iniciar": grande y prominente, con un reflejo tipo brillo
-     que recorre suavemente su contorno (sin latido). */
+  /* Botón "Iniciar": grande y prominente. Estático por defecto (las letras
+     no se mueven); solo se ilumina al pasar el cursor. */
   .welcome-start {
     position: relative;
     display: inline-flex;

@@ -145,7 +145,22 @@
     white-space: nowrap;
     text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
     transition: opacity 400ms ease;
+    /* Entrada suave fade-in-down tras cargar la estructura principal */
+    animation: welcomeSignatureDown 600ms ease both;
+    animation-delay: 400ms;
   }
+  /* Contraste diferenciado según la división de color del fondo */
+  .welcome-signature .sig-mcs   { color: #0891b2; }                 /* cyan/turquesa institucional sobre blanco */
+  .welcome-signature .sig-x     { color: #888888; }                 /* gris neutro medio */
+  .welcome-signature .sig-smnyl { color: #ffffff; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); } /* blanco sobre azul */
+
+  @keyframes welcomeSignatureDown {
+    from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  /* Al abrir las puertas, la firma se desvanece con su transición (no con la animación de entrada) */
+  #institutionalOverlay.is-opening .welcome-signature { animation: none; }
 
   /* --- Centro: botón circular + etiqueta --- */
   .welcome-center {
@@ -236,6 +251,7 @@
   @media (prefers-reduced-motion: reduce) {
     .welcome-cta::after { animation: none; }
     .welcome-cta { transition: none; }
+    .welcome-signature { animation: none; }
     #institutionalOverlay { transition: opacity 400ms ease; }
     #institutionalOverlay.is-opening { opacity: 0; }
     #institutionalOverlay.is-opening .welcome-door--left,
@@ -347,6 +363,11 @@
 
   .dx-bar-fill { transition: width 450ms cubic-bezier(0.22, 1, 0.36, 1); }
   @media (prefers-reduced-motion: reduce) { .dx-bar-fill { transition: none; } }
+
+  /* Paneles laterales contextuales (aparecen segun la etapa activa) */
+  @media (prefers-reduced-motion: no-preference) {
+    .dx-aside-panel:not(.hidden) { animation: dxStageIn 400ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+  }
 </style>
 </head>
 
@@ -378,8 +399,12 @@
         class="welcome-logo welcome-logo--right" />
     </div>
 
-    <!-- Firma institucional de la alianza -->
-    <p class="welcome-signature">M. Aceves y Consultores &times; Seguros Monterrey New York Life</p>
+    <!-- Firma institucional de la alianza (contraste diferenciado por marca) -->
+    <p class="welcome-signature">
+      <span class="sig-mcs">M. Aceves y Consultores</span>
+      <span class="sig-x">&times;</span>
+      <span class="sig-smnyl">Seguros Monterrey New York Life</span>
+    </p>
 
     <!-- Centro de la experiencia: botón circular + etiqueta -->
     <div class="welcome-center">
@@ -401,8 +426,25 @@
   <!-- Flujo por etapas dentro de un único <form> conectado a Formspree. -->
   <!-- Se revela automáticamente cuando el Welcome Overlay se oculta.    -->
   <!-- ================================================================ -->
-  <main class="relative z-0 min-h-screen bg-slate-50 flex items-start sm:items-center justify-center px-4 py-8 sm:py-14">
-    <form id="preRegisterForm" action="https://formspree.io/f/meebywra" method="POST" novalidate class="w-full max-w-2xl">
+  <main class="relative z-0 min-h-screen bg-slate-50 flex items-start xl:items-center justify-center px-4 py-8 sm:py-14">
+    <div class="w-full flex flex-col xl:flex-row xl:items-stretch xl:justify-center gap-6 xl:gap-7">
+
+      <!-- ===== Lateral IZQUIERDO (contextual por etapa) ===== -->
+      <aside id="dxAsideLeft" class="hidden xl:flex xl:flex-col xl:justify-center xl:w-60 xl:flex-shrink-0">
+        <!-- Sliders: gatillo de conciencia sobre la inflación -->
+        <div data-lateral="calc" class="dx-aside-panel hidden rounded-2xl border border-navy-100 bg-white p-5 shadow-sm">
+          <span class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gold-600">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+            ¿Sabías qué?
+          </span>
+          <p class="mt-3 text-xs leading-relaxed text-navy-500">
+            En México, la inflación promedio anual devora entre el <strong class="text-navy-700">4% y 5%</strong> del valor de tu dinero.
+            Ahorrar en pesos nominales en cuentas bancarias comunes garantiza una pérdida de poder adquisitivo a largo plazo.
+          </p>
+        </div>
+      </aside>
+
+      <form id="preRegisterForm" action="https://formspree.io/f/meebywra" method="POST" novalidate class="w-full max-w-2xl xl:flex-shrink-0">
 
       <!-- Cabecera: firma discreta + barra de progreso por etapas -->
       <div class="mb-6 sm:mb-8">
@@ -684,8 +726,8 @@
             <div class="mt-8 flex items-center justify-between gap-3">
               <button type="button" class="dx-back text-sm font-semibold text-navy-500 hover:text-navy-900 transition-colors">Atrás</button>
               <button type="button" id="dxSubmitBtn" class="inline-flex items-center gap-2 rounded-full bg-navy-800 hover:bg-navy-900 text-white font-semibold px-8 py-3.5 shadow-lg shadow-navy-900/20 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed">
-                <svg id="dxSubmitIcon" class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 10-8 0v2" /></svg>
                 <span id="dxSubmitLabel">Enviar mi diagnóstico</span>
+                <svg id="dxSubmitIcon" class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
               </button>
             </div>
           </section>
@@ -694,17 +736,98 @@
         <!-- FIN #dxStages -->
 
         <!-- ===================== VISTA: CONFIRMACIÓN ===================== -->
-        <div id="dxSuccess" class="hidden text-center py-6">
-          <div class="mx-auto w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center animate-pop">
-            <svg class="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
+        <div id="dxSuccess" class="hidden">
+
+          <!-- Mensaje de éxito -->
+          <div class="text-center">
+            <div class="mx-auto w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center animate-pop">
+              <svg class="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 class="mt-5 text-xl sm:text-2xl font-bold text-navy-900">¡Listo, <span id="dxSuccessName">amigo(a)</span>!</h2>
+            <p class="mt-2 text-sm text-navy-500 max-w-sm mx-auto">
+              Recibí tu diagnóstico. Estoy preparando una propuesta pensada para ti y te
+              contactaré muy pronto por WhatsApp.
+            </p>
           </div>
-          <h2 class="mt-5 text-xl sm:text-2xl font-bold text-navy-900">¡Listo, <span id="dxSuccessName">amigo(a)</span>!</h2>
-          <p class="mt-2 text-sm text-navy-500 max-w-sm mx-auto">
-            Recibí tu diagnóstico. Estoy preparando una propuesta pensada para ti y te
-            contactaré muy pronto por WhatsApp.
-          </p>
+
+          <!-- ===== Simulador de blindaje inflacionario (UDIs vs Pesos vs USD) ===== -->
+          <div class="mt-10 pt-8 border-t border-navy-100">
+            <h3 class="text-center text-base sm:text-lg font-bold text-navy-900">El valor real de tu dinero a los 65 años</h3>
+            <p class="mt-1.5 text-center text-xs text-navy-400 max-w-md mx-auto">
+              Proyección ilustrativa con un ahorro anual de $50,000 durante <span id="dxSimYears" class="font-semibold text-navy-600">—</span> años.
+            </p>
+
+            <div class="mt-5 grid gap-3 sm:grid-cols-3">
+              <!-- Bloque 1: Pesos -->
+              <div class="rounded-xl border border-red-100 bg-red-50/60 p-4 text-center">
+                <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-red-500">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6 9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0 3.182-5.511m-3.182 5.51-5.511-3.181" /></svg>
+                  Pesos en banco
+                </span>
+                <p id="dxSimPesos" class="mt-2 text-lg font-extrabold text-navy-900">—</p>
+                <p class="mt-1 text-[11px] leading-snug text-red-600">Tu dinero pierde valor (≈50% de poder adquisitivo por la inflación).</p>
+              </div>
+              <!-- Bloque 2: UDIs -->
+              <div class="rounded-xl border border-navy-800 bg-navy-800 p-4 text-center text-white">
+                <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-gold-300">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  Ahorro en UDIs
+                </span>
+                <p id="dxSimUdis" class="mt-2 text-lg font-extrabold text-white">—</p>
+                <p class="mt-1 text-[11px] leading-snug text-navy-100">Poder adquisitivo blindado: conserva el 100% de su capacidad de compra.</p>
+              </div>
+              <!-- Bloque 3: USD -->
+              <div class="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4 text-center">
+                <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-600">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0-5.94-2.28m5.94 2.28-2.28 5.941" /></svg>
+                  Ahorro en Dólares
+                </span>
+                <p id="dxSimUsd" class="mt-2 text-lg font-extrabold text-navy-900">—</p>
+                <p class="mt-1 text-[11px] leading-snug text-emerald-700">Protección cambiaria: crecimiento en una divisa global fuerte.</p>
+              </div>
+            </div>
+            <p class="mt-3 text-[10px] leading-relaxed text-navy-300 text-center">
+              Simulación ilustrativa. Los resultados no representan una garantía de rendimiento ni una recomendación financiera.
+            </p>
+          </div>
+
+          <!-- ===== Módulo activo de captura de referidos ===== -->
+          <div class="mt-8 pt-8 border-t border-navy-100">
+            <h3 class="text-center text-lg sm:text-xl font-bold text-navy-900 leading-snug max-w-xl mx-auto">
+              ¿Crees que a alguien más le serviría blindar su futuro y medir su preparación financiera?
+            </h3>
+            <p class="mt-2.5 text-center text-sm text-navy-500 max-w-lg mx-auto leading-relaxed">
+              Ayuda a tus familiares o amigos cercanos a proteger su patrimonio contra la devaluación.
+              Ingresa sus datos y les enviaremos una invitación exclusiva de tu parte para realizar este diagnóstico sin costo alguno.
+            </p>
+
+            <div class="mt-6 max-w-md mx-auto space-y-3">
+              <input type="text" id="dxRefName" class="dx-input" placeholder="Nombre completo del referido" />
+              <input type="tel" id="dxRefWhatsapp" inputmode="tel" class="dx-input" placeholder="WhatsApp de contacto" />
+              <select id="dxRefRelation" class="dx-input">
+                <option value="" disabled selected>Parentesco / Relación</option>
+                <option value="Amigo">Amigo</option>
+                <option value="Familiar">Familiar</option>
+                <option value="Colega">Colega</option>
+              </select>
+
+              <p id="dxRefError" class="hidden text-sm text-red-600"></p>
+              <p id="dxRefOk" class="hidden text-sm font-medium text-emerald-700">¡Gracias! Enviaremos la invitación de tu parte muy pronto.</p>
+
+              <button type="button" id="dxRefSubmit"
+                class="w-full inline-flex items-center justify-center gap-2 rounded-full bg-navy-800 hover:bg-navy-900 text-white font-semibold px-6 py-3.5 shadow-lg shadow-navy-900/20 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed">
+                <span id="dxRefSubmitLabel">Compartir Diagnóstico de Seguridad con mis Referidos</span>
+              </button>
+
+              <button type="button" id="dxRefWhatsAppBtn"
+                class="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#1ebe5b] text-white font-semibold px-6 py-3.5 shadow-lg shadow-emerald-600/20 transition-all duration-200">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
+                Compartir link directo por WhatsApp
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -723,7 +846,32 @@
       <input type="hidden" name="estimatedCapital" id="dxHiddenCapital" />
       <input type="hidden" name="preparednessLevel" id="dxHiddenLevel" />
       <input type="hidden" name="submittedAt" id="dxHiddenSubmittedAt" />
-    </form>
+      </form>
+
+      <!-- ===== Lateral DERECHO (contextual por etapa) ===== -->
+      <aside id="dxAsideRight" class="hidden xl:flex xl:flex-col xl:justify-center xl:w-60 xl:flex-shrink-0">
+        <!-- Datos básicos: micro-sello de seguridad discreto -->
+        <div data-lateral="info" class="dx-aside-panel hidden flex items-start gap-3 rounded-2xl border border-navy-100 bg-white/70 p-4 shadow-sm">
+          <svg class="w-5 h-5 flex-shrink-0 text-navy-300 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 0h10.5a2.25 2.25 0 012.25 2.25v6a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18.75v-6a2.25 2.25 0 012.25-2.25z" /></svg>
+          <p class="text-[11px] leading-relaxed text-navy-400">
+            Tus datos están protegidos bajo la Ley Federal de Protección de Datos Personales. Conexión 100% cifrada.
+          </p>
+        </div>
+
+        <!-- Sliders: el blindaje en UDIs / USD -->
+        <div data-lateral="calc" class="dx-aside-panel hidden rounded-2xl border border-navy-800 bg-navy-800 text-white p-5 shadow-sm">
+          <span class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gold-300">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            Monedas de Protección
+          </span>
+          <p class="mt-3 text-xs leading-relaxed text-navy-100">
+            Las estrategias de Seguros Monterrey New York Life utilizan <strong>UDIs</strong> (Unidades de Inversión)
+            y <strong>Dólares</strong> para garantizar que tu dinero mantenga su valor real y crezca por encima de la inflación con el paso de los años.
+          </p>
+        </div>
+      </aside>
+
+    </div>
   </main>
 
   <!-- ============================================================ -->
@@ -849,6 +997,14 @@
       // ------------------------------------------------------------
       // 1) NAVEGACIÓN ENTRE ETAPAS
       // ------------------------------------------------------------
+      // Paneles laterales contextuales: se muestra solo el que coincide con la etapa.
+      const asidePanels = document.querySelectorAll('.dx-aside-panel');
+      function updateLaterals(stageKey) {
+        Array.prototype.forEach.call(asidePanels, function (panel) {
+          panel.classList.toggle('hidden', panel.dataset.lateral !== stageKey);
+        });
+      }
+
       function goTo(stageKey) {
         Object.keys(stageEls).forEach((k) => stageEls[k].classList.toggle('is-active', k === stageKey));
         currentStage = stageKey;
@@ -863,6 +1019,7 @@
           progressWrap.classList.add('hidden');
         }
 
+        updateLaterals(stageKey);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
@@ -1197,9 +1354,89 @@
         successName.textContent = nombre ? nombre.split(' ')[0] : 'amigo(a)';
         stagesWrap.classList.add('hidden');
         progressWrap.classList.add('hidden');
+        updateLaterals('success'); // ninguna coincidencia -> oculta todos los laterales
+        renderInflationSimulator();
         successView.classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
+
+      // ------------------------------------------------------------
+      // 9) SIMULADOR DE BLINDAJE INFLACIONARIO (UDIs vs Pesos vs USD)
+      // ------------------------------------------------------------
+      // Proyección ILUSTRATIVA al llegar a los 65 años, con un ahorro
+      // anual hipotético de $50,000 MXN. No es una garantía financiera.
+      const SIM_ANNUAL_SAVING = 50000; // MXN aportados por año (hipótesis)
+      const SIM_TARGET_AGE = 65;        // meta de edad de retiro fija del simulador
+      const SIM_USD_ANNUAL_EDGE = 0.03; // ventaja cambiaria ilustrativa anual
+
+      function renderInflationSimulator() {
+        const age = Number(inAge.value) || 0;
+        const years = Math.max(0, SIM_TARGET_AGE - age);
+        const contributed = SIM_ANNUAL_SAVING * years;      // capital aportado nominal
+        const pesos = contributed * 0.5;                     // pierde ~50% de poder adquisitivo
+        const udis = contributed;                            // poder adquisitivo blindado (100%)
+        const usd = contributed * (1 + SIM_USD_ANNUAL_EDGE * years); // protección cambiaria
+
+        document.getElementById('dxSimYears').textContent = years;
+        document.getElementById('dxSimPesos').textContent = money(pesos);
+        document.getElementById('dxSimUdis').textContent = money(udis);
+        document.getElementById('dxSimUsd').textContent = money(usd);
+      }
+
+      // ------------------------------------------------------------
+      // 10) MÓDULO DE REFERIDOS (envío real a Formspree + WhatsApp API)
+      // ------------------------------------------------------------
+      const refName = document.getElementById('dxRefName');
+      const refWa = document.getElementById('dxRefWhatsapp');
+      const refRel = document.getElementById('dxRefRelation');
+      const refError = document.getElementById('dxRefError');
+      const refOk = document.getElementById('dxRefOk');
+      const refSubmit = document.getElementById('dxRefSubmit');
+      const refSubmitLabel = document.getElementById('dxRefSubmitLabel');
+      const refWhatsBtn = document.getElementById('dxRefWhatsAppBtn');
+
+      refSubmit.addEventListener('click', async function () {
+        const name = refName.value.trim();
+        const wa = digits(refWa.value);
+        refOk.classList.add('hidden');
+        if (name.length < 3 || wa.length < 10 || !refRel.value) {
+          refError.textContent = 'Ingresa nombre, WhatsApp válido (10 dígitos) y el parentesco.';
+          refError.classList.remove('hidden');
+          return;
+        }
+        refError.classList.add('hidden');
+        refSubmit.disabled = true;
+        refSubmitLabel.textContent = 'Enviando...';
+        try {
+          // FormData independiente: no interfiere con el diagnóstico ya enviado.
+          const fd = new FormData();
+          fd.append('_subject', 'Nuevo referido desde el Diagnóstico Patrimonial');
+          fd.append('tipo', 'Referido');
+          fd.append('referidoNombre', name);
+          fd.append('referidoWhatsApp', refWa.value.trim());
+          fd.append('referidoParentesco', refRel.value);
+          fd.append('referidoPor', inFullName.value.trim() || '(sin nombre)');
+          fd.append('submittedAt', new Date().toISOString());
+          const res = await fetch(form.action, { method: 'POST', body: fd, headers: { Accept: 'application/json' } });
+          if (!res.ok) throw new Error('Formspree respondió con un error.');
+          refOk.classList.remove('hidden');
+          refName.value = ''; refWa.value = ''; refRel.selectedIndex = 0;
+        } catch (err) {
+          console.error('[Referidos] Error al enviar:', err);
+          refError.textContent = 'No pudimos enviar el referido. Intenta de nuevo.';
+          refError.classList.remove('hidden');
+        } finally {
+          refSubmit.disabled = false;
+          refSubmitLabel.textContent = 'Compartir Diagnóstico de Seguridad con mis Referidos';
+        }
+      });
+
+      // Compartir link directo por WhatsApp con mensaje precargado.
+      refWhatsBtn.addEventListener('click', function () {
+        const url = window.location.href;
+        const msg = '¡Hola! Acabo de hacer un Diagnóstico Patrimonial interactivo para ver qué tan preparado está mi retiro y mi protección contra la devaluación. Me dio datos súper útiles de cómo influyen las UDIs y los Dólares. Te paso el link para que midas tu puntaje, toma solo 2 minutos: ' + url;
+        window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
+      });
 
       // ------------------------------------------------------------
       // Inicialización de vistas dinámicas

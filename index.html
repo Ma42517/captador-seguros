@@ -199,47 +199,38 @@
     font-weight: 700;
     letter-spacing: 0.02em;
     cursor: pointer;
-    transition: box-shadow 300ms ease, background-color 300ms ease;
+    transition: box-shadow 300ms ease, background-color 300ms ease, border-color 300ms ease, transform 300ms ease;
   }
-  .welcome-start:hover { background: #0c1729; box-shadow: 0 24px 54px -10px rgba(12, 23, 41, 0.75); }
+
+  /* Estado por defecto: botón tranquilo, sin animación. Al pasar el cursor
+     se "ilumina": el fondo aclara, aparece un halo de luz dorado y un
+     destello interior suave. */
+  .welcome-start:hover {
+    background: #1f3653; /* navy más claro: se enciende */
+    border-color: rgba(232, 184, 89, 0.9); /* borde dorado iluminado */
+    box-shadow:
+      0 0 22px rgba(232, 184, 89, 0.55),          /* halo de luz dorado */
+      0 0 46px rgba(232, 184, 89, 0.30),
+      0 24px 54px -10px rgba(12, 23, 41, 0.75);   /* sombra base */
+    transform: translateY(-2px);
+  }
   .welcome-start:focus-visible { outline: 3px solid #dca23a; outline-offset: 5px; }
 
-  /* Reflejo/brillo leve que orbita el borde del botón (reemplaza el latido).
-     Se usa @property para animar suavemente el ángulo del degradado cónico
-     y una máscara para limitar el brillo únicamente al contorno. */
-  @property --shine-angle {
-    syntax: '<angle>';
-    initial-value: 0deg;
-    inherits: false;
-  }
+  /* Destello interior que aparece únicamente al pasar el cursor (glow radial) */
   .welcome-start::after {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    padding: 2px; /* grosor del brillo del contorno */
-    background: conic-gradient(from var(--shine-angle),
-      transparent 0deg,
-      transparent 290deg,
-      rgba(255, 255, 255, 0.9) 330deg,
-      transparent 360deg);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
-    animation: shineOrbit 4.5s linear infinite;
+    background: radial-gradient(120% 140% at 50% 0%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 60%);
+    opacity: 0;
+    transition: opacity 300ms ease;
     pointer-events: none;
   }
-  @keyframes shineOrbit { to { --shine-angle: 360deg; } }
+  .welcome-start:hover::after { opacity: 1; }
 
-  /* Texto con efecto "ola": cada letra sube y baja de forma secuencial */
+  /* Texto del botón (sin animación de ola) */
   .welcome-start__text { display: inline-flex; }
-  .welcome-start__text span {
-    display: inline-block;
-    will-change: transform;
-    animation: welcomeWave 1.6s ease-in-out infinite;
-    animation-delay: calc(var(--i) * 0.07s);
-  }
 
   /* Icono de flecha: acompaña al texto y se desplaza en hover */
   .welcome-start__arrow {
@@ -249,12 +240,6 @@
     transition: transform 300ms ease;
   }
   .welcome-start:hover .welcome-start__arrow { transform: translateX(6px); }
-
-  /* Ola: las letras se elevan y regresan en secuencia */
-  @keyframes welcomeWave {
-    0%, 60%, 100% { transform: translateY(0); }
-    30%           { transform: translateY(-0.28em); }
-  }
 
   /* --- Fondo de "ondas de agua" (.bg-wave-decorator) en la parte inferior --- */
   .bg-wave-decorator {
@@ -343,8 +328,6 @@
 
   /* Accesibilidad: sin pulso continuo y apertura simplificada */
   @media (prefers-reduced-motion: reduce) {
-    .welcome-start::after { animation: none; }
-    .welcome-start__text span { animation: none; }
     .bg-wave-decorator .wave-track { animation: none; }
     .welcome-signature { animation: none; }
     #institutionalOverlay { transition: opacity 400ms ease; }
@@ -557,11 +540,8 @@
 
     <!-- Centro de la experiencia: botón grande "Iniciar" (ola + latido) -->
     <div class="welcome-center">
-      <button id="advanceBtn" type="button" class="welcome-start" aria-label="Iniciar">
-        <!-- Cada letra en un <span> con variable indexada --i para el efecto ola -->
-        <span class="welcome-start__text" aria-hidden="true">
-          <span style="--i:0">I</span><span style="--i:1">n</span><span style="--i:2">i</span><span style="--i:3">c</span><span style="--i:4">i</span><span style="--i:5">a</span><span style="--i:6">r</span>
-        </span>
+      <button id="advanceBtn" type="button" class="welcome-start">
+        <span class="welcome-start__text">Iniciar</span>
         <span class="welcome-start__arrow" aria-hidden="true">&#10148;</span>
       </button>
     </div>

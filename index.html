@@ -7,14 +7,14 @@
 <meta name="description" content="PROSPECTA — Interfaz del Asesor." />
 <meta name="theme-color" content="#000000" />
 
-<!-- Tipografías modernas sans-serif (wordmark: Montserrat · texto: Inter) -->
+<!-- Tipografías: Montserrat/Inter (marca y UI) + Playfair Display (preguntas) -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
 
 <style>
   /* ============================================================ */
-  /* PALETA (solo negro, blanco, gris acero y gris carbón)         */
+  /* PALETA (solo negro, blanco, gris acero/plata y gris carbón)   */
   /* Prohibido el dorado.                                          */
   /* ============================================================ */
   :root {
@@ -22,9 +22,9 @@
     --white:        #ffffff;
     --steel:        #9aa4af; /* gris acero */
     --steel-deep:   #6c7681; /* gris acero profundo */
+    --silver:       #b0bec5; /* plata */
     --carbon:       #26272b; /* gris carbón */
-    --carbon-dark:  #17181b; /* gris carbón muy oscuro */
-    --carbon-panel: #1c1d21; /* fondo revelado tras la cortina */
+    --carbon-deep:  #0f1115; /* gris carbón extremadamente oscuro (Fase 1 asesor) */
 
     /* Ritmo de la coreografía (JS lee estos tiempos vía CSS variables) */
     --absorb-time:  800ms;
@@ -48,15 +48,135 @@
 
   /* ============================================================ */
   /* CAPA DE FONDO — se revela al abrir la cortina.                */
-  /* Gris carbón muy oscuro y elegante (vacío por ahora).          */
+  /* Gris carbón extremadamente oscuro y elegante (#0f1115).       */
   /* ============================================================ */
   .backdrop {
     position: fixed;
     inset: 0;
     z-index: 1;
     background:
-      radial-gradient(120% 90% at 50% 30%, #2c2d32 0%, var(--carbon-panel) 45%, var(--carbon-dark) 100%);
+      radial-gradient(130% 100% at 50% 28%, #191c22 0%, var(--carbon-deep) 52%, #0a0b0e 100%);
   }
+
+  /* ============================================================ */
+  /* PANEL DEL ASESOR — FASE 1: CAPTURA DE NOMBRE                  */
+  /* Vive bajo la cortina (z-2) y emerge cuando la cortina abre.   */
+  /* ============================================================ */
+  .advisor {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1.5rem, 6vw, 4rem);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 900ms ease;
+  }
+  /* Emerge suavemente DESPUÉS de que la cortina termina de abrirse */
+  .stage.is-open .advisor {
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: var(--curtain-time);
+  }
+  /* Fade-out al pulsar "Continuar": deja la pantalla lista para lo siguiente */
+  .stage.is-open .advisor.is-leaving {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 700ms ease;
+    transition-delay: 0s;
+  }
+
+  .advisor__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: clamp(1.75rem, 5vh, 3rem);
+    width: 100%;
+    max-width: 42rem;
+    transform: translateY(20px);
+    transition: transform 1000ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .stage.is-open .advisor__inner {
+    transform: translateY(0);
+    transition-delay: var(--curtain-time);
+  }
+
+  /* Pregunta (H2): serif elegante en blanco / plata mate */
+  .advisor__question {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 500;
+    font-size: clamp(1.35rem, 4.4vw, 2.6rem);
+    line-height: 1.38;
+    letter-spacing: 0.005em;
+    color: #eef1f4;
+    max-width: 20ch;
+    text-wrap: balance;
+  }
+
+  /* Campo de entrada minimalista: sin bordes, solo línea inferior plata */
+  .advisor__field { width: min(92%, 28rem); }
+  .advisor__input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(176, 190, 197, 0.45);
+    padding: 0.55em 0.4em 0.45em;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: clamp(1.35rem, 4.6vw, 2.1rem);
+    color: #ffffff;
+    letter-spacing: 0.02em;
+    transition: border-color 350ms ease, box-shadow 350ms ease;
+  }
+  .advisor__input::placeholder {
+    color: rgba(176, 190, 197, 0.32);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+  }
+  /* Quita el outline azul por defecto del navegador */
+  .advisor__input:focus {
+    outline: none;
+    border-bottom-color: var(--silver);
+    box-shadow: 0 3px 14px -8px rgba(176, 190, 197, 0.6);
+  }
+
+  /* Botón "Continuar": apagado y deshabilitado al inicio */
+  .advisor__continue {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(0.9rem, 2.4vw, 1.05rem);
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #eef1f4;
+    background: transparent;
+    border: 1px solid rgba(176, 190, 197, 0.35);
+    border-radius: 999px;
+    padding: 0.85em 2.8em;
+    opacity: 0.3;
+    cursor: not-allowed;
+    transition: opacity 450ms ease, box-shadow 450ms ease,
+                border-color 450ms ease, background 450ms ease, transform 300ms ease;
+  }
+  /* Encendido: se ilumina con brillo plata sutil al activarse (JS quita [disabled]) */
+  .advisor__continue:not([disabled]) {
+    opacity: 1;
+    cursor: pointer;
+    border-color: rgba(176, 190, 197, 0.85);
+    box-shadow: 0 0 18px rgba(176, 190, 197, 0.32),
+                inset 0 0 14px rgba(176, 190, 197, 0.07);
+  }
+  .advisor__continue:not([disabled]):hover {
+    transform: translateY(-2px);
+    background: rgba(176, 190, 197, 0.08);
+    box-shadow: 0 0 30px rgba(176, 190, 197, 0.55),
+                inset 0 0 16px rgba(176, 190, 197, 0.10);
+  }
+  .advisor__continue:not([disabled]):active { transform: translateY(0); }
+  .advisor__continue:focus-visible { outline: 2px solid var(--silver); outline-offset: 4px; }
 
   /* ============================================================ */
   /* CORTINA — dos mitades negras que cubren el fondo.             */
@@ -149,7 +269,6 @@
     font-size: clamp(58px, 10vw, 100px);
     line-height: 1;
     color: var(--steel-deep);
-    /* Efecto biselado / grabado: luz abajo-derecha + sombra arriba-izquierda */
     text-shadow:
       -1px -1px 1px rgba(0, 0, 0, 0.55),
       1px 1px 1px rgba(255, 255, 255, 0.85),
@@ -175,7 +294,7 @@
     white-space: nowrap;
   }
 
-  /* Firma pegada justo debajo de ROSPECTA (alineada a su borde izquierdo) */
+  /* Firma pegada debajo de ROSPECTA: minúsculas, grisácea y transparente */
   .brand__signature {
     position: absolute;
     top: calc(100% + clamp(4px, 1.2vh, 12px));
@@ -186,9 +305,9 @@
     font-weight: 300;
     font-size: clamp(0.62rem, 1.7vw, 0.95rem);
     letter-spacing: 0.16em;
-    color: rgba(255, 255, 255, 0.5);
+    text-transform: lowercase;
+    color: rgba(176, 190, 197, 0.34); /* tono plata muy transparente */
   }
-  .brand__signature b { font-weight: 600; color: rgba(255, 255, 255, 0.72); }
 
   /* Cada letra (de ROSPECTA y de la firma) se anima por separado */
   .brand__word span,
@@ -207,14 +326,11 @@
     transform: translateX(var(--pull, -120px)) scaleX(0.05);
     opacity: 0;
   }
-  /* El recuadro "traga": pequeño latido de succión */
   .stage.is-absorbing .brand__box { transform: scale(1.06); }
 
   /* ============================================================ */
   /* RESPONSIVIDAD — orientación y tamaños                          */
   /* ============================================================ */
-
-  /* Móvil vertical muy estrecho */
   @media (max-width: 380px) {
     .brand__word { font-size: 40px; }
     .brand__p    { font-size: 52px; }
@@ -222,11 +338,12 @@
     .brand__signature { font-size: 0.58rem; letter-spacing: 0.12em; }
   }
 
-  /* Tablet / móvil en horizontal con poca altura */
   @media (orientation: landscape) and (max-height: 500px) {
     .brand__box  { width: clamp(70px, 14vh, 110px); height: clamp(70px, 14vh, 110px); }
     .brand__p    { font-size: clamp(46px, 9vh, 74px); }
     .brand__word { font-size: clamp(40px, 7.5vh, 66px); }
+    .advisor__inner { gap: clamp(1rem, 4vh, 1.75rem); }
+    .advisor__question { font-size: clamp(1.2rem, 5.5vh, 2rem); }
   }
 
   /* ============================================================ */
@@ -237,7 +354,9 @@
     .brand__box,
     .brand__word span,
     .brand__signature span,
-    .curtain__half { transition-duration: 0.001ms !important; }
+    .curtain__half,
+    .advisor,
+    .advisor__inner { transition-duration: 0.001ms !important; }
   }
 </style>
 </head>
@@ -248,8 +367,35 @@
        (sin clase) → Fase 1 · .is-absorbing → Fase 2 · .is-open → Fase 3 -->
   <div class="stage" id="stage">
 
-    <!-- Fondo elegante revelado al abrir la cortina (sin contenido por ahora) -->
+    <!-- Fondo elegante revelado al abrir la cortina -->
     <div class="backdrop" aria-hidden="true"></div>
+
+    <!-- ===================================================== -->
+    <!-- PANEL DEL ASESOR · FASE 1 — CAPTURA DE NOMBRE          -->
+    <!-- ===================================================== -->
+    <section class="advisor" id="advisor" aria-label="Inicio del diagnóstico">
+      <div class="advisor__inner">
+        <h2 class="advisor__question">
+          Para iniciar su diagnóstico personalizado, ¿con quién tenemos el honor de hablar?
+        </h2>
+
+        <div class="advisor__field">
+          <input
+            type="text"
+            id="advisorName"
+            class="advisor__input"
+            placeholder="Escriba su nombre"
+            autocomplete="name"
+            enterkeyhint="go"
+            maxlength="60"
+            aria-label="Su nombre" />
+        </div>
+
+        <button type="button" id="advisorContinue" class="advisor__continue" disabled>
+          Continuar
+        </button>
+      </div>
+    </section>
 
     <!-- CORTINA: dos mitades negras que se abren a los lados -->
     <div class="curtain" aria-hidden="true">
@@ -260,17 +406,14 @@
     <!-- CAPA LOGO: recuadro 3D "P" + palabra "ROSPECTA" + firma -->
     <div class="logo-layer">
       <button type="button" class="brand" id="brand" aria-label="PROSPECTA">
-        <!-- Recuadro blanco 3D con la letra P -->
         <span class="brand__box">
           <span class="brand__p" aria-hidden="true">P</span>
         </span>
-
-        <!-- Columna: ROSPECTA arriba, firma pegada debajo -->
         <span class="brand__text">
           <span class="brand__word" id="word" aria-hidden="true">
             <span>R</span><span>O</span><span>S</span><span>P</span><span>E</span><span>C</span><span>T</span><span>A</span>
           </span>
-          <span class="brand__signature" id="signature" aria-hidden="true" data-text="by M.ACEVES y Consultores"></span>
+          <span class="brand__signature" id="signature" aria-hidden="true" data-text="by m.aceves y consultores"></span>
         </span>
       </button>
     </div>
@@ -281,10 +424,20 @@
   (function () {
     'use strict';
 
+    /* ------------------------------------------------------------ */
+    /* Estado compartido del asesor (persiste el nombre capturado    */
+    /* para personalizar las siguientes pantallas del diagnóstico).  */
+    /* ------------------------------------------------------------ */
+    var advisorState = { name: '' };
+
     var stage     = document.getElementById('stage');
     var brand     = document.getElementById('brand');
     var word      = document.getElementById('word');
     var signature = document.getElementById('signature');
+
+    var advisor      = document.getElementById('advisor');
+    var nameInput    = document.getElementById('advisorName');
+    var continueBtn  = document.getElementById('advisorContinue');
 
     // Lee los tiempos definidos en CSS para mantener JS y CSS sincronizados.
     var css = getComputedStyle(document.documentElement);
@@ -301,10 +454,13 @@
       return fallback;
     }
 
-    // Construye la firma "by M.ACEVES y Consultores" letra por letra.
-    // Se resalta la marca (MACEVES) en negrita para lectura de marca.
+    /* ============================================================ */
+    /* PANTALLA DE INICIO NEGRA (P + ROSPECTA + firma) → CORTINA     */
+    /* ============================================================ */
+
+    // Construye la firma "by m.aceves y consultores" letra por letra.
     (function buildSignature() {
-      var text = signature.getAttribute('data-text') || 'by M.ACEVES y Consultores';
+      var text = signature.getAttribute('data-text') || 'by m.aceves y consultores';
       var frag = document.createDocumentFragment();
       Array.prototype.forEach.call(text, function (ch) {
         var span = document.createElement('span');
@@ -314,10 +470,8 @@
       signature.appendChild(frag);
     })();
 
-    var running = false;
-
-    // Prepara el desplazamiento de cada letra de una línea hacia su borde
-    // izquierdo (el punto por donde entra al recuadro de la P).
+    // Prepara el desplazamiento de cada letra hacia su borde izquierdo
+    // (el punto por donde entra al recuadro de la P).
     function primeLine(container, startIndex) {
       var containerLeft = container.getBoundingClientRect().left;
       var spans = container.children;
@@ -330,30 +484,71 @@
       return spans.length;
     }
 
+    var running = false;
     function runSequence() {
       if (running) return;
       running = true;
       brand.disabled = true;
 
-      // --- FASE 2: ROSPECTA y la firma se deslizan a la izquierda y son
-      //     "absorbidas" por el recuadro (escalonado, izquierda→derecha). ---
+      // FASE 2: ROSPECTA y la firma son absorbidas por el recuadro.
       var count = 0;
       count += primeLine(word, count);
       count += primeLine(signature, count);
-
       stage.classList.add('is-absorbing');
 
-      // Duración real de la absorción (incluye el retardo de la última letra).
       var absorbTotal = ABSORB + (count * STEP);
 
-      // --- FASE 3: un segundo después, la pantalla negra se abre como
-      //     cortina y el recuadro de la P se va JUNTO con ella. ---
+      // FASE 3: un segundo después, se abre la cortina y la P se va con ella;
+      // al terminar, emerge el Panel del Asesor y enfocamos el campo de nombre.
       window.setTimeout(function () {
         stage.classList.add('is-open');
+        window.setTimeout(function () {
+          if (nameInput) {
+            try { nameInput.focus({ preventScroll: true }); } catch (e) { nameInput.focus(); }
+          }
+        }, CURTAIN + 120);
       }, absorbTotal + PAUSE);
     }
 
     brand.addEventListener('click', runSequence);
+
+    /* ============================================================ */
+    /* PANEL DEL ASESOR · FASE 1 — CAPTURA DE NOMBRE                */
+    /* ============================================================ */
+
+    // El botón se enciende en cuanto hay un nombre escrito.
+    function refreshContinueState() {
+      var hasName = nameInput.value.trim().length > 0;
+      continueBtn.disabled = !hasName;
+    }
+    nameInput.addEventListener('input', refreshContinueState);
+
+    // Enter en el campo equivale a pulsar "Continuar" (si está activo).
+    nameInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !continueBtn.disabled) {
+        e.preventDefault();
+        commitName();
+      }
+    });
+
+    continueBtn.addEventListener('click', commitName);
+
+    function commitName() {
+      var name = nameInput.value.trim();
+      if (!name) return;
+
+      // 1) Guarda el nombre para personalizar las siguientes pantallas.
+      advisorState.name = name;
+      // Expuesto globalmente para que las próximas secciones lo lean.
+      window.PROSPECTA = window.PROSPECTA || {};
+      window.PROSPECTA.advisorState = advisorState;
+      console.info('[PROSPECTA] Nombre capturado:', advisorState.name);
+
+      // 2) Fade-out de esta sección; queda lista para la siguiente.
+      advisor.classList.add('is-leaving');
+      // Punto de enganche para la Fase 2 del diagnóstico (aún por construir):
+      // advisor.addEventListener('transitionend', mostrarSiguienteSeccion, { once: true });
+    }
   })();
   </script>
 

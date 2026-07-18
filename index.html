@@ -106,7 +106,8 @@
     position: absolute; left: 50%; top: 50%; z-index: 2;
     white-space: nowrap; pointer-events: none; color: var(--white);
     transform: translate(-50%, -50%);
-    transition: transform 500ms cubic-bezier(0.6, 0, 0.35, 1) 300ms, opacity 420ms ease 300ms;
+    /* Se absorbe justo cuando la [ P ] cruza el centro (~520ms del barrido) */
+    transition: transform 560ms cubic-bezier(0.6, 0, 0.35, 1) 430ms, opacity 480ms ease 430ms;
   }
   .capture__flying.is-absorbed { transform: translate(-50%, -50%) translateX(-46vw) scale(0.14); opacity: 0; }
 
@@ -114,15 +115,16 @@
   .sweeper {
     position: absolute; left: 50%; top: 50%; z-index: 5; pointer-events: none;
     display: inline-flex; align-items: baseline;
-    transform: translate(-50%, -50%) translateX(54vw);
-    transition: transform 850ms ease-in-out;
+    transform: translate(-50%, -50%) translateX(56vw);
+    /* Ajuste 2: cruce a velocidad constante y elegante (~1.2s, lineal) */
+    transition: transform 1200ms linear;
     will-change: transform, box-shadow;
   }
   .sweeper .s-br { font-family: 'Montserrat', sans-serif; font-weight: 300; font-size: var(--sweep-size); color: var(--white); line-height: 1; }
   .sweeper .s-p  { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: var(--sweep-size); color: var(--white); line-height: 1; margin: 0 0.16em; }
   .sweeper.is-sweeping {
-    transform: translate(-50%, -50%) translateX(-70vw);
-    animation: sweepTrail 850ms ease-in-out forwards;
+    transform: translate(-50%, -50%) translateX(-72vw);
+    animation: sweepTrail 1200ms linear forwards;
   }
   @keyframes sweepTrail {
     0%   { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
@@ -139,7 +141,8 @@
     background: var(--black);
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
-    transition: transform 0.68s cubic-bezier(0.5, 0, 0.35, 1);
+    /* Ajuste 1: subida majestuosa (peso → acelera → frena suave arriba) */
+    transition: transform 1.15s cubic-bezier(0.62, 0, 0.28, 1);
   }
   .curtain.is-lifting { transform: translateY(-100vh); pointer-events: none; }
 
@@ -190,11 +193,11 @@
   .stage.is-contracting .logo-row .text { max-width: 0; opacity: 0; }
 
   /* Fase 2 · Caída y rebote (--fall lo calcula el JS para tocar el fondo) */
-  .logo-row.is-dropping { animation: fallBounce 860ms forwards; }
+  .logo-row.is-dropping { animation: fallBounce 1550ms forwards; }
   @keyframes fallBounce {
-    0%   { transform: translateY(0);            animation-timing-function: cubic-bezier(0.55, 0.05, 0.95, 0.4); } /* gravedad: acelera */
-    45%  { transform: translateY(var(--fall));  animation-timing-function: cubic-bezier(0.16, 0.75, 0.3, 1); }    /* toca fondo → tirón */
-    100% { transform: translateY(-150vh); }                                                                       /* sale disparado */
+    0%   { transform: translateY(0);            animation-timing-function: cubic-bezier(0.6, 0.05, 0.9, 0.35); } /* gravedad: acelera al caer */
+    27%  { transform: translateY(var(--fall));  animation-timing-function: cubic-bezier(0.62, 0, 0.28, 1); }     /* toca fondo → despegue con peso, majestuoso */
+    100% { transform: translateY(-150vh); }                                                                      /* sube y frena suave arriba */
   }
 
   /* ============================================================ */
@@ -276,8 +279,8 @@
     var hint     = document.getElementById('captureHint');
 
     var CONTRACT  = 560;   // [ PROSPECTA ] → [ P ]
-    var LAUNCH_AT = 390;   // instante del "tirón" (≈45% de 860ms)
-    var LIFT      = 680;   // telón sube
+    var LAUNCH_AT = 420;   // instante del "tirón" (≈27% de 1550ms)
+    var LIFT      = 1150;  // telón sube (majestuoso, ~1.15s)
 
     /* ============================================================ */
     /* FASE 1-2 · Contracción → caída/rebote → telón sube           */
@@ -384,7 +387,7 @@
       window.setTimeout(function () {
         if (next) swapQuestion(next.label);
         else swapQuestion('Gracias, ' + firstName(advisorState.nombre) + '.');
-      }, 220);
+      }, 520);
 
       window.setTimeout(function () {
         input.value = '';
@@ -392,7 +395,7 @@
         input.removeAttribute('readonly');
         syncWidth(); // la línea plateada vuelve al centro (mínimo)
         if (next) field.setAttribute('data-line', next.lineColor === 'cyan' ? 'cyan' : 'silver');
-      }, 820);
+      }, 1000);
 
       window.setTimeout(function () {
         if (flying.parentNode) flying.parentNode.removeChild(flying);
@@ -403,7 +406,7 @@
           transitioning = false;
           input.focus(); placeCaret();
         } else { finishCapture(); }
-      }, 1000);
+      }, 1320);
     }
 
     function swapQuestion(text) {

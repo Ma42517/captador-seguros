@@ -9,7 +9,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Montserrat:wght@600;700;800;900&family=Playfair+Display:ital,wght@1,500;1,600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Montserrat:wght@300;400;700;800;900&family=Playfair+Display:ital,wght@1,500;1,600&display=swap" rel="stylesheet" />
 
 <style>
   /* ============================================================ */
@@ -22,11 +22,8 @@
     --steel-cyan: #74b9cc;
     --carbon:     #0f1115;
 
-    --logo-size:  clamp(66px, 10vw, 108px);           /* lado del cuadro final */
-    --word-size:  clamp(34px, 5.2vw, 56px);           /* tamaño de P y ROSPECTA */
-    --frame-w:    clamp(3px, 0.42vw, 5px);            /* grosor del borde */
-    --frame-px:   clamp(12px, 1.8vw, 20px);           /* aire horizontal */
-
+    --big:        clamp(2.6rem, 8vw, 7rem);        /* letras gigantes */
+    --sweep-size: clamp(2.1rem, 6vw, 3.8rem);      /* [ P ] barredor */
     --min-line:   clamp(180px, 45vw, 300px);
   }
 
@@ -38,7 +35,7 @@
     background: var(--black);
     color: var(--white);
     min-height: 100vh; min-height: 100dvh;
-    overflow: hidden;
+    overflow: hidden;                               /* sin scroll durante la caída */
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -54,7 +51,6 @@
     display: flex; align-items: center; justify-content: center;
     padding: clamp(1.5rem, 6vw, 4rem);
   }
-
   .capture {
     position: relative;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -114,52 +110,16 @@
   }
   .capture__flying.is-absorbed { transform: translate(-50%, -50%) translateX(-46vw) scale(0.14); opacity: 0; }
 
-  /* ============================================================ */
-  /* LOGO — cuadro con borde blanco (flat). Reutilizable.         */
-  /* Fase 1: rectángulo con 'PROSPECTA'. Contraído: cuadrado 'P'. */
-  /* ============================================================ */
-  .logo-frame {
-    box-sizing: border-box;
-    height: var(--logo-size);
-    display: inline-flex; align-items: center; justify-content: center;
-    padding: 0 var(--frame-px);
-    border: var(--frame-w) solid var(--white);
-    border-radius: 0;
-    background: transparent;
-    white-space: nowrap;
-    transition: width 0.5s cubic-bezier(0.6, 0, 0.2, 1),
-                transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  .logo-word { display: inline-flex; align-items: baseline; }
-  .lp, .lrest {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 800;
-    font-size: var(--word-size);
-    line-height: 1;
-    letter-spacing: 0.01em;
-    color: var(--white);
-    user-select: none;
-  }
-  .lrest { display: inline-block; overflow: hidden; white-space: nowrap; max-width: 12ch;
-           transition: max-width 0.45s cubic-bezier(0.6, 0, 0.2, 1), opacity 0.3s ease; }
-
-  /* Cuadro cuadrado (barredor de la Fase 4) */
-  .logo-square {
-    box-sizing: border-box;
-    width: var(--logo-size); height: var(--logo-size);
-    display: inline-flex; align-items: center; justify-content: center;
-    border: var(--frame-w) solid var(--white); border-radius: 0;
-    background: transparent;
-  }
-  .logo-square .lp { font-size: var(--word-size); }
-
-  /* BARREDOR (Fase 4): el cuadro de la 'P' cruza con estela */
+  /* BARREDOR: el mismo logo [ P ] cruzando con estela */
   .sweeper {
     position: absolute; left: 50%; top: 50%; z-index: 5; pointer-events: none;
+    display: inline-flex; align-items: baseline;
     transform: translate(-50%, -50%) translateX(54vw);
     transition: transform 850ms ease-in-out;
     will-change: transform, box-shadow;
   }
+  .sweeper .s-br { font-family: 'Montserrat', sans-serif; font-weight: 300; font-size: var(--sweep-size); color: var(--white); line-height: 1; }
+  .sweeper .s-p  { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: var(--sweep-size); color: var(--white); line-height: 1; margin: 0 0.16em; }
   .sweeper.is-sweeping {
     transform: translate(-50%, -50%) translateX(-70vw);
     animation: sweepTrail 850ms ease-in-out forwards;
@@ -178,36 +138,71 @@
     position: absolute; inset: 0; z-index: 10;
     background: var(--black);
     display: flex; align-items: center; justify-content: center;
-    /* Fase 3 · Magia del telón: sube todo el telón */
-    transition: transform 0.72s cubic-bezier(0.6, 0.04, 0.98, 0.34);
+    overflow: hidden;
+    transition: transform 0.68s cubic-bezier(0.5, 0, 0.35, 1);
   }
   .curtain.is-lifting { transform: translateY(-100vh); pointer-events: none; }
 
   .logo-block {
-    display: flex; flex-direction: column; align-items: center;
-    gap: clamp(0.9rem, 2.4vh, 1.5rem);
+    display: flex; flex-direction: column; align-items: stretch;
     cursor: pointer; background: none; border: 0; padding: 0;
   }
-  .logo-block:focus-visible .logo-frame { outline: 2px solid var(--steel-cyan); outline-offset: 8px; }
+  .logo-block:focus-visible .logo-row { outline: 2px solid var(--steel-cyan); outline-offset: 10px; }
 
-  /* Fase 3 · el cuadro de la 'P' baja (peso) antes de dispararse */
-  .logo-frame.is-dip { transform: translateY(28px); }
-
-  .signature {
-    font-family: 'Inter', sans-serif; font-weight: 300;
-    font-size: clamp(0.62rem, 1.6vw, 0.85rem);
-    letter-spacing: 0.2em; text-transform: lowercase;
-    color: rgba(176, 190, 197, 0.42);
-    transition: opacity 0.25s ease;
+  /* [ PROSPECTA ] — letras gigantes */
+  .logo-row {
+    display: flex; align-items: baseline; justify-content: center;
+    white-space: nowrap;
+    color: var(--white);
+    line-height: 1;
   }
+  .logo-row .bracket {
+    font-family: 'Montserrat', sans-serif; font-weight: 300;
+    font-size: var(--big); line-height: 1;
+  }
+  .logo-row .text {
+    display: inline-block; overflow: hidden; white-space: nowrap;
+    max-width: 6ch;
+    font-family: 'Montserrat', sans-serif; font-weight: 800;
+    font-size: var(--big); line-height: 1; letter-spacing: 0.005em;
+    transition: max-width 0.55s cubic-bezier(0.6, 0, 0.2, 1), opacity 0.35s ease;
+  }
+  .logo-row .center-p {
+    font-family: 'Montserrat', sans-serif; font-weight: 800;
+    font-size: var(--big); line-height: 1;
+    margin: 0 0.18em;                 /* espacio elegante: [ P ] no se cierra del todo */
+  }
+
+  /* Firma: debajo de la sección ROSPECTA, alineada a la derecha */
+  .signature {
+    align-self: flex-end;
+    margin-top: clamp(6px, 1.4vh, 14px);
+    padding-right: 0.2em;
+    font-family: 'Inter', sans-serif; font-weight: 300;
+    font-size: clamp(0.62rem, 1.6vw, 0.9rem);
+    letter-spacing: 0.16em; text-transform: lowercase;
+    color: rgba(176, 190, 197, 0.42);
+    transition: opacity 0.3s ease;
+  }
+
+  /* Fase 1 · Contracción: colapsan 'PROS' y 'ECTA'; firma desaparece */
   .stage.is-contracting .signature { opacity: 0; }
-  .stage.is-contracting .lrest { max-width: 0; opacity: 0; }
+  .stage.is-contracting .logo-row .text { max-width: 0; opacity: 0; }
+
+  /* Fase 2 · Caída y rebote (--fall lo calcula el JS para tocar el fondo) */
+  .logo-row.is-dropping { animation: fallBounce 860ms forwards; }
+  @keyframes fallBounce {
+    0%   { transform: translateY(0);            animation-timing-function: cubic-bezier(0.55, 0.05, 0.95, 0.4); } /* gravedad: acelera */
+    45%  { transform: translateY(var(--fall));  animation-timing-function: cubic-bezier(0.16, 0.75, 0.3, 1); }    /* toca fondo → tirón */
+    100% { transform: translateY(-150vh); }                                                                       /* sale disparado */
+  }
 
   /* ============================================================ */
   /* RESPONSIVIDAD                                                */
   /* ============================================================ */
+  @media (max-width: 560px) { :root { --big: clamp(2.1rem, 12vw, 3.6rem); } }
   @media (orientation: landscape) and (max-height: 500px) {
-    :root { --logo-size: clamp(56px, 13vh, 92px); --word-size: clamp(28px, 6.5vh, 46px); }
+    :root { --big: clamp(2rem, 11vh, 4rem); --sweep-size: clamp(1.8rem, 8vh, 3rem); }
     .capture { gap: clamp(1.25rem, 5vh, 2rem); }
     .capture__question { font-size: clamp(1.15rem, 6vh, 1.9rem); }
     .capture__input, .capture__mirror, .capture__flying { font-size: clamp(1.9rem, 11vh, 3rem); }
@@ -217,8 +212,8 @@
   /* ACCESIBILIDAD                                                */
   /* ============================================================ */
   @media (prefers-reduced-motion: reduce) {
-    .logo-frame, .lrest, .curtain, .signature, .sweeper, .capture__flying, .capture__input,
-    .capture__question { transition-duration: 0.001ms !important; }
+    .logo-row .text, .curtain, .signature, .sweeper, .capture__flying, .capture__input, .capture__question { transition-duration: 0.001ms !important; }
+    .logo-row.is-dropping { animation-duration: 0.001ms; }
     .sweeper.is-sweeping { animation: none; }
   }
 </style>
@@ -226,7 +221,7 @@
 
 <body>
 
-  <!-- (sin clase) → Fase 1 · .is-contracting → dip → telón sube → Fase 4 -->
+  <!-- (sin clase) → Fase 1 · .is-contracting → caída/rebote → telón sube → Fase 3 -->
   <div class="stage" id="stage">
 
     <!-- ===== CAPA INFERIOR (contenido revelado) ===== -->
@@ -246,8 +241,8 @@
     <!-- ===== CAPA SUPERIOR (telón negro) ===== -->
     <div class="curtain" id="curtain">
       <button type="button" class="logo-block" id="logoBlock" aria-label="PROSPECTA — iniciar">
-        <span class="logo-frame" id="logoFrame">
-          <span class="logo-word"><span class="lp">P</span><span class="lrest">ROSPECTA</span></span>
+        <span class="logo-row" id="logoRow">
+          <span class="bracket">[</span><span class="text">PROS</span><span class="center-p">P</span><span class="text">ECTA</span><span class="bracket">]</span>
         </span>
         <span class="signature">by M.aceves y consultores</span>
       </button>
@@ -272,7 +267,7 @@
     var stage     = document.getElementById('stage');
     var curtain   = document.getElementById('curtain');
     var logoBlock = document.getElementById('logoBlock');
-    var logoFrame = document.getElementById('logoFrame');
+    var logoRow   = document.getElementById('logoRow');
 
     var question = document.getElementById('captureQuestion');
     var field    = document.getElementById('captureField');
@@ -280,12 +275,12 @@
     var mirror   = document.getElementById('captureMirror');
     var hint     = document.getElementById('captureHint');
 
-    var CONTRACT = 500;  // rectángulo → cuadrado
-    var DIP      = 210;  // el cuadro baja (peso)
-    var LIFT     = 720;  // telón sube
+    var CONTRACT  = 560;   // [ PROSPECTA ] → [ P ]
+    var LAUNCH_AT = 390;   // instante del "tirón" (≈45% de 860ms)
+    var LIFT      = 680;   // telón sube
 
     /* ============================================================ */
-    /* FASE 2-3 · Contracción + rebote + telón sube                 */
+    /* FASE 1-2 · Contracción → caída/rebote → telón sube           */
     /* ============================================================ */
     var introRunning = false;
     function runIntro() {
@@ -293,30 +288,27 @@
       introRunning = true;
       logoBlock.disabled = true;
 
-      // Fase 2: congela el ancho actual y anima hacia el cuadrado (= alto).
-      var startW = logoFrame.offsetWidth;
-      var squareW = logoFrame.offsetHeight;
-      logoFrame.style.width = startW + 'px';
-      void logoFrame.offsetWidth;
-      stage.classList.add('is-contracting');       // colapsa 'ROSPECTA' + firma
-      requestAnimationFrame(function () {
-        logoFrame.style.width = squareW + 'px';     // marco → cuadrado perfecto
-      });
+      // Fase 1: colapsan PROS/ECTA y los corchetes se cierran a [ P ].
+      stage.classList.add('is-contracting');
 
-      // Fase 3: rebote con física (peso hacia abajo, luego tirón hacia arriba
-      // llevándose el telón entero).
       window.setTimeout(function () {
-        logoFrame.classList.add('is-dip');          // baja 28px (peso)
+        // Fase 2: calcula la caída EXACTA para tocar el fondo (sin scroll).
+        var rect = logoRow.getBoundingClientRect();
+        var fall = Math.round(window.innerHeight - rect.bottom - 2);
+        logoRow.style.setProperty('--fall', fall + 'px');
+        logoRow.classList.add('is-dropping');
+
+        // En el instante del tirón, el telón entero sube con el [ P ].
         window.setTimeout(function () {
-          curtain.classList.add('is-lifting');       // telón + 'P' suben juntos
-          window.setTimeout(startCapture, LIFT + 60);
-        }, DIP);
-      }, CONTRACT + 40);
+          curtain.classList.add('is-lifting');
+          window.setTimeout(startCapture, LIFT + 40);
+        }, LAUNCH_AT);
+      }, CONTRACT);
     }
     logoBlock.addEventListener('click', runIntro);
 
     /* ============================================================ */
-    /* FASE 4 · Captura: firma dinámica + barredor (cuadro 'P')     */
+    /* FASE 3 · Captura: firma dinámica + barredor [ P ]            */
     /* ============================================================ */
     var minLine = 220;
 
@@ -347,14 +339,14 @@
       runSweeper();
     });
 
-    function makeSquareP() {
-      var sq = document.createElement('span');
-      sq.className = 'logo-square sweeper';
-      var p = document.createElement('span');
-      p.className = 'lp';
-      p.textContent = 'P';
-      sq.appendChild(p);
-      return sq;
+    function makeBracketP() {
+      var s = document.createElement('span');
+      s.className = 'sweeper';
+      var l = document.createElement('span'); l.className = 's-br'; l.textContent = '[';
+      var p = document.createElement('span'); p.className = 's-p';  p.textContent = 'P';
+      var r = document.createElement('span'); r.className = 's-br'; r.textContent = ']';
+      s.appendChild(l); s.appendChild(p); s.appendChild(r);
+      return s;
     }
 
     function runSweeper() {
@@ -381,8 +373,7 @@
       input.setAttribute('readonly', 'readonly');
       hint.classList.add('is-dim');
 
-      // Barredor = el mismo cuadro de la 'P'
-      var sweeper = makeSquareP();
+      var sweeper = makeBracketP();
       field.appendChild(sweeper);
       void sweeper.offsetWidth;
       sweeper.classList.add('is-sweeping');
@@ -399,7 +390,7 @@
         input.value = '';
         input.style.color = '';
         input.removeAttribute('readonly');
-        syncWidth(); // la línea se encoge a su mínimo (centrada)
+        syncWidth(); // la línea plateada vuelve al centro (mínimo)
         if (next) field.setAttribute('data-line', next.lineColor === 'cyan' ? 'cyan' : 'silver');
       }, 820);
 

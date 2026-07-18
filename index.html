@@ -57,7 +57,9 @@
     text-align: center;
     gap: clamp(2rem, 7vh, 3.75rem);
     width: 100%; max-width: 46rem; margin: 0 auto;
+    transition: opacity 0.5s ease;
   }
+  .capture.is-hidden { opacity: 0; pointer-events: none; }
   .capture__question {
     font-family: 'Inter', sans-serif; font-weight: 300;
     font-size: clamp(1.3rem, 4.4vw, 2.35rem);
@@ -131,6 +133,84 @@
     18%  { box-shadow: 85px 0 60px 5px rgba(255, 255, 255, 0.30), 175px 0 115px 2px rgba(184, 192, 200, 0.18); }
     60%  { box-shadow: 72px 0 55px 5px rgba(255, 255, 255, 0.24), 145px 0 100px 2px rgba(184, 192, 200, 0.14); }
     100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+  }
+
+  /* ============================================================ */
+  /* MECÁNICA · DOS MUNDOS (acercamiento rápido)                  */
+  /* ============================================================ */
+  .worlds {
+    position: absolute; inset: 0; z-index: 3;
+    display: flex;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.55s ease;
+  }
+  .worlds.is-active { opacity: 1; pointer-events: auto; }
+
+  .worlds__prompt {
+    position: absolute; top: 7%; left: 0; right: 0; z-index: 4;
+    text-align: center;
+    font-family: 'Inter', sans-serif; font-weight: 300;
+    font-size: clamp(1.1rem, 3.4vw, 1.7rem);
+    letter-spacing: 0.02em; color: #eef1f4;
+    transition: opacity 0.4s ease;
+  }
+  .worlds.is-choosing .worlds__prompt { opacity: 0; }
+
+  .world {
+    position: relative; flex: 1 1 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: clamp(1rem, 3.5vh, 2.2rem);
+    border: 0; cursor: pointer; overflow: hidden;
+    transition: flex-basis 0.9s cubic-bezier(0.6, 0, 0.2, 1), opacity 0.6s ease;
+  }
+  .world--a { background: radial-gradient(120% 90% at 50% 32%, #17323f 0%, #0a1319 72%); }
+  .world--b { background: radial-gradient(120% 90% at 50% 32%, #34251a 0%, #140d09 72%); }
+  .world + .world { box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.08); }
+  .world__scene { width: clamp(110px, 32%, 240px); height: auto; color: rgba(255, 255, 255, 0.92); transition: transform 0.5s cubic-bezier(0.34, 1.2, 0.5, 1); }
+  .world:hover .world__scene { transform: translateY(-8px) scale(1.05); }
+  .world__word {
+    font-family: 'Inter', sans-serif; font-weight: 400;
+    font-size: clamp(0.72rem, 2vw, 1rem);
+    letter-spacing: 0.34em; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.58);
+    transition: opacity 0.4s ease;
+  }
+  .worlds.is-choosing .world { pointer-events: none; }
+  .worlds.is-choosing .world:not(.chosen) { flex-basis: 0; opacity: 0; }
+  .world.chosen { flex-basis: 100%; }
+  .world.chosen .world__scene { transform: scale(1.18); }
+  .world.chosen .world__word { opacity: 0; }
+
+  .core-orb {
+    position: absolute; left: 50%; top: 50%; z-index: 5;
+    width: clamp(72px, 16vw, 120px); height: clamp(72px, 16vw, 120px);
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 40%, var(--orb-color, #74b9cc), rgba(0, 0, 0, 0) 70%);
+    box-shadow: 0 0 60px 12px var(--orb-color, #74b9cc);
+    transform: translate(-50%, -50%) scale(0); opacity: 0;
+    pointer-events: none;
+    transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.5, 1), opacity 0.5s ease;
+  }
+  .core-orb.is-alive { opacity: 0.92; transform: translate(-50%, -50%) scale(1); animation: orbPulse 1.8s ease-in-out infinite; }
+  @keyframes orbPulse {
+    0%, 100% { box-shadow: 0 0 50px 8px var(--orb-color, #74b9cc); }
+    50%      { box-shadow: 0 0 82px 22px var(--orb-color, #74b9cc); }
+  }
+
+  .mirror-line {
+    position: absolute; left: 0; right: 0; bottom: 15%; z-index: 6;
+    text-align: center; padding: 0 1.5rem;
+    font-family: 'Inter', sans-serif; font-weight: 300;
+    font-size: clamp(1.05rem, 3.2vw, 1.6rem);
+    color: #ffffff; text-wrap: balance;
+    opacity: 0; transform: translateY(12px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .mirror-line.show { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 700px) {
+    .worlds { flex-direction: column; }
+    .world + .world { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08); }
   }
 
   /* ============================================================ */
@@ -241,6 +321,34 @@
       </div>
     </div>
 
+    <!-- ===== MECÁNICA · DOS MUNDOS (acercamiento rápido) ===== -->
+    <div class="worlds" id="worlds" aria-hidden="true">
+      <p class="worlds__prompt">¿Hacia dónde te llama?</p>
+
+      <button type="button" class="world world--a" data-world="cumbre" data-color="#74b9cc"
+              data-mirror="Te mueve conquistar tu propia cima." aria-label="La Cumbre">
+        <svg class="world__scene" viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="3"
+             stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+          <circle cx="95" cy="20" r="6" fill="currentColor" stroke="none" />
+          <path d="M4 80 L36 34 L56 60 L80 24 L116 80" />
+        </svg>
+        <span class="world__word">La Cumbre</span>
+      </button>
+
+      <button type="button" class="world world--b" data-world="hogar" data-color="#d9a066"
+              data-mirror="Todo lo construyes por los tuyos." aria-label="El Refugio">
+        <svg class="world__scene" viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="3"
+             stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+          <path d="M20 82 V46 L60 18 L100 46 V82" />
+          <path d="M48 82 V60 H72 V82" />
+        </svg>
+        <span class="world__word">El Refugio</span>
+      </button>
+
+      <span class="core-orb" id="coreOrb" aria-hidden="true"></span>
+      <p class="mirror-line" id="mirrorLine" aria-live="polite"></p>
+    </div>
+
     <!-- ===== CAPA SUPERIOR (telón negro) ===== -->
     <div class="curtain" id="curtain">
       <button type="button" class="logo-block" id="logoBlock" aria-label="PROSPECTA — iniciar">
@@ -277,6 +385,12 @@
     var input    = document.getElementById('captureInput');
     var mirror   = document.getElementById('captureMirror');
     var hint     = document.getElementById('captureHint');
+
+    var capture    = document.getElementById('capture');
+    var worlds     = document.getElementById('worlds');
+    var worldEls   = worlds ? worlds.querySelectorAll('.world') : [];
+    var coreOrb    = document.getElementById('coreOrb');
+    var mirrorLine = document.getElementById('mirrorLine');
 
     var CONTRACT  = 560;   // [ PROSPECTA ] → [ P ]
     var LAUNCH_AT = 420;   // instante del "tirón" (≈27% de 1550ms)
@@ -363,6 +477,7 @@
 
       var isLast = (qIndex >= QUESTIONS.length - 1);
       var next = isLast ? null : QUESTIONS[qIndex + 1];
+      var goToWorldsAfter = (current.key === 'nombre'); // tras el nombre → mecánica "Dos Mundos"
 
       var rect = input.getBoundingClientRect();
       input.style.width = rect.width + 'px';
@@ -385,7 +500,8 @@
       });
 
       window.setTimeout(function () {
-        if (next) swapQuestion(next.label);
+        if (goToWorldsAfter) question.classList.add('is-hiding');
+        else if (next) swapQuestion(next.label);
         else swapQuestion('Gracias, ' + firstName(advisorState.nombre) + '.');
       }, 520);
 
@@ -394,12 +510,13 @@
         input.style.color = '';
         input.removeAttribute('readonly');
         syncWidth(); // la línea plateada vuelve al centro (mínimo)
-        if (next) field.setAttribute('data-line', next.lineColor === 'cyan' ? 'cyan' : 'silver');
+        if (!goToWorldsAfter && next) field.setAttribute('data-line', next.lineColor === 'cyan' ? 'cyan' : 'silver');
       }, 1000);
 
       window.setTimeout(function () {
         if (flying.parentNode) flying.parentNode.removeChild(flying);
         if (sweeper.parentNode) sweeper.parentNode.removeChild(sweeper);
+        if (goToWorldsAfter) { showWorlds(); return; }   // inserta "Dos Mundos" antes del negocio
         if (next) {
           qIndex++;
           hint.classList.remove('is-dim');
@@ -417,6 +534,67 @@
       }, 240);
     }
     function firstName(full) { return full ? full.trim().split(/\s+/)[0] : ''; }
+
+    /* ============================================================ */
+    /* MECÁNICA · DOS MUNDOS (acercamiento rápido)                  */
+    /* Un solo toque revela el motivador dominante; el Núcleo toma  */
+    /* su color y una frase espejo genera el "me conocen".          */
+    /* ============================================================ */
+    var worldChosen = false;
+
+    function showWorlds() {
+      capture.classList.add('is-hidden');
+      worlds.classList.add('is-active');
+      worlds.setAttribute('aria-hidden', 'false');
+    }
+
+    Array.prototype.forEach.call(worldEls, function (w) {
+      w.addEventListener('click', function () {
+        if (worldChosen) return;
+        worldChosen = true;
+
+        var key = w.getAttribute('data-world');
+        advisorState.mundo = key;               // motivador dominante (cumbre/hogar)
+        advisorState.answers.mundo = key;
+        console.info('[PROSPECTA] Mundo elegido →', key);
+
+        worlds.classList.add('is-choosing');
+        w.classList.add('chosen');
+
+        if (coreOrb) {
+          coreOrb.style.setProperty('--orb-color', w.getAttribute('data-color'));
+          coreOrb.classList.add('is-alive');    // el Núcleo cobra vida con ese color
+        }
+        if (mirrorLine) {
+          mirrorLine.textContent = w.getAttribute('data-mirror');
+          window.setTimeout(function () { mirrorLine.classList.add('show'); }, 560);
+        }
+
+        window.setTimeout(proceedToBusiness, 2400);
+      });
+    });
+
+    function proceedToBusiness() {
+      worlds.classList.remove('is-active', 'is-choosing');
+      worlds.setAttribute('aria-hidden', 'true');
+      if (coreOrb) coreOrb.classList.remove('is-alive');
+      if (mirrorLine) mirrorLine.classList.remove('show');
+      Array.prototype.forEach.call(worldEls, function (w) { w.classList.remove('chosen'); });
+      worldChosen = false;
+
+      // Continúa con la siguiente pantalla (misma línea de captura).
+      qIndex = 1; // 'negocio'
+      question.textContent = QUESTIONS[1].label;
+      question.classList.remove('is-hiding');
+      field.setAttribute('data-line', QUESTIONS[1].lineColor === 'cyan' ? 'cyan' : 'silver');
+      input.value = ''; input.style.color = ''; input.removeAttribute('readonly');
+      capture.classList.remove('is-hidden');
+      hint.classList.remove('is-dim');
+      transitioning = false;
+      syncWidth();
+      window.setTimeout(function () { input.focus(); placeCaret(); }, 60);
+    }
+
     function finishCapture() {
       hint.classList.add('is-dim');
       input.setAttribute('readonly', 'readonly');

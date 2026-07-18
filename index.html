@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>PROSPECTA | Interfaz del Asesor</title>
-<meta name="description" content="PROSPECTA — Interfaz del Asesor." />
+<title>PROSPECTA</title>
+<meta name="description" content="PROSPECTA — Arquitectura de su vida financiera." />
 <meta name="theme-color" content="#000000" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Montserrat:wght@300;400;700;800;900&family=Playfair+Display:ital,wght@1,500;1,600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Montserrat:wght@300;400;600;700;800;900&family=Playfair+Display:ital,wght@1,500;1,600&display=swap" rel="stylesheet" />
 
 <style>
   /* ============================================================ */
@@ -17,13 +17,15 @@
   /* ============================================================ */
   :root {
     --black:      #000000;
+    --carbon:     #0f1115;
+    --carbon-2:   #14171d;
     --white:      #ffffff;
     --silver:     #b0bec5;
     --steel-cyan: #74b9cc;
-    --carbon:     #0f1115;
+    --amber:      #d6a15e;   /* alerta sobria (fisuras / estancamiento) */
 
-    --big:        clamp(2.6rem, 8vw, 7rem);        /* letras gigantes */
-    --sweep-size: clamp(2.1rem, 6vw, 3.8rem);      /* [ P ] barredor */
+    --big:        clamp(2.6rem, 8vw, 7rem);
+    --sweep-size: clamp(2.1rem, 6vw, 3.8rem);
     --min-line:   clamp(180px, 45vw, 300px);
   }
 
@@ -35,318 +37,338 @@
     background: var(--black);
     color: var(--white);
     min-height: 100vh; min-height: 100dvh;
-    overflow: hidden;                               /* sin scroll durante la caída */
+    overflow: hidden;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   .stage { position: fixed; inset: 0; }
 
-  /* ============================================================ */
-  /* CAPA INFERIOR (CONTENIDO) — Gris Carbón + captura            */
-  /* ============================================================ */
-  .content {
-    position: absolute; inset: 0; z-index: 1;
-    background: var(--carbon);
-    display: flex; align-items: center; justify-content: center;
-    padding: clamp(1.5rem, 6vw, 4rem);
+  /* Barra de progreso superior (sensación de avance) */
+  .progress {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 40;
+    height: 2px; background: rgba(255, 255, 255, 0.06);
+    opacity: 0; transition: opacity 0.6s ease;
   }
-  .capture {
-    position: relative;
+  .progress.is-visible { opacity: 1; }
+  .progress__bar {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--silver), var(--steel-cyan));
+    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* ============================================================ */
+  /* CAPA INFERIOR (CONTENIDO) — Gris Carbón + pantallas          */
+  /* ============================================================ */
+  .content { position: absolute; inset: 0; z-index: 1; background: var(--carbon); }
+
+  .screen {
+    position: absolute; inset: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     text-align: center;
-    gap: clamp(2rem, 7vh, 3.75rem);
-    width: 100%; max-width: 46rem; margin: 0 auto;
-    transition: opacity 0.5s ease;
+    padding: clamp(1.5rem, 5vw, 3.5rem);
+    opacity: 0; pointer-events: none; transform: translateY(14px);
+    transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  .capture.is-hidden { opacity: 0; pointer-events: none; }
+  .screen.is-active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+  /* ---------- FASE 1 · Captura de nombre ---------- */
+  .capture { position: relative; display: flex; flex-direction: column; align-items: center; gap: clamp(2rem, 7vh, 3.75rem); width: 100%; max-width: 46rem; }
   .capture__question {
     font-family: 'Inter', sans-serif; font-weight: 300;
     font-size: clamp(1.3rem, 4.4vw, 2.35rem);
-    line-height: 1.35; letter-spacing: 0.015em;
-    color: #eef1f4; max-width: 20ch; text-wrap: balance;
+    line-height: 1.35; letter-spacing: 0.015em; color: #eef1f4; max-width: 22ch; text-wrap: balance;
     transition: opacity 320ms ease, transform 320ms ease;
   }
   .capture__question.is-hiding { opacity: 0; transform: translateY(-8px); }
-
   .capture__field { position: relative; display: flex; justify-content: center; align-items: flex-end; width: 100%; }
   .capture__mirror { position: absolute; visibility: hidden; white-space: pre; pointer-events: none; left: -9999px; top: 0; }
-
   .capture__input, .capture__mirror, .capture__flying {
-    font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
-    font-style: italic; font-weight: 500;
-    font-size: clamp(2rem, 7.2vw, 3.7rem);
-    line-height: 1.2; letter-spacing: 0.005em;
-    padding: 0 0.2em 0.1em;
+    font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-weight: 500;
+    font-size: clamp(2rem, 7.2vw, 3.7rem); line-height: 1.2; letter-spacing: 0.005em; padding: 0 0.2em 0.1em;
   }
   .capture__input {
     width: var(--min-line); min-width: var(--min-line); max-width: 90vw;
-    text-align: center; color: var(--white);
-    background: transparent; border: none;
-    border-bottom: 2px solid var(--silver);
-    caret-color: var(--white);
-    transition: width 300ms cubic-bezier(0.22, 1, 0.36, 1), border-color 700ms ease, box-shadow 700ms ease;
+    text-align: center; color: var(--white); background: transparent; border: none;
+    border-bottom: 2px solid var(--silver); caret-color: var(--white);
+    transition: width 300ms cubic-bezier(0.22, 1, 0.36, 1);
   }
   .capture__input:focus { outline: none; }
-  .capture__field[data-line="cyan"] .capture__input {
-    border-bottom-color: var(--steel-cyan);
-    caret-color: var(--steel-cyan);
-    box-shadow: 0 3px 16px -8px rgba(116, 185, 204, 0.65);
-  }
-
   .capture__hint {
-    font-family: 'Inter', sans-serif; font-weight: 300;
-    font-size: clamp(0.62rem, 1.6vw, 0.78rem);
-    letter-spacing: 0.28em; text-transform: uppercase;
-    color: rgba(176, 190, 197, 0.34);
+    font-family: 'Inter', sans-serif; font-weight: 300; font-size: clamp(0.62rem, 1.6vw, 0.78rem);
+    letter-spacing: 0.28em; text-transform: uppercase; color: rgba(176, 190, 197, 0.34);
     transition: opacity 320ms ease;
   }
   .capture__hint.is-dim { opacity: 0; }
   .capture__hint kbd { font-family: inherit; letter-spacing: normal; padding: 0 0.25em; color: rgba(176, 190, 197, 0.6); }
 
-  .capture__flying {
-    position: absolute; left: 50%; top: 50%; z-index: 2;
-    white-space: nowrap; pointer-events: none; color: var(--white);
-    transform: translate(-50%, -50%);
-    /* Se absorbe justo cuando la [ P ] cruza el centro (~520ms del barrido) */
-    transition: transform 560ms cubic-bezier(0.6, 0, 0.35, 1) 430ms, opacity 480ms ease 430ms;
-  }
+  .capture__flying { position: absolute; left: 50%; top: 50%; z-index: 2; white-space: nowrap; pointer-events: none; color: var(--white); transform: translate(-50%, -50%); transition: transform 560ms cubic-bezier(0.6, 0, 0.35, 1) 430ms, opacity 480ms ease 430ms; }
   .capture__flying.is-absorbed { transform: translate(-50%, -50%) translateX(-46vw) scale(0.14); opacity: 0; }
 
-  /* BARREDOR: el mismo logo [ P ] cruzando con estela */
-  .sweeper {
-    position: absolute; left: 50%; top: 50%; z-index: 5; pointer-events: none;
-    display: inline-flex; align-items: baseline;
-    transform: translate(-50%, -50%) translateX(56vw);
-    /* Ajuste 2: cruce a velocidad constante y elegante (~1.2s, lineal) */
-    transition: transform 1200ms linear;
-    will-change: transform, box-shadow;
-  }
+  .sweeper { position: absolute; left: 50%; top: 50%; z-index: 5; pointer-events: none; display: inline-flex; align-items: baseline; transform: translate(-50%, -50%) translateX(56vw); transition: transform 1200ms linear; will-change: transform, box-shadow; }
   .sweeper .s-br { font-family: 'Montserrat', sans-serif; font-weight: 300; font-size: var(--sweep-size); color: var(--white); line-height: 1; }
   .sweeper .s-p  { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: var(--sweep-size); color: var(--white); line-height: 1; margin: 0 0.16em; }
-  .sweeper.is-sweeping {
-    transform: translate(-50%, -50%) translateX(-72vw);
-    animation: sweepTrail 1200ms linear forwards;
-  }
+  .sweeper.is-sweeping { transform: translate(-50%, -50%) translateX(-72vw); animation: sweepTrail 1200ms linear forwards; }
   @keyframes sweepTrail {
-    0%   { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
-    18%  { box-shadow: 85px 0 60px 5px rgba(255, 255, 255, 0.30), 175px 0 115px 2px rgba(184, 192, 200, 0.18); }
-    60%  { box-shadow: 72px 0 55px 5px rgba(255, 255, 255, 0.24), 145px 0 100px 2px rgba(184, 192, 200, 0.14); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+    0% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+    18% { box-shadow: 85px 0 60px 5px rgba(255,255,255,0.30), 175px 0 115px 2px rgba(184,192,200,0.18); }
+    60% { box-shadow: 72px 0 55px 5px rgba(255,255,255,0.24), 145px 0 100px 2px rgba(184,192,200,0.14); }
+    100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
   }
 
-  /* ============================================================ */
-  /* MECÁNICA · DOS MUNDOS (acercamiento rápido)                  */
-  /* ============================================================ */
-  .worlds {
-    position: absolute; inset: 0; z-index: 3;
-    display: flex;
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.55s ease;
-  }
-  .worlds.is-active { opacity: 1; pointer-events: auto; }
-
-  .worlds__prompt {
-    position: absolute; top: 7%; left: 0; right: 0; z-index: 4;
-    text-align: center;
-    font-family: 'Inter', sans-serif; font-weight: 300;
-    font-size: clamp(1.1rem, 3.4vw, 1.7rem);
-    letter-spacing: 0.02em; color: #eef1f4;
+  /* ---------- FASE 2 · La Gran Elección (split) ---------- */
+  #screenChoice { padding: 0; }
+  .choice__prompt {
+    position: absolute; top: clamp(6%, 9vh, 12%); left: 0; right: 0; z-index: 4;
+    padding: 0 clamp(1.5rem, 6vw, 5rem); text-align: center;
+    font-family: 'Inter', sans-serif; font-weight: 300; font-size: clamp(1.05rem, 3vw, 1.6rem);
+    line-height: 1.45; letter-spacing: 0.01em; color: #eef1f4; max-width: 30ch; margin: 0 auto;
     transition: opacity 0.4s ease;
   }
-  .worlds.is-choosing .worlds__prompt { opacity: 0; }
-
-  .world {
+  #screenChoice.is-choosing .choice__prompt { opacity: 0; }
+  .choice { position: absolute; inset: 0; display: flex; }
+  .choice-half {
     position: relative; flex: 1 1 50%;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: clamp(1rem, 3.5vh, 2.2rem);
-    border: 0; cursor: pointer; overflow: hidden;
-    transition: flex-basis 0.9s cubic-bezier(0.6, 0, 0.2, 1), opacity 0.6s ease;
+    gap: clamp(1rem, 3vh, 1.8rem); padding: clamp(2rem, 6vh, 4rem) 1.5rem;
+    border: 0; cursor: pointer; overflow: hidden; color: var(--white);
+    transition: flex-basis 0.8s cubic-bezier(0.6, 0, 0.2, 1), opacity 0.55s ease, background 0.4s ease;
   }
-  .world--a { background: radial-gradient(120% 90% at 50% 32%, #17323f 0%, #0a1319 72%); }
-  .world--b { background: radial-gradient(120% 90% at 50% 32%, #34251a 0%, #140d09 72%); }
-  .world + .world { box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.08); }
-  .world__scene { width: clamp(110px, 32%, 240px); height: auto; color: rgba(255, 255, 255, 0.92); transition: transform 0.5s cubic-bezier(0.34, 1.2, 0.5, 1); }
-  .world:hover .world__scene { transform: translateY(-8px) scale(1.05); }
-  .world__word {
-    font-family: 'Inter', sans-serif; font-weight: 400;
-    font-size: clamp(0.72rem, 2vw, 1rem);
-    letter-spacing: 0.34em; text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.58);
-    transition: opacity 0.4s ease;
-  }
-  .worlds.is-choosing .world { pointer-events: none; }
-  .worlds.is-choosing .world:not(.chosen) { flex-basis: 0; opacity: 0; }
-  .world.chosen { flex-basis: 100%; }
-  .world.chosen .world__scene { transform: scale(1.18); }
-  .world.chosen .world__word { opacity: 0; }
+  .choice-half--cumbre  { background: radial-gradient(120% 90% at 50% 34%, #16303d 0%, #0a1319 74%); }
+  .choice-half--refugio { background: radial-gradient(120% 90% at 50% 34%, #241c2f 0%, #0d0b13 74%); }
+  .choice-half + .choice-half { box-shadow: inset 1px 0 0 rgba(255,255,255,0.08); }
+  .choice-half:hover { filter: brightness(1.12); }
+  .choice-ico { width: clamp(84px, 15vw, 130px); height: auto; color: rgba(255,255,255,0.92); transition: transform 0.5s cubic-bezier(0.34,1.2,0.5,1); }
+  .choice-half:hover .choice-ico { transform: translateY(-8px) scale(1.06); }
+  .choice-title { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: clamp(1rem, 2.6vw, 1.5rem); letter-spacing: 0.14em; }
+  .choice-sub { font-family: 'Inter', sans-serif; font-weight: 300; font-size: clamp(0.72rem, 1.7vw, 0.95rem); letter-spacing: 0.06em; color: rgba(255,255,255,0.6); max-width: 22ch; }
+  #screenChoice.is-choosing .choice-half { pointer-events: none; }
+  #screenChoice.is-choosing .choice-half:not(.chosen) { flex-basis: 0; opacity: 0; }
+  .choice-half.chosen { flex-basis: 100%; }
+  .choice-half.chosen .choice-ico { transform: scale(1.14); }
 
-  .core-orb {
-    position: absolute; left: 50%; top: 50%; z-index: 5;
-    width: clamp(72px, 16vw, 120px); height: clamp(72px, 16vw, 120px);
-    border-radius: 50%;
-    background: radial-gradient(circle at 50% 40%, var(--orb-color, #74b9cc), rgba(0, 0, 0, 0) 70%);
-    box-shadow: 0 0 60px 12px var(--orb-color, #74b9cc);
-    transform: translate(-50%, -50%) scale(0); opacity: 0;
-    pointer-events: none;
-    transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.5, 1), opacity 0.5s ease;
+  /* ---------- FASE 3 · Pregunta de estrés ---------- */
+  .stress { display: flex; flex-direction: column; align-items: center; gap: clamp(1.75rem, 5vh, 2.75rem); width: 100%; max-width: 40rem; }
+  .stress__q { font-family: 'Inter', sans-serif; font-weight: 300; font-size: clamp(1.2rem, 3.6vw, 2rem); line-height: 1.4; color: #eef1f4; max-width: 26ch; text-wrap: balance; }
+  .stress__opts { display: flex; flex-direction: column; gap: clamp(0.7rem, 1.8vh, 1rem); width: 100%; max-width: 30rem; }
+  .opt {
+    display: flex; align-items: center; gap: 1rem; width: 100%;
+    padding: clamp(0.9rem, 2vh, 1.15rem) clamp(1.1rem, 3vw, 1.6rem);
+    background: var(--carbon-2); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px;
+    color: #e9edf1; font-family: 'Inter', sans-serif; font-size: clamp(0.9rem, 2.4vw, 1.1rem); font-weight: 400;
+    text-align: left; cursor: pointer;
+    transition: border-color 0.25s ease, background 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
   }
-  .core-orb.is-alive { opacity: 0.92; transform: translate(-50%, -50%) scale(1); animation: orbPulse 1.8s ease-in-out infinite; }
-  @keyframes orbPulse {
-    0%, 100% { box-shadow: 0 0 50px 8px var(--orb-color, #74b9cc); }
-    50%      { box-shadow: 0 0 82px 22px var(--orb-color, #74b9cc); }
-  }
+  .opt:hover { border-color: rgba(116,185,204,0.7); background: #171b22; transform: translateY(-2px); box-shadow: 0 10px 30px -16px rgba(116,185,204,0.5); }
+  .opt__k { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 2rem; height: 2rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-weight: 700; font-size: 0.9rem; color: var(--silver); }
+  .opt.is-picked { border-color: var(--steel-cyan); background: #101821; box-shadow: 0 0 0 1px var(--steel-cyan) inset; }
 
-  .mirror-line {
-    position: absolute; left: 0; right: 0; bottom: 15%; z-index: 6;
-    text-align: center; padding: 0 1.5rem;
-    font-family: 'Inter', sans-serif; font-weight: 300;
-    font-size: clamp(1.05rem, 3.2vw, 1.6rem);
-    color: #ffffff; text-wrap: balance;
-    opacity: 0; transform: translateY(12px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-  }
-  .mirror-line.show { opacity: 1; transform: translateY(0); }
+  /* ---------- FASE 4 · Veredicto (procesando + pirámide) ---------- */
+  .verdict { display: flex; flex-direction: column; align-items: center; gap: clamp(1.5rem, 4vh, 2.25rem); width: 100%; max-width: 44rem; }
+  .proc { display: flex; flex-direction: column; align-items: center; gap: 1.4rem; }
+  .proc__txt { font-family: 'Inter', sans-serif; font-weight: 300; letter-spacing: 0.14em; text-transform: uppercase; font-size: clamp(0.78rem, 2vw, 0.95rem); color: var(--silver); }
+  .proc__bar { position: relative; width: clamp(180px, 40vw, 240px); height: 2px; background: rgba(255,255,255,0.1); overflow: hidden; border-radius: 2px; }
+  .proc__bar::after { content: ""; position: absolute; top: 0; left: -45%; width: 45%; height: 100%; background: linear-gradient(90deg, transparent, var(--steel-cyan), transparent); animation: procSlide 1.1s linear infinite; }
+  @keyframes procSlide { to { left: 115%; } }
 
-  @media (max-width: 700px) {
-    .worlds { flex-direction: column; }
-    .world + .world { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+  .verdict__reveal { display: none; flex-direction: column; align-items: center; gap: clamp(1.25rem, 3.5vh, 2rem); width: 100%; }
+  .verdict.show-reveal .proc { display: none; }
+  .verdict.show-reveal .verdict__reveal { display: flex; }
+
+  .pyramid { width: clamp(240px, 60vw, 380px); height: auto; }
+  .pyr-level { opacity: 0; }
+  .pyramid.is-drawn .pyr-level { animation: pyrIn 0.6s ease forwards; }
+  @keyframes pyrIn { from { opacity: 0; } to { opacity: 1; } }
+  .pyr-shape { fill: #1b2husky; }
+  .pyr-shape { fill: #1b222b; stroke: var(--carbon); stroke-width: 2.5; transition: fill 0.5s ease; }
+  .pyr-label { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 12px; fill: #cfd6dd; letter-spacing: 0.04em; }
+  .pyr-level.is-weak .pyr-shape { fill: rgba(214,161,94,0.22); stroke: rgba(214,161,94,0.9); }
+  .pyr-level.is-weak .pyr-label { fill: var(--amber); font-weight: 700; }
+  .pyramid.is-drawn .pyr-level.is-weak .pyr-shape { animation: weakPulse 2s ease-in-out 0.9s infinite; }
+  @keyframes weakPulse { 0%,100% { stroke-opacity: 0.6; } 50% { stroke-opacity: 1; } }
+  .pyr-level.is-strong .pyr-shape { fill: #223041; stroke: var(--carbon); }
+
+  .verdict__msg { font-family: 'Inter', sans-serif; font-weight: 300; font-size: clamp(1rem, 2.8vw, 1.35rem); line-height: 1.5; color: #eef1f4; max-width: 34ch; text-wrap: balance; }
+  .verdict__msg b { font-weight: 600; color: var(--amber); }
+
+  /* Botones premium (CTA / Desbloquear) */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
+    font-family: 'Inter', sans-serif; font-weight: 600; letter-spacing: 0.04em;
+    font-size: clamp(0.95rem, 2.4vw, 1.1rem); color: var(--black);
+    padding: clamp(0.85rem, 2vh, 1.1rem) clamp(1.8rem, 5vw, 2.8rem);
+    background: linear-gradient(180deg, #ffffff, #d9dee3); border: 0; border-radius: 999px; cursor: pointer;
+    box-shadow: 0 12px 34px -14px rgba(255,255,255,0.5);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
   }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 18px 42px -14px rgba(255,255,255,0.6); filter: brightness(1.03); }
+  .btn:active { transform: translateY(0); }
+  .btn:focus-visible { outline: 2px solid var(--steel-cyan); outline-offset: 4px; }
+  .btn[disabled] { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* ---------- FASE 5 · Captura final ---------- */
+  .final { display: flex; flex-direction: column; align-items: center; gap: clamp(1.5rem, 4vh, 2.25rem); width: 100%; max-width: 34rem; }
+  .final__txt { font-family: 'Inter', sans-serif; font-weight: 300; font-size: clamp(1rem, 2.8vw, 1.3rem); line-height: 1.5; color: #eef1f4; max-width: 32ch; text-wrap: balance; }
+  .final__form { display: flex; flex-direction: column; gap: clamp(1rem, 2.6vh, 1.5rem); width: 100%; max-width: 24rem; }
+  .fld { position: relative; text-align: left; }
+  .fld input {
+    width: 100%; background: transparent; border: none; border-bottom: 1.5px solid rgba(176,190,197,0.4);
+    color: var(--white); font-family: 'Inter', sans-serif; font-size: clamp(1rem, 2.6vw, 1.15rem); font-weight: 400;
+    padding: 0.6em 0.2em 0.5em; letter-spacing: 0.02em; transition: border-color 0.3s ease;
+  }
+  .fld input::placeholder { color: rgba(176,190,197,0.35); }
+  .fld input:focus { outline: none; border-bottom-color: var(--steel-cyan); }
+  .fld input.invalid { border-bottom-color: #cf6f5f; }
+  .final__note { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 0.72rem; letter-spacing: 0.04em; color: rgba(176,190,197,0.4); }
+  .final__ok { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+  .final__ok svg { width: 56px; height: 56px; color: var(--steel-cyan); }
 
   /* ============================================================ */
-  /* CAPA SUPERIOR (TELÓN) — negro absoluto, sube al final         */
+  /* CAPA SUPERIOR (TELÓN)                                        */
   /* ============================================================ */
   .curtain {
-    position: absolute; inset: 0; z-index: 10;
-    background: var(--black);
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
-    /* Ajuste 1: subida majestuosa (peso → acelera → frena suave arriba) */
+    position: absolute; inset: 0; z-index: 10; background: var(--black);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
     transition: transform 1.15s cubic-bezier(0.62, 0, 0.28, 1);
   }
   .curtain.is-lifting { transform: translateY(-100vh); pointer-events: none; }
-
-  .logo-block {
-    display: flex; flex-direction: column; align-items: stretch;
-    cursor: pointer; background: none; border: 0; padding: 0;
-  }
+  .logo-block { display: flex; flex-direction: column; align-items: stretch; cursor: pointer; background: none; border: 0; padding: 0; }
   .logo-block:focus-visible .logo-row { outline: 2px solid var(--steel-cyan); outline-offset: 10px; }
-
-  /* [ PROSPECTA ] — letras gigantes */
-  .logo-row {
-    display: flex; align-items: baseline; justify-content: center;
-    white-space: nowrap;
-    color: var(--white);
-    line-height: 1;
-  }
-  .logo-row .bracket {
-    font-family: 'Montserrat', sans-serif; font-weight: 300;
-    font-size: var(--big); line-height: 1;
-  }
-  .logo-row .text {
-    display: inline-block; overflow: hidden; white-space: nowrap;
-    max-width: 6ch;
-    font-family: 'Montserrat', sans-serif; font-weight: 800;
-    font-size: var(--big); line-height: 1; letter-spacing: 0.005em;
-    transition: max-width 0.55s cubic-bezier(0.6, 0, 0.2, 1), opacity 0.35s ease;
-  }
-  .logo-row .center-p {
-    font-family: 'Montserrat', sans-serif; font-weight: 800;
-    font-size: var(--big); line-height: 1;
-    margin: 0 0.18em;                 /* espacio elegante: [ P ] no se cierra del todo */
-  }
-
-  /* Firma: debajo de la sección ROSPECTA, alineada a la derecha */
-  .signature {
-    align-self: flex-end;
-    margin-top: clamp(6px, 1.4vh, 14px);
-    padding-right: 0.2em;
-    font-family: 'Inter', sans-serif; font-weight: 300;
-    font-size: clamp(0.62rem, 1.6vw, 0.9rem);
-    letter-spacing: 0.16em; text-transform: lowercase;
-    color: rgba(176, 190, 197, 0.42);
-    transition: opacity 0.3s ease;
-  }
-
-  /* Fase 1 · Contracción: colapsan 'PROS' y 'ECTA'; firma desaparece */
+  .logo-row { display: flex; align-items: baseline; justify-content: center; white-space: nowrap; color: var(--white); line-height: 1; }
+  .logo-row .bracket { font-family: 'Montserrat', sans-serif; font-weight: 300; font-size: var(--big); line-height: 1; }
+  .logo-row .text { display: inline-block; overflow: hidden; white-space: nowrap; max-width: 6ch; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: var(--big); line-height: 1; letter-spacing: 0.005em; transition: max-width 0.55s cubic-bezier(0.6, 0, 0.2, 1), opacity 0.35s ease; }
+  .logo-row .center-p { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: var(--big); line-height: 1; margin: 0 0.18em; }
+  .signature { align-self: flex-end; margin-top: clamp(6px, 1.4vh, 14px); padding-right: 0.2em; font-family: 'Inter', sans-serif; font-weight: 300; font-size: clamp(0.62rem, 1.6vw, 0.9rem); letter-spacing: 0.16em; text-transform: lowercase; color: rgba(176,190,197,0.42); transition: opacity 0.3s ease; }
   .stage.is-contracting .signature { opacity: 0; }
   .stage.is-contracting .logo-row .text { max-width: 0; opacity: 0; }
-
-  /* Fase 2 · Caída y rebote (--fall lo calcula el JS para tocar el fondo) */
   .logo-row.is-dropping { animation: fallBounce 1550ms forwards; }
   @keyframes fallBounce {
-    0%   { transform: translateY(0);            animation-timing-function: cubic-bezier(0.6, 0.05, 0.9, 0.35); } /* gravedad: acelera al caer */
-    27%  { transform: translateY(var(--fall));  animation-timing-function: cubic-bezier(0.62, 0, 0.28, 1); }     /* toca fondo → despegue con peso, majestuoso */
-    100% { transform: translateY(-150vh); }                                                                      /* sube y frena suave arriba */
+    0%   { transform: translateY(0);           animation-timing-function: cubic-bezier(0.6, 0.05, 0.9, 0.35); }
+    27%  { transform: translateY(var(--fall)); animation-timing-function: cubic-bezier(0.62, 0, 0.28, 1); }
+    100% { transform: translateY(-150vh); }
   }
 
   /* ============================================================ */
   /* RESPONSIVIDAD                                                */
   /* ============================================================ */
   @media (max-width: 560px) { :root { --big: clamp(2.1rem, 12vw, 3.6rem); } }
-  @media (orientation: landscape) and (max-height: 500px) {
-    :root { --big: clamp(2rem, 11vh, 4rem); --sweep-size: clamp(1.8rem, 8vh, 3rem); }
-    .capture { gap: clamp(1.25rem, 5vh, 2rem); }
-    .capture__question { font-size: clamp(1.15rem, 6vh, 1.9rem); }
-    .capture__input, .capture__mirror, .capture__flying { font-size: clamp(1.9rem, 11vh, 3rem); }
+  @media (max-width: 700px) {
+    .choice { flex-direction: column; }
+    .choice-half + .choice-half { box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); }
+    .choice__prompt { top: 4%; }
   }
 
-  /* ============================================================ */
-  /* ACCESIBILIDAD                                                */
-  /* ============================================================ */
   @media (prefers-reduced-motion: reduce) {
-    .logo-row .text, .curtain, .signature, .sweeper, .capture__flying, .capture__input, .capture__question { transition-duration: 0.001ms !important; }
+    .screen, .curtain, .logo-row .text, .signature, .sweeper, .capture__flying, .capture__input, .choice-half, .btn { transition-duration: 0.001ms !important; }
     .logo-row.is-dropping { animation-duration: 0.001ms; }
-    .sweeper.is-sweeping { animation: none; }
+    .sweeper.is-sweeping, .proc__bar::after, .pyramid.is-drawn .pyr-level, .pyramid.is-drawn .pyr-level.is-weak .pyr-shape { animation: none; }
+    .pyramid.is-drawn .pyr-level { opacity: 1; }
   }
 </style>
 </head>
 
 <body>
 
-  <!-- (sin clase) → Fase 1 · .is-contracting → caída/rebote → telón sube → Fase 3 -->
+  <div class="progress" id="progress"><div class="progress__bar" id="progressBar"></div></div>
+
   <div class="stage" id="stage">
 
-    <!-- ===== CAPA INFERIOR (contenido revelado) ===== -->
+    <!-- ===== CAPA INFERIOR (contenido / pantallas) ===== -->
     <div class="content">
-      <div class="capture" id="capture">
-        <h2 class="capture__question" id="captureQuestion">Su nombre, por favor</h2>
-        <div class="capture__field" id="captureField" data-line="silver">
-          <span class="capture__mirror" id="captureMirror" aria-hidden="true"></span>
-          <input type="text" id="captureInput" class="capture__input"
-            autocomplete="off" autocapitalize="words" spellcheck="false"
-            enterkeyhint="next" maxlength="80" aria-label="Escriba su respuesta" />
+
+      <!-- FASE 1 · Nombre -->
+      <section class="screen is-active" id="screenName">
+        <div class="capture" id="capture">
+          <h2 class="capture__question" id="captureQuestion">Su nombre, por favor</h2>
+          <div class="capture__field" id="captureField">
+            <span class="capture__mirror" id="captureMirror" aria-hidden="true"></span>
+            <input type="text" id="captureInput" class="capture__input" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="go" maxlength="80" aria-label="Su nombre" />
+          </div>
+          <p class="capture__hint" id="captureHint">Presione <kbd>Enter</kbd> para continuar</p>
         </div>
-        <p class="capture__hint" id="captureHint">Presione <kbd>Enter</kbd> para continuar</p>
-      </div>
-    </div>
+      </section>
 
-    <!-- ===== MECÁNICA · DOS MUNDOS (acercamiento rápido) ===== -->
-    <div class="worlds" id="worlds" aria-hidden="true">
-      <p class="worlds__prompt">¿Hacia dónde te llama?</p>
+      <!-- FASE 2 · La Gran Elección -->
+      <section class="screen" id="screenChoice">
+        <p class="choice__prompt" id="choicePrompt"></p>
+        <div class="choice">
+          <button type="button" class="choice-half choice-half--cumbre" data-choice="cumbre">
+            <svg class="choice-ico" viewBox="0 0 100 78" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+              <path d="M6 70 L34 26 L48 46 L66 16 L94 70 Z" />
+              <path d="M60 24 L66 16 L72 24 Z" fill="currentColor" stroke="none" />
+            </svg>
+            <span class="choice-title">LA CUMBRE</span>
+            <span class="choice-sub">Acumulación y Trascendencia</span>
+          </button>
+          <button type="button" class="choice-half choice-half--refugio" data-choice="refugio">
+            <svg class="choice-ico" viewBox="0 0 100 78" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+              <path d="M14 72 V38 L50 12 L86 38 V72" />
+              <path d="M40 72 V52 H60 V72" />
+            </svg>
+            <span class="choice-title">EL REFUGIO</span>
+            <span class="choice-sub">Seguridad y Protección</span>
+          </button>
+        </div>
+      </section>
 
-      <button type="button" class="world world--a" data-world="cumbre" data-color="#74b9cc"
-              data-mirror="Te mueve conquistar tu propia cima." aria-label="La Cumbre">
-        <svg class="world__scene" viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="3"
-             stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
-          <circle cx="95" cy="20" r="6" fill="currentColor" stroke="none" />
-          <path d="M4 80 L36 34 L56 60 L80 24 L116 80" />
-        </svg>
-        <span class="world__word">La Cumbre</span>
-      </button>
+      <!-- FASE 3 · Pregunta de estrés -->
+      <section class="screen" id="screenStress">
+        <div class="stress">
+          <h2 class="stress__q" id="stressQ"></h2>
+          <div class="stress__opts" id="stressOpts"></div>
+        </div>
+      </section>
 
-      <button type="button" class="world world--b" data-world="hogar" data-color="#d9a066"
-              data-mirror="Todo lo construyes por los tuyos." aria-label="El Refugio">
-        <svg class="world__scene" viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="3"
-             stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
-          <path d="M20 82 V46 L60 18 L100 46 V82" />
-          <path d="M48 82 V60 H72 V82" />
-        </svg>
-        <span class="world__word">El Refugio</span>
-      </button>
+      <!-- FASE 4 · Veredicto -->
+      <section class="screen" id="screenVerdict">
+        <div class="verdict" id="verdict">
+          <div class="proc">
+            <div class="proc__bar"></div>
+            <p class="proc__txt">Procesando Arquitectura Financiera…</p>
+          </div>
 
-      <span class="core-orb" id="coreOrb" aria-hidden="true"></span>
-      <p class="mirror-line" id="mirrorLine" aria-live="polite"></p>
+          <div class="verdict__reveal">
+            <svg class="pyramid" id="pyramid" viewBox="0 0 400 300" aria-hidden="true">
+              <!-- Base: Protección -->
+              <g class="pyr-level" data-lvl="proteccion">
+                <polygon class="pyr-shape" points="95,220 305,220 340,280 60,280" />
+                <text class="pyr-label" x="200" y="254" text-anchor="middle">PROTECCIÓN</text>
+              </g>
+              <!-- Nivel 2: Salud -->
+              <g class="pyr-level" data-lvl="salud">
+                <polygon class="pyr-shape" points="130,160 270,160 305,220 95,220" />
+                <text class="pyr-label" x="200" y="194" text-anchor="middle">SALUD</text>
+              </g>
+              <!-- Nivel 3: Acumulación -->
+              <g class="pyr-level" data-lvl="acumulacion">
+                <polygon class="pyr-shape" points="165,100 235,100 270,160 130,160" />
+                <text class="pyr-label" x="200" y="136" text-anchor="middle">ACUMULACIÓN</text>
+              </g>
+              <!-- Punta: Retiro -->
+              <g class="pyr-level" data-lvl="retiro">
+                <polygon class="pyr-shape" points="200,44 235,100 165,100" />
+                <text class="pyr-label" x="200" y="90" text-anchor="middle" font-size="10">RETIRO</text>
+              </g>
+            </svg>
+            <p class="verdict__msg" id="verdictMsg"></p>
+            <button type="button" class="btn" id="verdictCta">Desbloquear mi diagnóstico</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- FASE 5 · Captura final -->
+      <section class="screen" id="screenFinal">
+        <div class="final" id="final">
+          <p class="final__txt">Para enviar la estructura de su Pirámide Financiera a detalle y validar su sesión de cortesía, ingrese sus datos:</p>
+          <form class="final__form" id="finalForm" novalidate>
+            <div class="fld"><input type="tel" id="fPhone" inputmode="tel" autocomplete="tel" placeholder="Teléfono" maxlength="20" /></div>
+            <div class="fld"><input type="email" id="fEmail" inputmode="email" autocomplete="email" placeholder="Correo electrónico" maxlength="120" /></div>
+            <button type="submit" class="btn" id="finalBtn">Desbloquear Diagnóstico</button>
+          </form>
+          <p class="final__note">Conexión protegida · Sus datos no se comparten con terceros.</p>
+        </div>
+      </section>
+
     </div>
 
     <!-- ===== CAPA SUPERIOR (telón negro) ===== -->
@@ -365,248 +387,210 @@
   (function () {
     'use strict';
 
-    var advisorState = { answers: {} };
+    var S = { name: '', choice: '', stress: '', phone: '', email: '' };
     window.PROSPECTA = window.PROSPECTA || {};
-    window.PROSPECTA.advisorState = advisorState;
-
-    var QUESTIONS = [
-      { key: 'nombre',   label: 'Su nombre, por favor',        lineColor: 'silver' },
-      { key: 'negocio',  label: '¿A qué se dedica su negocio?', lineColor: 'cyan'   }
-    ];
-    var qIndex = 0;
+    window.PROSPECTA.state = S;
 
     var stage     = document.getElementById('stage');
     var curtain   = document.getElementById('curtain');
     var logoBlock = document.getElementById('logoBlock');
     var logoRow   = document.getElementById('logoRow');
+    var progress  = document.getElementById('progress');
+    var progressBar = document.getElementById('progressBar');
 
-    var question = document.getElementById('captureQuestion');
-    var field    = document.getElementById('captureField');
-    var input    = document.getElementById('captureInput');
-    var mirror   = document.getElementById('captureMirror');
-    var hint     = document.getElementById('captureHint');
+    var screens = {
+      name:    document.getElementById('screenName'),
+      choice:  document.getElementById('screenChoice'),
+      stress:  document.getElementById('screenStress'),
+      verdict: document.getElementById('screenVerdict'),
+      final:   document.getElementById('screenFinal')
+    };
+    var PROG = { name: 20, choice: 40, stress: 60, verdict: 80, final: 100 };
 
-    var capture    = document.getElementById('capture');
-    var worlds     = document.getElementById('worlds');
-    var worldEls   = worlds ? worlds.querySelectorAll('.world') : [];
-    var coreOrb    = document.getElementById('coreOrb');
-    var mirrorLine = document.getElementById('mirrorLine');
+    function showScreen(id) {
+      Object.keys(screens).forEach(function (k) { screens[k].classList.toggle('is-active', k === id); });
+      if (PROG[id]) progressBar.style.width = PROG[id] + '%';
+    }
 
-    var CONTRACT  = 560;   // [ PROSPECTA ] → [ P ]
-    var LAUNCH_AT = 420;   // instante del "tirón" (≈27% de 1550ms)
-    var LIFT      = 1150;  // telón sube (majestuoso, ~1.15s)
-
-    /* ============================================================ */
-    /* FASE 1-2 · Contracción → caída/rebote → telón sube           */
-    /* ============================================================ */
-    var introRunning = false;
-    function runIntro() {
+    /* ============ FASE 1a · Telón ============ */
+    var CONTRACT = 560, LAUNCH_AT = 420, LIFT = 1150, introRunning = false;
+    logoBlock.addEventListener('click', function () {
       if (introRunning) return;
-      introRunning = true;
-      logoBlock.disabled = true;
-
-      // Fase 1: colapsan PROS/ECTA y los corchetes se cierran a [ P ].
+      introRunning = true; logoBlock.disabled = true;
       stage.classList.add('is-contracting');
-
       window.setTimeout(function () {
-        // Fase 2: calcula la caída EXACTA para tocar el fondo (sin scroll).
         var rect = logoRow.getBoundingClientRect();
-        var fall = Math.round(window.innerHeight - rect.bottom - 2);
-        logoRow.style.setProperty('--fall', fall + 'px');
+        logoRow.style.setProperty('--fall', Math.round(window.innerHeight - rect.bottom - 2) + 'px');
         logoRow.classList.add('is-dropping');
-
-        // En el instante del tirón, el telón entero sube con el [ P ].
         window.setTimeout(function () {
           curtain.classList.add('is-lifting');
-          window.setTimeout(startCapture, LIFT + 40);
+          progress.classList.add('is-visible');
+          window.setTimeout(startName, LIFT + 40);
         }, LAUNCH_AT);
       }, CONTRACT);
-    }
-    logoBlock.addEventListener('click', runIntro);
+    });
 
-    /* ============================================================ */
-    /* FASE 3 · Captura: firma dinámica + barredor [ P ]            */
-    /* ============================================================ */
-    var minLine = 220;
+    /* ============ FASE 1b · Nombre ============ */
+    var qEl = document.getElementById('captureQuestion');
+    var field = document.getElementById('captureField');
+    var input = document.getElementById('captureInput');
+    var mirror = document.getElementById('captureMirror');
+    var hint = document.getElementById('captureHint');
+    var minLine = 220, busy = false;
 
     function syncWidth() {
       mirror.textContent = input.value || '';
-      var textW = mirror.getBoundingClientRect().width;
-      var target = Math.max(minLine, Math.ceil(textW) + 26);
-      var cap = Math.floor(window.innerWidth * 0.9);
-      input.style.width = Math.min(target, cap) + 'px';
+      var w = Math.max(minLine, Math.ceil(mirror.getBoundingClientRect().width) + 26);
+      input.style.width = Math.min(w, Math.floor(window.innerWidth * 0.9)) + 'px';
     }
-    function placeCaret() { var len = input.value.length; try { input.setSelectionRange(len, len); } catch (e) {} }
-    function startCapture() {
-      var declaredMin = parseFloat(getComputedStyle(input).minWidth);
-      if (declaredMin && !isNaN(declaredMin)) minLine = declaredMin;
-      syncWidth(); input.focus(); placeCaret();
+    function startName() {
+      var m = parseFloat(getComputedStyle(input).minWidth); if (m) minLine = m;
+      showScreen('name'); syncWidth(); input.focus();
     }
-
-    input.addEventListener('input', function () {
-      syncWidth();
-      hint.classList.toggle('is-dim', input.value.trim().length > 0);
-    });
-
-    var transitioning = false;
+    input.addEventListener('input', function () { syncWidth(); hint.classList.toggle('is-dim', input.value.trim().length > 0); });
     input.addEventListener('keydown', function (e) {
-      if (e.key !== 'Enter') return;
-      e.preventDefault();
-      if (transitioning || input.value.trim().length === 0) return;
-      runSweeper();
+      if (e.key !== 'Enter' || busy || input.value.trim().length === 0) return;
+      e.preventDefault(); sweepName();
     });
 
     function makeBracketP() {
-      var s = document.createElement('span');
-      s.className = 'sweeper';
-      var l = document.createElement('span'); l.className = 's-br'; l.textContent = '[';
-      var p = document.createElement('span'); p.className = 's-p';  p.textContent = 'P';
-      var r = document.createElement('span'); r.className = 's-br'; r.textContent = ']';
-      s.appendChild(l); s.appendChild(p); s.appendChild(r);
+      var s = document.createElement('span'); s.className = 'sweeper';
+      s.innerHTML = '<span class="s-br">[</span><span class="s-p">P</span><span class="s-br">]</span>';
       return s;
     }
-
-    function runSweeper() {
-      transitioning = true;
-
-      var current = QUESTIONS[qIndex];
-      var value = input.value.trim();
-      advisorState.answers[current.key] = value;
-      advisorState[current.key] = value;
-      console.info('[PROSPECTA] Capturado:', current.key, '→', value);
-
-      var isLast = (qIndex >= QUESTIONS.length - 1);
-      var next = isLast ? null : QUESTIONS[qIndex + 1];
-      var goToWorldsAfter = (current.key === 'nombre'); // tras el nombre → mecánica "Dos Mundos"
-
-      var rect = input.getBoundingClientRect();
-      input.style.width = rect.width + 'px';
-
-      var flying = document.createElement('span');
-      flying.className = 'capture__flying';
-      flying.textContent = value;
-      field.appendChild(flying);
-
-      input.style.color = 'transparent';
-      input.setAttribute('readonly', 'readonly');
-      hint.classList.add('is-dim');
-
-      var sweeper = makeBracketP();
-      field.appendChild(sweeper);
-      void sweeper.offsetWidth;
-      sweeper.classList.add('is-sweeping');
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () { flying.classList.add('is-absorbed'); });
-      });
-
+    function sweepName() {
+      busy = true;
+      S.name = input.value.trim();
+      var rect = input.getBoundingClientRect(); input.style.width = rect.width + 'px';
+      var flying = document.createElement('span'); flying.className = 'capture__flying'; flying.textContent = S.name; field.appendChild(flying);
+      input.style.color = 'transparent'; input.setAttribute('readonly', 'readonly'); hint.classList.add('is-dim');
+      var sw = makeBracketP(); field.appendChild(sw); void sw.offsetWidth; sw.classList.add('is-sweeping');
+      requestAnimationFrame(function () { requestAnimationFrame(function () { flying.classList.add('is-absorbed'); }); });
       window.setTimeout(function () {
-        if (goToWorldsAfter) question.classList.add('is-hiding');
-        else if (next) swapQuestion(next.label);
-        else swapQuestion('Gracias, ' + firstName(advisorState.nombre) + '.');
-      }, 520);
-
-      window.setTimeout(function () {
-        input.value = '';
-        input.style.color = '';
-        input.removeAttribute('readonly');
-        syncWidth(); // la línea plateada vuelve al centro (mínimo)
-        if (!goToWorldsAfter && next) field.setAttribute('data-line', next.lineColor === 'cyan' ? 'cyan' : 'silver');
-      }, 1000);
-
-      window.setTimeout(function () {
-        if (flying.parentNode) flying.parentNode.removeChild(flying);
-        if (sweeper.parentNode) sweeper.parentNode.removeChild(sweeper);
-        if (goToWorldsAfter) { showWorlds(); return; }   // inserta "Dos Mundos" antes del negocio
-        if (next) {
-          qIndex++;
-          hint.classList.remove('is-dim');
-          transitioning = false;
-          input.focus(); placeCaret();
-        } else { finishCapture(); }
+        if (flying.parentNode) flying.remove(); if (sw.parentNode) sw.remove();
+        input.value = ''; input.style.color = ''; input.removeAttribute('readonly'); busy = false;
+        buildChoice();
       }, 1320);
     }
 
-    function swapQuestion(text) {
-      question.classList.add('is-hiding');
-      window.setTimeout(function () {
-        question.textContent = text;
-        question.classList.remove('is-hiding');
-      }, 240);
+    /* ============ FASE 2 · La Gran Elección ============ */
+    var choicePrompt = document.getElementById('choicePrompt');
+    var choiceScreen = screens.choice;
+    var choiceHalves = choiceScreen.querySelectorAll('.choice-half');
+    var choiceLocked = false;
+
+    function firstName() { return S.name ? S.name.split(/\s+/)[0] : ''; }
+    function buildChoice() {
+      choiceLocked = false;
+      choiceScreen.classList.remove('is-choosing');
+      Array.prototype.forEach.call(choiceHalves, function (h) { h.classList.remove('chosen'); });
+      choicePrompt.textContent = firstName() + ', en la arquitectura de su vida financiera, ¿hacia dónde le llama su instinto hoy?';
+      showScreen('choice');
     }
-    function firstName(full) { return full ? full.trim().split(/\s+/)[0] : ''; }
-
-    /* ============================================================ */
-    /* MECÁNICA · DOS MUNDOS (acercamiento rápido)                  */
-    /* Un solo toque revela el motivador dominante; el Núcleo toma  */
-    /* su color y una frase espejo genera el "me conocen".          */
-    /* ============================================================ */
-    var worldChosen = false;
-
-    function showWorlds() {
-      capture.classList.add('is-hidden');
-      worlds.classList.add('is-active');
-      worlds.setAttribute('aria-hidden', 'false');
-    }
-
-    Array.prototype.forEach.call(worldEls, function (w) {
-      w.addEventListener('click', function () {
-        if (worldChosen) return;
-        worldChosen = true;
-
-        var key = w.getAttribute('data-world');
-        advisorState.mundo = key;               // motivador dominante (cumbre/hogar)
-        advisorState.answers.mundo = key;
-        console.info('[PROSPECTA] Mundo elegido →', key);
-
-        worlds.classList.add('is-choosing');
-        w.classList.add('chosen');
-
-        if (coreOrb) {
-          coreOrb.style.setProperty('--orb-color', w.getAttribute('data-color'));
-          coreOrb.classList.add('is-alive');    // el Núcleo cobra vida con ese color
-        }
-        if (mirrorLine) {
-          mirrorLine.textContent = w.getAttribute('data-mirror');
-          window.setTimeout(function () { mirrorLine.classList.add('show'); }, 560);
-        }
-
-        window.setTimeout(proceedToBusiness, 2400);
+    Array.prototype.forEach.call(choiceHalves, function (h) {
+      h.addEventListener('click', function () {
+        if (choiceLocked) return; choiceLocked = true;
+        S.choice = h.getAttribute('data-choice');
+        choiceScreen.classList.add('is-choosing'); h.classList.add('chosen');
+        window.setTimeout(buildStress, 1000);
       });
     });
 
-    function proceedToBusiness() {
-      worlds.classList.remove('is-active', 'is-choosing');
-      worlds.setAttribute('aria-hidden', 'true');
-      if (coreOrb) coreOrb.classList.remove('is-alive');
-      if (mirrorLine) mirrorLine.classList.remove('show');
-      Array.prototype.forEach.call(worldEls, function (w) { w.classList.remove('chosen'); });
-      worldChosen = false;
-
-      // Continúa con la siguiente pantalla (misma línea de captura).
-      qIndex = 1; // 'negocio'
-      question.textContent = QUESTIONS[1].label;
-      question.classList.remove('is-hiding');
-      field.setAttribute('data-line', QUESTIONS[1].lineColor === 'cyan' ? 'cyan' : 'silver');
-      input.value = ''; input.style.color = ''; input.removeAttribute('readonly');
-      capture.classList.remove('is-hidden');
-      hint.classList.remove('is-dim');
-      transitioning = false;
-      syncWidth();
-      window.setTimeout(function () { input.focus(); placeCaret(); }, 60);
+    /* ============ FASE 3 · Pregunta de estrés (dinámica) ============ */
+    var stressQ = document.getElementById('stressQ');
+    var stressOpts = document.getElementById('stressOpts');
+    var STRESS = {
+      refugio: {
+        q: 'Si un imprevisto de salud detuviera sus ingresos mañana, ¿por cuánto tiempo su refugio se mantendría a salvo?',
+        opts: ['Menos de 6 meses.', 'De 6 a 12 meses.', 'Está blindado de por vida.']
+      },
+      cumbre: {
+        q: 'Al llegar a su cumbre a los 65 años, ¿qué porcentaje de su nivel de vida actual tiene garantizado mes a mes?',
+        opts: ['Menos del 30%.', '50% promedio.', '100% garantizado.']
+      }
+    };
+    function buildStress() {
+      var data = STRESS[S.choice] || STRESS.refugio;
+      stressQ.textContent = data.q;
+      stressOpts.innerHTML = '';
+      var letters = ['A', 'B', 'C'];
+      data.opts.forEach(function (label, i) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'opt';
+        b.innerHTML = '<span class="opt__k">' + letters[i] + '</span><span>' + label + '</span>';
+        b.addEventListener('click', function () {
+          S.stress = letters[i];
+          Array.prototype.forEach.call(stressOpts.children, function (c) { c.classList.remove('is-picked'); });
+          b.classList.add('is-picked');
+          window.setTimeout(runVerdict, 420);
+        });
+        stressOpts.appendChild(b);
+      });
+      showScreen('stress');
     }
 
-    function finishCapture() {
-      hint.classList.add('is-dim');
-      input.setAttribute('readonly', 'readonly');
-      transitioning = false;
-      console.info('[PROSPECTA] Captura completa:', advisorState.answers);
-    }
+    /* ============ FASE 4 · Veredicto de la Pirámide ============ */
+    var verdict = document.getElementById('verdict');
+    var pyramid = document.getElementById('pyramid');
+    var verdictMsg = document.getElementById('verdictMsg');
+    var VERDICT = {
+      refugio: { weak: 'retiro',     msg: 'Su enfoque en las bases es sólido, pero la proyección hacia su <b>retiro está estancada</b>. Requiere optimización.' },
+      cumbre:  { weak: 'proteccion', msg: 'Visión de crecimiento detectada, pero las <b>bases de protección patrimonial presentan fisuras</b>. Riesgo de colapso ante imprevistos.' }
+    };
+    function runVerdict() {
+      verdict.classList.remove('show-reveal');
+      pyramid.classList.remove('is-drawn');
+      showScreen('verdict');
 
-    var resizeTimer;
-    window.addEventListener('resize', function () {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function () { if (!transitioning) syncWidth(); }, 120);
+      window.setTimeout(function () {
+        var v = VERDICT[S.choice] || VERDICT.refugio;
+        // Estado de cada nivel + resaltar el débil
+        var order = ['proteccion', 'salud', 'acumulacion', 'retiro'];
+        Array.prototype.forEach.call(pyramid.querySelectorAll('.pyr-level'), function (g) {
+          var lvl = g.getAttribute('data-lvl');
+          var idx = order.indexOf(lvl);
+          g.classList.toggle('is-weak', lvl === v.weak);
+          g.classList.toggle('is-strong', lvl !== v.weak);
+          // dibujo escalonado de base → punta
+          g.style.animationDelay = (idx * 0.22) + 's';
+        });
+        verdictMsg.innerHTML = v.msg;
+        verdict.classList.add('show-reveal');
+        pyramid.classList.add('is-drawn');
+      }, 2000); // "Procesando…" 2s
+    }
+    document.getElementById('verdictCta').addEventListener('click', function () { showScreen('final'); setTimeout(function(){ document.getElementById('fPhone').focus(); }, 300); });
+
+    /* ============ FASE 5 · Captura final ============ */
+    var finalForm = document.getElementById('finalForm');
+    var fPhone = document.getElementById('fPhone');
+    var fEmail = document.getElementById('fEmail');
+    var finalDiv = document.getElementById('final');
+
+    function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+    function validPhone(v) { return (v.replace(/\D/g, '').length >= 10); }
+
+    finalForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var okP = validPhone(fPhone.value), okE = validEmail(fEmail.value.trim());
+      fPhone.classList.toggle('invalid', !okP);
+      fEmail.classList.toggle('invalid', !okE);
+      if (!okP || !okE) { (!okP ? fPhone : fEmail).focus(); return; }
+
+      S.phone = fPhone.value.trim(); S.email = fEmail.value.trim();
+      console.info('[PROSPECTA] Perfil completo:', S);
+
+      finalDiv.innerHTML =
+        '<div class="final__ok">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9"/></svg>' +
+        '<h2 class="final__txt" style="font-weight:500;color:#fff;">Diagnóstico desbloqueado, ' + (firstName() || 'gracias') + '.</h2>' +
+        '<p class="final__txt">Su Pirámide Financiera y su sesión de cortesía han sido reservadas. Su asesor validará los detalles en breve.</p>' +
+        '</div>';
     });
+
+    /* Reajuste del ancho de la línea al redimensionar */
+    var rt;
+    window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (!busy) syncWidth(); }, 120); });
   })();
   </script>
 

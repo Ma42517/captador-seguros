@@ -4,265 +4,146 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>PROSPECTA</title>
-<meta name="description" content="PROSPECTA — Arquitectura de su vida financiera." />
+<meta name="description" content="PROSPECTA — La arquitectura de su patrimonio." />
 <meta name="theme-color" content="#000000" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Montserrat:wght@300;400;600;700;800;900&family=Playfair+Display:ital,wght@1,500;1,600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Montserrat:wght@300;400;600;700;800;900&family=Playfair+Display:ital,wght@1,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
 <style>
-  /* ============================================================ */
-  /* PALETA + VARIABLES                                            */
-  /* ============================================================ */
   :root {
-    --black:      #000000;
-    --carbon:     #0f1115;
-    --carbon-2:   #14171d;
-    --white:      #ffffff;
-    --silver:     #b0bec5;
-    --steel-cyan: #74b9cc;
-    --amber:      #d6a15e;   /* alerta sobria (fisuras / estancamiento) */
-
-    --big:        clamp(2.6rem, 8vw, 7rem);
-    --sweep-size: clamp(2.1rem, 6vw, 3.8rem);
-    --min-line:   clamp(180px, 45vw, 300px);
+    --black:#000000; --carbon:#0f1115; --carbon-2:#14171d;
+    --white:#ffffff; --silver:#b0bec5; --steel-cyan:#74b9cc; --amber:#d6a15e;
+    --big:clamp(2.6rem,8vw,7rem); --sweep-size:clamp(2.1rem,6vw,3.8rem); --min-line:clamp(180px,45vw,300px);
   }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--black);color:var(--white);min-height:100vh;min-height:100dvh;overflow:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  .stage{position:fixed;inset:0}
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
+  /* Progreso */
+  .progress{position:fixed;top:0;left:0;right:0;z-index:40;height:2px;background:rgba(255,255,255,.06);opacity:0;transition:opacity .6s ease}
+  .progress.is-visible{opacity:1}
+  .progress__bar{height:100%;width:0%;background:linear-gradient(90deg,var(--silver),var(--steel-cyan));transition:width .8s cubic-bezier(.22,1,.36,1)}
 
-  body {
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    background: var(--black);
-    color: var(--white);
-    min-height: 100vh; min-height: 100dvh;
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-  }
+  /* Contenido + pantallas */
+  .content{position:absolute;inset:0;z-index:1;background:var(--carbon)}
+  .screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:clamp(1.5rem,5vw,3.5rem);opacity:0;pointer-events:none;transform:translateY(14px);transition:opacity .55s ease,transform .55s cubic-bezier(.22,1,.36,1)}
+  .screen.is-active{opacity:1;pointer-events:auto;transform:translateY(0)}
 
-  .stage { position: fixed; inset: 0; }
+  /* ---- Fase 1 · Nombre ---- */
+  .capture{position:relative;display:flex;flex-direction:column;align-items:center;gap:clamp(2rem,7vh,3.75rem);width:100%;max-width:46rem}
+  .capture__question{font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(1.3rem,4.4vw,2.35rem);line-height:1.35;letter-spacing:.015em;color:#eef1f4;max-width:22ch;text-wrap:balance;transition:opacity .32s ease,transform .32s ease}
+  .capture__question.is-hiding{opacity:0;transform:translateY(-8px)}
+  .capture__field{position:relative;display:flex;justify-content:center;align-items:flex-end;width:100%}
+  .capture__mirror{position:absolute;visibility:hidden;white-space:pre;pointer-events:none;left:-9999px;top:0}
+  .capture__input,.capture__mirror,.capture__flying{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(2rem,7.2vw,3.7rem);line-height:1.2;letter-spacing:.005em;padding:0 .2em .1em}
+  .capture__input{width:var(--min-line);min-width:var(--min-line);max-width:90vw;text-align:center;color:var(--white);background:transparent;border:none;border-bottom:2px solid var(--silver);caret-color:var(--white);transition:width .3s cubic-bezier(.22,1,.36,1)}
+  .capture__input:focus{outline:none}
+  .capture__hint{font-family:'Space Mono',monospace;font-weight:400;font-size:clamp(.6rem,1.5vw,.72rem);letter-spacing:.22em;text-transform:uppercase;color:rgba(176,190,197,.34);transition:opacity .32s ease}
+  .capture__hint.is-dim{opacity:0}
+  .capture__hint kbd{font-family:inherit;padding:0 .25em;color:rgba(176,190,197,.6)}
+  .capture__flying{position:absolute;left:50%;top:50%;z-index:2;white-space:nowrap;pointer-events:none;color:var(--white);transform:translate(-50%,-50%);transition:transform .56s cubic-bezier(.6,0,.35,1) .43s,opacity .48s ease .43s}
+  .capture__flying.is-absorbed{transform:translate(-50%,-50%) translateX(-46vw) scale(.14);opacity:0}
+  .sweeper{position:absolute;left:50%;top:50%;z-index:5;pointer-events:none;display:inline-flex;align-items:baseline;transform:translate(-50%,-50%) translateX(56vw);transition:transform 1.2s linear;will-change:transform,box-shadow}
+  .sweeper .s-br{font-family:'Montserrat',sans-serif;font-weight:300;font-size:var(--sweep-size);color:var(--white);line-height:1}
+  .sweeper .s-p{font-family:'Montserrat',sans-serif;font-weight:800;font-size:var(--sweep-size);color:var(--white);line-height:1;margin:0 .16em}
+  .sweeper.is-sweeping{transform:translate(-50%,-50%) translateX(-72vw);animation:sweepTrail 1.2s linear forwards}
+  @keyframes sweepTrail{0%{box-shadow:0 0 0 0 rgba(255,255,255,0)}18%{box-shadow:85px 0 60px 5px rgba(255,255,255,.3),175px 0 115px 2px rgba(184,192,200,.18)}60%{box-shadow:72px 0 55px 5px rgba(255,255,255,.24)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
 
-  /* Barra de progreso superior (sensación de avance) */
-  .progress {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 40;
-    height: 2px; background: rgba(255, 255, 255, 0.06);
-    opacity: 0; transition: opacity 0.6s ease;
-  }
-  .progress.is-visible { opacity: 1; }
-  .progress__bar {
-    height: 100%; width: 0%;
-    background: linear-gradient(90deg, var(--silver), var(--steel-cyan));
-    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-  }
+  /* ---- Fase 2 · La Gran Elección ---- */
+  #screenChoice{padding:0}
+  .choice__prompt{position:absolute;top:clamp(6%,9vh,12%);left:0;right:0;z-index:4;padding:0 clamp(1.5rem,6vw,5rem);text-align:center;font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(1.05rem,3vw,1.6rem);line-height:1.45;color:#eef1f4;max-width:30ch;margin:0 auto;transition:opacity .4s ease}
+  #screenChoice.is-choosing .choice__prompt{opacity:0}
+  .choice{position:absolute;inset:0;display:flex}
+  .choice-half{position:relative;flex:1 1 50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(1rem,3vh,1.8rem);padding:clamp(2rem,6vh,4rem) 1.5rem;border:0;cursor:pointer;overflow:hidden;color:var(--white);transition:flex-basis .8s cubic-bezier(.6,0,.2,1),opacity .55s ease,filter .4s ease}
+  .choice-half--cumbre{background:radial-gradient(120% 90% at 50% 34%,#16303d 0%,#0a1319 74%)}
+  .choice-half--refugio{background:radial-gradient(120% 90% at 50% 34%,#241c2f 0%,#0d0b13 74%)}
+  .choice-half+.choice-half{box-shadow:inset 1px 0 0 rgba(255,255,255,.08)}
+  .choice-half:hover{filter:brightness(1.12)}
+  .choice-ico{width:clamp(84px,15vw,130px);height:auto;color:rgba(255,255,255,.92);transition:transform .5s cubic-bezier(.34,1.2,.5,1)}
+  .choice-half:hover .choice-ico{transform:translateY(-8px) scale(1.06)}
+  .choice-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:clamp(1rem,2.6vw,1.5rem);letter-spacing:.14em}
+  .choice-sub{font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(.72rem,1.7vw,.95rem);letter-spacing:.06em;color:rgba(255,255,255,.6);max-width:22ch}
+  #screenChoice.is-choosing .choice-half{pointer-events:none}
+  #screenChoice.is-choosing .choice-half:not(.chosen){flex-basis:0;opacity:0}
+  .choice-half.chosen{flex-basis:100%}
+  .choice-half.chosen .choice-ico{transform:scale(1.14)}
 
-  /* ============================================================ */
-  /* CAPA INFERIOR (CONTENIDO) — Gris Carbón + pantallas          */
-  /* ============================================================ */
-  .content { position: absolute; inset: 0; z-index: 1; background: var(--carbon); }
+  /* ---- Fase 3 · Prueba de Resistencia (el juego) ---- */
+  .game{display:flex;flex-direction:column;align-items:center;gap:clamp(1.25rem,3.5vh,2.25rem);width:100%;max-width:40rem}
+  .game__prompt{font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(1.05rem,3vw,1.55rem);line-height:1.45;color:#eef1f4;max-width:28ch;text-wrap:balance}
+  .game__prompt b{font-weight:500;color:#fff}
+  .pyramid{width:clamp(250px,62vw,400px);height:auto;overflow:visible}
+  .pyramid.is-quaking{animation:quake .62s ease-in-out}
+  @keyframes quake{0%,100%{transform:translate(0,0)}18%{transform:translate(-5px,2px) rotate(-.6deg)}38%{transform:translate(6px,-2px) rotate(.6deg)}58%{transform:translate(-5px,2px) rotate(-.4deg)}78%{transform:translate(4px,-1px) rotate(.3deg)}}
 
-  .screen {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center;
-    padding: clamp(1.5rem, 5vw, 3.5rem);
-    opacity: 0; pointer-events: none; transform: translateY(14px);
-    transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .screen.is-active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  .lvl{cursor:pointer;outline:none;transform-box:fill-box;transform-origin:center;transition:transform .5s cubic-bezier(.34,1.2,.5,1)}
+  .lvl-shape{fill:#161b22;stroke:#39424d;stroke-width:2.5;transition:fill .35s ease,stroke .35s ease}
+  .lvl-label{font-family:'Space Mono',monospace;font-size:13px;letter-spacing:1px;fill:#9aa6b2;pointer-events:none;transition:fill .35s ease}
+  .lvl-label--sm{font-size:10px}
+  .lvl:hover .lvl-shape,.lvl:focus-visible .lvl-shape{stroke:#cfd6dd}
+  .lvl.is-firm .lvl-shape{fill:#26333f;stroke:#9fb4c4}
+  .lvl.is-firm .lvl-label{fill:#eef1f4}
+  .lvl-crack{fill:none;stroke:var(--amber);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;opacity:0;stroke-dasharray:150;stroke-dashoffset:150;pointer-events:none}
+  /* Estado tras la prueba: los niveles NO firmes se agrietan y ceden */
+  .pyramid.tested .lvl:not(.is-firm) .lvl-shape{fill:rgba(214,161,94,.13);stroke:var(--amber)}
+  .pyramid.tested .lvl:not(.is-firm) .lvl-label{fill:var(--amber)}
+  .pyramid.tested .lvl:not(.is-firm) .lvl-crack{opacity:1;animation:crackDraw .55s ease .15s forwards}
+  @keyframes crackDraw{to{stroke-dashoffset:0}}
+  .pyramid.tested .lvl[data-lvl="retiro"]:not(.is-firm){transform:translate(5px,6px) rotate(4.5deg)}
+  .pyramid.tested .lvl[data-lvl="acumulacion"]:not(.is-firm){transform:translate(-4px,5px) rotate(-3deg)}
+  .pyramid.tested .lvl[data-lvl="salud"]:not(.is-firm){transform:translate(4px,5px) rotate(2deg)}
+  .pyramid.tested .lvl[data-lvl="proteccion"]:not(.is-firm){transform:translateY(6px)}
 
-  /* ---------- FASE 1 · Captura de nombre ---------- */
-  .capture { position: relative; display: flex; flex-direction: column; align-items: center; gap: clamp(2rem, 7vh, 3.75rem); width: 100%; max-width: 46rem; }
-  .capture__question {
-    font-family: 'Inter', sans-serif; font-weight: 300;
-    font-size: clamp(1.3rem, 4.4vw, 2.35rem);
-    line-height: 1.35; letter-spacing: 0.015em; color: #eef1f4; max-width: 22ch; text-wrap: balance;
-    transition: opacity 320ms ease, transform 320ms ease;
-  }
-  .capture__question.is-hiding { opacity: 0; transform: translateY(-8px); }
-  .capture__field { position: relative; display: flex; justify-content: center; align-items: flex-end; width: 100%; }
-  .capture__mirror { position: absolute; visibility: hidden; white-space: pre; pointer-events: none; left: -9999px; top: 0; }
-  .capture__input, .capture__mirror, .capture__flying {
-    font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-weight: 500;
-    font-size: clamp(2rem, 7.2vw, 3.7rem); line-height: 1.2; letter-spacing: 0.005em; padding: 0 0.2em 0.1em;
-  }
-  .capture__input {
-    width: var(--min-line); min-width: var(--min-line); max-width: 90vw;
-    text-align: center; color: var(--white); background: transparent; border: none;
-    border-bottom: 2px solid var(--silver); caret-color: var(--white);
-    transition: width 300ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .capture__input:focus { outline: none; }
-  .capture__hint {
-    font-family: 'Inter', sans-serif; font-weight: 300; font-size: clamp(0.62rem, 1.6vw, 0.78rem);
-    letter-spacing: 0.28em; text-transform: uppercase; color: rgba(176, 190, 197, 0.34);
-    transition: opacity 320ms ease;
-  }
-  .capture__hint.is-dim { opacity: 0; }
-  .capture__hint kbd { font-family: inherit; letter-spacing: normal; padding: 0 0.25em; color: rgba(176, 190, 197, 0.6); }
+  .game__result{font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(1rem,2.8vw,1.35rem);line-height:1.5;color:#eef1f4;max-width:32ch;min-height:2.5em;text-wrap:balance;opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s ease}
+  .game__result.show{opacity:1;transform:translateY(0)}
+  .game__result b{color:var(--amber);font-weight:600}
 
-  .capture__flying { position: absolute; left: 50%; top: 50%; z-index: 2; white-space: nowrap; pointer-events: none; color: var(--white); transform: translate(-50%, -50%); transition: transform 560ms cubic-bezier(0.6, 0, 0.35, 1) 430ms, opacity 480ms ease 430ms; }
-  .capture__flying.is-absorbed { transform: translate(-50%, -50%) translateX(-46vw) scale(0.14); opacity: 0; }
+  /* Botones */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.6rem;font-family:'Inter',sans-serif;font-weight:600;letter-spacing:.04em;font-size:clamp(.95rem,2.4vw,1.1rem);color:var(--black);padding:clamp(.85rem,2vh,1.1rem) clamp(1.8rem,5vw,2.8rem);background:linear-gradient(180deg,#fff,#d9dee3);border:0;border-radius:999px;cursor:pointer;transition:transform .25s ease,filter .25s ease}
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.03)}
+  .btn:active{transform:translateY(0)}
+  .btn:focus-visible{outline:2px solid var(--steel-cyan);outline-offset:4px}
+  .btn[hidden]{display:none}
+  .btn--ghost{background:transparent;color:#e9edf1;border:1px solid rgba(255,255,255,.25)}
+  .btn--ghost:hover{border-color:var(--steel-cyan);background:rgba(116,185,204,.08)}
 
-  .sweeper { position: absolute; left: 50%; top: 50%; z-index: 5; pointer-events: none; display: inline-flex; align-items: baseline; transform: translate(-50%, -50%) translateX(56vw); transition: transform 1200ms linear; will-change: transform, box-shadow; }
-  .sweeper .s-br { font-family: 'Montserrat', sans-serif; font-weight: 300; font-size: var(--sweep-size); color: var(--white); line-height: 1; }
-  .sweeper .s-p  { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: var(--sweep-size); color: var(--white); line-height: 1; margin: 0 0.16em; }
-  .sweeper.is-sweeping { transform: translate(-50%, -50%) translateX(-72vw); animation: sweepTrail 1200ms linear forwards; }
-  @keyframes sweepTrail {
-    0% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
-    18% { box-shadow: 85px 0 60px 5px rgba(255,255,255,0.30), 175px 0 115px 2px rgba(184,192,200,0.18); }
-    60% { box-shadow: 72px 0 55px 5px rgba(255,255,255,0.24), 145px 0 100px 2px rgba(184,192,200,0.14); }
-    100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
-  }
+  /* ---- Fase 4 · Captura final ---- */
+  .final{display:flex;flex-direction:column;align-items:center;gap:clamp(1.5rem,4vh,2.25rem);width:100%;max-width:34rem}
+  .final__txt{font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(1rem,2.8vw,1.3rem);line-height:1.5;color:#eef1f4;max-width:32ch;text-wrap:balance}
+  .final__form{display:flex;flex-direction:column;gap:clamp(1rem,2.6vh,1.5rem);width:100%;max-width:24rem}
+  .fld input{width:100%;background:transparent;border:none;border-bottom:1.5px solid rgba(176,190,197,.4);color:var(--white);font-family:'Inter',sans-serif;font-size:clamp(1rem,2.6vw,1.15rem);padding:.6em .2em .5em;text-align:center;transition:border-color .3s ease}
+  .fld input::placeholder{color:rgba(176,190,197,.35)}
+  .fld input:focus{outline:none;border-bottom-color:var(--steel-cyan)}
+  .fld input.invalid{border-bottom-color:#cf6f5f}
+  .final__note{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.08em;color:rgba(176,190,197,.4)}
+  .final__ok{display:flex;flex-direction:column;align-items:center;gap:1rem}
+  .final__ok svg{width:56px;height:56px;color:var(--steel-cyan)}
 
-  /* ---------- FASE 2 · La Gran Elección (split) ---------- */
-  #screenChoice { padding: 0; }
-  .choice__prompt {
-    position: absolute; top: clamp(6%, 9vh, 12%); left: 0; right: 0; z-index: 4;
-    padding: 0 clamp(1.5rem, 6vw, 5rem); text-align: center;
-    font-family: 'Inter', sans-serif; font-weight: 300; font-size: clamp(1.05rem, 3vw, 1.6rem);
-    line-height: 1.45; letter-spacing: 0.01em; color: #eef1f4; max-width: 30ch; margin: 0 auto;
-    transition: opacity 0.4s ease;
-  }
-  #screenChoice.is-choosing .choice__prompt { opacity: 0; }
-  .choice { position: absolute; inset: 0; display: flex; }
-  .choice-half {
-    position: relative; flex: 1 1 50%;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: clamp(1rem, 3vh, 1.8rem); padding: clamp(2rem, 6vh, 4rem) 1.5rem;
-    border: 0; cursor: pointer; overflow: hidden; color: var(--white);
-    transition: flex-basis 0.8s cubic-bezier(0.6, 0, 0.2, 1), opacity 0.55s ease, background 0.4s ease;
-  }
-  .choice-half--cumbre  { background: radial-gradient(120% 90% at 50% 34%, #16303d 0%, #0a1319 74%); }
-  .choice-half--refugio { background: radial-gradient(120% 90% at 50% 34%, #241c2f 0%, #0d0b13 74%); }
-  .choice-half + .choice-half { box-shadow: inset 1px 0 0 rgba(255,255,255,0.08); }
-  .choice-half:hover { filter: brightness(1.12); }
-  .choice-ico { width: clamp(84px, 15vw, 130px); height: auto; color: rgba(255,255,255,0.92); transition: transform 0.5s cubic-bezier(0.34,1.2,0.5,1); }
-  .choice-half:hover .choice-ico { transform: translateY(-8px) scale(1.06); }
-  .choice-title { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: clamp(1rem, 2.6vw, 1.5rem); letter-spacing: 0.14em; }
-  .choice-sub { font-family: 'Inter', sans-serif; font-weight: 300; font-size: clamp(0.72rem, 1.7vw, 0.95rem); letter-spacing: 0.06em; color: rgba(255,255,255,0.6); max-width: 22ch; }
-  #screenChoice.is-choosing .choice-half { pointer-events: none; }
-  #screenChoice.is-choosing .choice-half:not(.chosen) { flex-basis: 0; opacity: 0; }
-  .choice-half.chosen { flex-basis: 100%; }
-  .choice-half.chosen .choice-ico { transform: scale(1.14); }
+  /* Telón */
+  .curtain{position:absolute;inset:0;z-index:10;background:var(--black);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:transform 1.15s cubic-bezier(.62,0,.28,1)}
+  .curtain.is-lifting{transform:translateY(-100vh);pointer-events:none}
+  .logo-block{display:flex;flex-direction:column;align-items:stretch;cursor:pointer;background:none;border:0;padding:0}
+  .logo-block:focus-visible .logo-row{outline:2px solid var(--steel-cyan);outline-offset:10px}
+  .logo-row{display:flex;align-items:baseline;justify-content:center;white-space:nowrap;color:var(--white);line-height:1}
+  .logo-row .bracket{font-family:'Montserrat',sans-serif;font-weight:300;font-size:var(--big);line-height:1}
+  .logo-row .text{display:inline-block;overflow:hidden;white-space:nowrap;max-width:6ch;font-family:'Montserrat',sans-serif;font-weight:800;font-size:var(--big);line-height:1;letter-spacing:.005em;transition:max-width .55s cubic-bezier(.6,0,.2,1),opacity .35s ease}
+  .logo-row .center-p{font-family:'Montserrat',sans-serif;font-weight:800;font-size:var(--big);line-height:1;margin:0 .18em}
+  .signature{align-self:flex-end;margin-top:clamp(6px,1.4vh,14px);padding-right:.2em;font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(.62rem,1.6vw,.9rem);letter-spacing:.16em;text-transform:lowercase;color:rgba(176,190,197,.42);transition:opacity .3s ease}
+  .stage.is-contracting .signature{opacity:0}
+  .stage.is-contracting .logo-row .text{max-width:0;opacity:0}
+  .logo-row.is-dropping{animation:fallBounce 1.55s forwards}
+  @keyframes fallBounce{0%{transform:translateY(0);animation-timing-function:cubic-bezier(.6,.05,.9,.35)}27%{transform:translateY(var(--fall));animation-timing-function:cubic-bezier(.62,0,.28,1)}100%{transform:translateY(-150vh)}}
 
-  /* ---------- FASE 3 · Pregunta de estrés ---------- */
-  .stress { display: flex; flex-direction: column; align-items: center; gap: clamp(1.75rem, 5vh, 2.75rem); width: 100%; max-width: 40rem; }
-  .stress__q { font-family: 'Inter', sans-serif; font-weight: 300; font-size: clamp(1.2rem, 3.6vw, 2rem); line-height: 1.4; color: #eef1f4; max-width: 26ch; text-wrap: balance; }
-  .stress__opts { display: flex; flex-direction: column; gap: clamp(0.7rem, 1.8vh, 1rem); width: 100%; max-width: 30rem; }
-  .opt {
-    display: flex; align-items: center; gap: 1rem; width: 100%;
-    padding: clamp(0.9rem, 2vh, 1.15rem) clamp(1.1rem, 3vw, 1.6rem);
-    background: var(--carbon-2); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px;
-    color: #e9edf1; font-family: 'Inter', sans-serif; font-size: clamp(0.9rem, 2.4vw, 1.1rem); font-weight: 400;
-    text-align: left; cursor: pointer;
-    transition: border-color 0.25s ease, background 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
-  }
-  .opt:hover { border-color: rgba(116,185,204,0.7); background: #171b22; transform: translateY(-2px); box-shadow: 0 10px 30px -16px rgba(116,185,204,0.5); }
-  .opt__k { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 2rem; height: 2rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-weight: 700; font-size: 0.9rem; color: var(--silver); }
-  .opt.is-picked { border-color: var(--steel-cyan); background: #101821; box-shadow: 0 0 0 1px var(--steel-cyan) inset; }
-
-  /* ---------- FASE 4 · Veredicto (procesando + pirámide) ---------- */
-  .verdict { display: flex; flex-direction: column; align-items: center; gap: clamp(1.5rem, 4vh, 2.25rem); width: 100%; max-width: 44rem; }
-  .proc { display: flex; flex-direction: column; align-items: center; gap: 1.4rem; }
-  .proc__txt { font-family: 'Inter', sans-serif; font-weight: 300; letter-spacing: 0.14em; text-transform: uppercase; font-size: clamp(0.78rem, 2vw, 0.95rem); color: var(--silver); }
-  .proc__bar { position: relative; width: clamp(180px, 40vw, 240px); height: 2px; background: rgba(255,255,255,0.1); overflow: hidden; border-radius: 2px; }
-  .proc__bar::after { content: ""; position: absolute; top: 0; left: -45%; width: 45%; height: 100%; background: linear-gradient(90deg, transparent, var(--steel-cyan), transparent); animation: procSlide 1.1s linear infinite; }
-  @keyframes procSlide { to { left: 115%; } }
-
-  .verdict__reveal { display: none; flex-direction: column; align-items: center; gap: clamp(1.25rem, 3.5vh, 2rem); width: 100%; }
-  .verdict.show-reveal .proc { display: none; }
-  .verdict.show-reveal .verdict__reveal { display: flex; }
-
-  .pyramid { width: clamp(240px, 60vw, 380px); height: auto; }
-  .pyr-level { opacity: 0; }
-  .pyramid.is-drawn .pyr-level { animation: pyrIn 0.6s ease forwards; }
-  @keyframes pyrIn { from { opacity: 0; } to { opacity: 1; } }
-  .pyr-shape { fill: #1b2husky; }
-  .pyr-shape { fill: #1b222b; stroke: var(--carbon); stroke-width: 2.5; transition: fill 0.5s ease; }
-  .pyr-label { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 12px; fill: #cfd6dd; letter-spacing: 0.04em; }
-  .pyr-level.is-weak .pyr-shape { fill: rgba(214,161,94,0.22); stroke: rgba(214,161,94,0.9); }
-  .pyr-level.is-weak .pyr-label { fill: var(--amber); font-weight: 700; }
-  .pyramid.is-drawn .pyr-level.is-weak .pyr-shape { animation: weakPulse 2s ease-in-out 0.9s infinite; }
-  @keyframes weakPulse { 0%,100% { stroke-opacity: 0.6; } 50% { stroke-opacity: 1; } }
-  .pyr-level.is-strong .pyr-shape { fill: #223041; stroke: var(--carbon); }
-
-  .verdict__msg { font-family: 'Inter', sans-serif; font-weight: 300; font-size: clamp(1rem, 2.8vw, 1.35rem); line-height: 1.5; color: #eef1f4; max-width: 34ch; text-wrap: balance; }
-  .verdict__msg b { font-weight: 600; color: var(--amber); }
-
-  /* Botones premium (CTA / Desbloquear) */
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
-    font-family: 'Inter', sans-serif; font-weight: 600; letter-spacing: 0.04em;
-    font-size: clamp(0.95rem, 2.4vw, 1.1rem); color: var(--black);
-    padding: clamp(0.85rem, 2vh, 1.1rem) clamp(1.8rem, 5vw, 2.8rem);
-    background: linear-gradient(180deg, #ffffff, #d9dee3); border: 0; border-radius: 999px; cursor: pointer;
-    box-shadow: 0 12px 34px -14px rgba(255,255,255,0.5);
-    transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
-  }
-  .btn:hover { transform: translateY(-2px); box-shadow: 0 18px 42px -14px rgba(255,255,255,0.6); filter: brightness(1.03); }
-  .btn:active { transform: translateY(0); }
-  .btn:focus-visible { outline: 2px solid var(--steel-cyan); outline-offset: 4px; }
-  .btn[disabled] { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
-
-  /* ---------- FASE 5 · Captura final ---------- */
-  .final { display: flex; flex-direction: column; align-items: center; gap: clamp(1.5rem, 4vh, 2.25rem); width: 100%; max-width: 34rem; }
-  .final__txt { font-family: 'Inter', sans-serif; font-weight: 300; font-size: clamp(1rem, 2.8vw, 1.3rem); line-height: 1.5; color: #eef1f4; max-width: 32ch; text-wrap: balance; }
-  .final__form { display: flex; flex-direction: column; gap: clamp(1rem, 2.6vh, 1.5rem); width: 100%; max-width: 24rem; }
-  .fld { position: relative; text-align: left; }
-  .fld input {
-    width: 100%; background: transparent; border: none; border-bottom: 1.5px solid rgba(176,190,197,0.4);
-    color: var(--white); font-family: 'Inter', sans-serif; font-size: clamp(1rem, 2.6vw, 1.15rem); font-weight: 400;
-    padding: 0.6em 0.2em 0.5em; letter-spacing: 0.02em; transition: border-color 0.3s ease;
-  }
-  .fld input::placeholder { color: rgba(176,190,197,0.35); }
-  .fld input:focus { outline: none; border-bottom-color: var(--steel-cyan); }
-  .fld input.invalid { border-bottom-color: #cf6f5f; }
-  .final__note { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 0.72rem; letter-spacing: 0.04em; color: rgba(176,190,197,0.4); }
-  .final__ok { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
-  .final__ok svg { width: 56px; height: 56px; color: var(--steel-cyan); }
-
-  /* ============================================================ */
-  /* CAPA SUPERIOR (TELÓN)                                        */
-  /* ============================================================ */
-  .curtain {
-    position: absolute; inset: 0; z-index: 10; background: var(--black);
-    display: flex; align-items: center; justify-content: center; overflow: hidden;
-    transition: transform 1.15s cubic-bezier(0.62, 0, 0.28, 1);
-  }
-  .curtain.is-lifting { transform: translateY(-100vh); pointer-events: none; }
-  .logo-block { display: flex; flex-direction: column; align-items: stretch; cursor: pointer; background: none; border: 0; padding: 0; }
-  .logo-block:focus-visible .logo-row { outline: 2px solid var(--steel-cyan); outline-offset: 10px; }
-  .logo-row { display: flex; align-items: baseline; justify-content: center; white-space: nowrap; color: var(--white); line-height: 1; }
-  .logo-row .bracket { font-family: 'Montserrat', sans-serif; font-weight: 300; font-size: var(--big); line-height: 1; }
-  .logo-row .text { display: inline-block; overflow: hidden; white-space: nowrap; max-width: 6ch; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: var(--big); line-height: 1; letter-spacing: 0.005em; transition: max-width 0.55s cubic-bezier(0.6, 0, 0.2, 1), opacity 0.35s ease; }
-  .logo-row .center-p { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: var(--big); line-height: 1; margin: 0 0.18em; }
-  .signature { align-self: flex-end; margin-top: clamp(6px, 1.4vh, 14px); padding-right: 0.2em; font-family: 'Inter', sans-serif; font-weight: 300; font-size: clamp(0.62rem, 1.6vw, 0.9rem); letter-spacing: 0.16em; text-transform: lowercase; color: rgba(176,190,197,0.42); transition: opacity 0.3s ease; }
-  .stage.is-contracting .signature { opacity: 0; }
-  .stage.is-contracting .logo-row .text { max-width: 0; opacity: 0; }
-  .logo-row.is-dropping { animation: fallBounce 1550ms forwards; }
-  @keyframes fallBounce {
-    0%   { transform: translateY(0);           animation-timing-function: cubic-bezier(0.6, 0.05, 0.9, 0.35); }
-    27%  { transform: translateY(var(--fall)); animation-timing-function: cubic-bezier(0.62, 0, 0.28, 1); }
-    100% { transform: translateY(-150vh); }
-  }
-
-  /* ============================================================ */
-  /* RESPONSIVIDAD                                                */
-  /* ============================================================ */
-  @media (max-width: 560px) { :root { --big: clamp(2.1rem, 12vw, 3.6rem); } }
-  @media (max-width: 700px) {
-    .choice { flex-direction: column; }
-    .choice-half + .choice-half { box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); }
-    .choice__prompt { top: 4%; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .screen, .curtain, .logo-row .text, .signature, .sweeper, .capture__flying, .capture__input, .choice-half, .btn { transition-duration: 0.001ms !important; }
-    .logo-row.is-dropping { animation-duration: 0.001ms; }
-    .sweeper.is-sweeping, .proc__bar::after, .pyramid.is-drawn .pyr-level, .pyramid.is-drawn .pyr-level.is-weak .pyr-shape { animation: none; }
-    .pyramid.is-drawn .pyr-level { opacity: 1; }
+  @media(max-width:560px){:root{--big:clamp(2.1rem,12vw,3.6rem)}}
+  @media(max-width:700px){.choice{flex-direction:column}.choice-half+.choice-half{box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}.choice__prompt{top:4%}}
+  @media(prefers-reduced-motion:reduce){
+    .screen,.curtain,.logo-row .text,.signature,.sweeper,.capture__flying,.capture__input,.choice-half,.btn,.lvl,.game__result{transition-duration:.001ms!important}
+    .logo-row.is-dropping{animation-duration:.001ms}
+    .sweeper.is-sweeping,.pyramid.is-quaking,.pyramid.tested .lvl-crack{animation:none}
+    .pyramid.tested .lvl-crack{opacity:1;stroke-dashoffset:0}
   }
 </style>
 </head>
@@ -272,8 +153,6 @@
   <div class="progress" id="progress"><div class="progress__bar" id="progressBar"></div></div>
 
   <div class="stage" id="stage">
-
-    <!-- ===== CAPA INFERIOR (contenido / pantallas) ===== -->
     <div class="content">
 
       <!-- FASE 1 · Nombre -->
@@ -293,77 +172,60 @@
         <p class="choice__prompt" id="choicePrompt"></p>
         <div class="choice">
           <button type="button" class="choice-half choice-half--cumbre" data-choice="cumbre">
-            <svg class="choice-ico" viewBox="0 0 100 78" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
-              <path d="M6 70 L34 26 L48 46 L66 16 L94 70 Z" />
-              <path d="M60 24 L66 16 L72 24 Z" fill="currentColor" stroke="none" />
-            </svg>
+            <svg class="choice-ico" viewBox="0 0 100 78" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M6 70 L34 26 L48 46 L66 16 L94 70 Z"/><path d="M60 24 L66 16 L72 24 Z" fill="currentColor" stroke="none"/></svg>
             <span class="choice-title">LA CUMBRE</span>
             <span class="choice-sub">Acumulación y Trascendencia</span>
           </button>
           <button type="button" class="choice-half choice-half--refugio" data-choice="refugio">
-            <svg class="choice-ico" viewBox="0 0 100 78" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
-              <path d="M14 72 V38 L50 12 L86 38 V72" />
-              <path d="M40 72 V52 H60 V72" />
-            </svg>
+            <svg class="choice-ico" viewBox="0 0 100 78" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M14 72 V38 L50 12 L86 38 V72"/><path d="M40 72 V52 H60 V72"/></svg>
             <span class="choice-title">EL REFUGIO</span>
             <span class="choice-sub">Seguridad y Protección</span>
           </button>
         </div>
       </section>
 
-      <!-- FASE 3 · Pregunta de estrés -->
-      <section class="screen" id="screenStress">
-        <div class="stress">
-          <h2 class="stress__q" id="stressQ"></h2>
-          <div class="stress__opts" id="stressOpts"></div>
+      <!-- FASE 3 · Prueba de Resistencia (juego) -->
+      <section class="screen" id="screenGame">
+        <div class="game">
+          <p class="game__prompt" id="gamePrompt"></p>
+
+          <svg class="pyramid" id="pyramid" viewBox="0 0 400 300" aria-label="Su estructura patrimonial de 4 niveles">
+            <g class="lvl" data-lvl="proteccion" tabindex="0" role="button" aria-pressed="false" aria-label="Protección">
+              <polygon class="lvl-shape" points="95,220 305,220 340,280 60,280"/>
+              <path class="lvl-crack" d="M200 220 L188 240 L210 254 L194 268 L206 280"/>
+              <text class="lvl-label" x="200" y="256" text-anchor="middle">PROTECCIÓN</text>
+            </g>
+            <g class="lvl" data-lvl="salud" tabindex="0" role="button" aria-pressed="false" aria-label="Salud">
+              <polygon class="lvl-shape" points="130,160 270,160 305,220 95,220"/>
+              <path class="lvl-crack" d="M200 160 L190 180 L212 197 L198 220"/>
+              <text class="lvl-label" x="200" y="196" text-anchor="middle">SALUD</text>
+            </g>
+            <g class="lvl" data-lvl="acumulacion" tabindex="0" role="button" aria-pressed="false" aria-label="Acumulación">
+              <polygon class="lvl-shape" points="165,100 235,100 270,160 130,160"/>
+              <path class="lvl-crack" d="M200 100 L192 122 L210 142 L200 160"/>
+              <text class="lvl-label" x="200" y="136" text-anchor="middle">ACUMULACIÓN</text>
+            </g>
+            <g class="lvl" data-lvl="retiro" tabindex="0" role="button" aria-pressed="false" aria-label="Retiro">
+              <polygon class="lvl-shape" points="200,44 235,100 165,100"/>
+              <path class="lvl-crack" d="M200 46 L206 68 L194 88 L200 100"/>
+              <text class="lvl-label lvl-label--sm" x="200" y="88" text-anchor="middle">RETIRO</text>
+            </g>
+          </svg>
+
+          <button type="button" class="btn" id="gameTest">Poner a prueba</button>
+          <p class="game__result" id="gameResult" aria-live="polite"></p>
+          <button type="button" class="btn" id="gameCta" hidden>Reforzar mi estructura</button>
         </div>
       </section>
 
-      <!-- FASE 4 · Veredicto -->
-      <section class="screen" id="screenVerdict">
-        <div class="verdict" id="verdict">
-          <div class="proc">
-            <div class="proc__bar"></div>
-            <p class="proc__txt">Procesando Arquitectura Financiera…</p>
-          </div>
-
-          <div class="verdict__reveal">
-            <svg class="pyramid" id="pyramid" viewBox="0 0 400 300" aria-hidden="true">
-              <!-- Base: Protección -->
-              <g class="pyr-level" data-lvl="proteccion">
-                <polygon class="pyr-shape" points="95,220 305,220 340,280 60,280" />
-                <text class="pyr-label" x="200" y="254" text-anchor="middle">PROTECCIÓN</text>
-              </g>
-              <!-- Nivel 2: Salud -->
-              <g class="pyr-level" data-lvl="salud">
-                <polygon class="pyr-shape" points="130,160 270,160 305,220 95,220" />
-                <text class="pyr-label" x="200" y="194" text-anchor="middle">SALUD</text>
-              </g>
-              <!-- Nivel 3: Acumulación -->
-              <g class="pyr-level" data-lvl="acumulacion">
-                <polygon class="pyr-shape" points="165,100 235,100 270,160 130,160" />
-                <text class="pyr-label" x="200" y="136" text-anchor="middle">ACUMULACIÓN</text>
-              </g>
-              <!-- Punta: Retiro -->
-              <g class="pyr-level" data-lvl="retiro">
-                <polygon class="pyr-shape" points="200,44 235,100 165,100" />
-                <text class="pyr-label" x="200" y="90" text-anchor="middle" font-size="10">RETIRO</text>
-              </g>
-            </svg>
-            <p class="verdict__msg" id="verdictMsg"></p>
-            <button type="button" class="btn" id="verdictCta">Desbloquear mi diagnóstico</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- FASE 5 · Captura final -->
+      <!-- FASE 4 · Captura final -->
       <section class="screen" id="screenFinal">
         <div class="final" id="final">
-          <p class="final__txt">Para enviar la estructura de su Pirámide Financiera a detalle y validar su sesión de cortesía, ingrese sus datos:</p>
+          <p class="final__txt">Para enviarle el plano completo de su estructura y reservar su sesión de cortesía, deje sus datos:</p>
           <form class="final__form" id="finalForm" novalidate>
-            <div class="fld"><input type="tel" id="fPhone" inputmode="tel" autocomplete="tel" placeholder="Teléfono" maxlength="20" /></div>
-            <div class="fld"><input type="email" id="fEmail" inputmode="email" autocomplete="email" placeholder="Correo electrónico" maxlength="120" /></div>
-            <button type="submit" class="btn" id="finalBtn">Desbloquear Diagnóstico</button>
+            <div class="fld"><input type="tel" id="fPhone" inputmode="tel" autocomplete="tel" placeholder="Teléfono" maxlength="20"/></div>
+            <div class="fld"><input type="email" id="fEmail" inputmode="email" autocomplete="email" placeholder="Correo electrónico" maxlength="120"/></div>
+            <button type="submit" class="btn" id="finalBtn">Desbloquear mi diagnóstico</button>
           </form>
           <p class="final__note">Conexión protegida · Sus datos no se comparten con terceros.</p>
         </div>
@@ -371,226 +233,149 @@
 
     </div>
 
-    <!-- ===== CAPA SUPERIOR (telón negro) ===== -->
+    <!-- Telón -->
     <div class="curtain" id="curtain">
       <button type="button" class="logo-block" id="logoBlock" aria-label="PROSPECTA — iniciar">
-        <span class="logo-row" id="logoRow">
-          <span class="bracket">[</span><span class="text">PROS</span><span class="center-p">P</span><span class="text">ECTA</span><span class="bracket">]</span>
-        </span>
+        <span class="logo-row" id="logoRow"><span class="bracket">[</span><span class="text">PROS</span><span class="center-p">P</span><span class="text">ECTA</span><span class="bracket">]</span></span>
         <span class="signature">by M.aceves y consultores</span>
       </button>
     </div>
-
   </div>
 
   <script>
-  (function () {
+  (function(){
     'use strict';
+    var S={name:'',choice:'',firm:[],weak:[],phone:'',email:''};
+    window.PROSPECTA={state:S};
 
-    var S = { name: '', choice: '', stress: '', phone: '', email: '' };
-    window.PROSPECTA = window.PROSPECTA || {};
-    window.PROSPECTA.state = S;
+    var stage=document.getElementById('stage'),curtain=document.getElementById('curtain'),
+        logoBlock=document.getElementById('logoBlock'),logoRow=document.getElementById('logoRow'),
+        progress=document.getElementById('progress'),progressBar=document.getElementById('progressBar');
 
-    var stage     = document.getElementById('stage');
-    var curtain   = document.getElementById('curtain');
-    var logoBlock = document.getElementById('logoBlock');
-    var logoRow   = document.getElementById('logoRow');
-    var progress  = document.getElementById('progress');
-    var progressBar = document.getElementById('progressBar');
+    var screens={name:document.getElementById('screenName'),choice:document.getElementById('screenChoice'),game:document.getElementById('screenGame'),final:document.getElementById('screenFinal')};
+    var PROG={name:25,choice:50,game:75,final:100};
+    function showScreen(id){Object.keys(screens).forEach(function(k){screens[k].classList.toggle('is-active',k===id);});if(PROG[id])progressBar.style.width=PROG[id]+'%';}
 
-    var screens = {
-      name:    document.getElementById('screenName'),
-      choice:  document.getElementById('screenChoice'),
-      stress:  document.getElementById('screenStress'),
-      verdict: document.getElementById('screenVerdict'),
-      final:   document.getElementById('screenFinal')
-    };
-    var PROG = { name: 20, choice: 40, stress: 60, verdict: 80, final: 100 };
-
-    function showScreen(id) {
-      Object.keys(screens).forEach(function (k) { screens[k].classList.toggle('is-active', k === id); });
-      if (PROG[id]) progressBar.style.width = PROG[id] + '%';
-    }
-
-    /* ============ FASE 1a · Telón ============ */
-    var CONTRACT = 560, LAUNCH_AT = 420, LIFT = 1150, introRunning = false;
-    logoBlock.addEventListener('click', function () {
-      if (introRunning) return;
-      introRunning = true; logoBlock.disabled = true;
+    /* Telón */
+    var CONTRACT=560,LAUNCH_AT=420,LIFT=1150,introRunning=false;
+    logoBlock.addEventListener('click',function(){
+      if(introRunning)return;introRunning=true;logoBlock.disabled=true;
       stage.classList.add('is-contracting');
-      window.setTimeout(function () {
-        var rect = logoRow.getBoundingClientRect();
-        logoRow.style.setProperty('--fall', Math.round(window.innerHeight - rect.bottom - 2) + 'px');
+      setTimeout(function(){
+        var r=logoRow.getBoundingClientRect();
+        logoRow.style.setProperty('--fall',Math.round(window.innerHeight-r.bottom-2)+'px');
         logoRow.classList.add('is-dropping');
-        window.setTimeout(function () {
-          curtain.classList.add('is-lifting');
-          progress.classList.add('is-visible');
-          window.setTimeout(startName, LIFT + 40);
-        }, LAUNCH_AT);
-      }, CONTRACT);
+        setTimeout(function(){curtain.classList.add('is-lifting');progress.classList.add('is-visible');setTimeout(startName,LIFT+40);},LAUNCH_AT);
+      },CONTRACT);
     });
 
-    /* ============ FASE 1b · Nombre ============ */
-    var qEl = document.getElementById('captureQuestion');
-    var field = document.getElementById('captureField');
-    var input = document.getElementById('captureInput');
-    var mirror = document.getElementById('captureMirror');
-    var hint = document.getElementById('captureHint');
-    var minLine = 220, busy = false;
-
-    function syncWidth() {
-      mirror.textContent = input.value || '';
-      var w = Math.max(minLine, Math.ceil(mirror.getBoundingClientRect().width) + 26);
-      input.style.width = Math.min(w, Math.floor(window.innerWidth * 0.9)) + 'px';
-    }
-    function startName() {
-      var m = parseFloat(getComputedStyle(input).minWidth); if (m) minLine = m;
-      showScreen('name'); syncWidth(); input.focus();
-    }
-    input.addEventListener('input', function () { syncWidth(); hint.classList.toggle('is-dim', input.value.trim().length > 0); });
-    input.addEventListener('keydown', function (e) {
-      if (e.key !== 'Enter' || busy || input.value.trim().length === 0) return;
-      e.preventDefault(); sweepName();
-    });
-
-    function makeBracketP() {
-      var s = document.createElement('span'); s.className = 'sweeper';
-      s.innerHTML = '<span class="s-br">[</span><span class="s-p">P</span><span class="s-br">]</span>';
-      return s;
-    }
-    function sweepName() {
-      busy = true;
-      S.name = input.value.trim();
-      var rect = input.getBoundingClientRect(); input.style.width = rect.width + 'px';
-      var flying = document.createElement('span'); flying.className = 'capture__flying'; flying.textContent = S.name; field.appendChild(flying);
-      input.style.color = 'transparent'; input.setAttribute('readonly', 'readonly'); hint.classList.add('is-dim');
-      var sw = makeBracketP(); field.appendChild(sw); void sw.offsetWidth; sw.classList.add('is-sweeping');
-      requestAnimationFrame(function () { requestAnimationFrame(function () { flying.classList.add('is-absorbed'); }); });
-      window.setTimeout(function () {
-        if (flying.parentNode) flying.remove(); if (sw.parentNode) sw.remove();
-        input.value = ''; input.style.color = ''; input.removeAttribute('readonly'); busy = false;
-        buildChoice();
-      }, 1320);
+    /* Fase 1 · Nombre */
+    var qEl=document.getElementById('captureQuestion'),field=document.getElementById('captureField'),
+        input=document.getElementById('captureInput'),mirror=document.getElementById('captureMirror'),
+        hint=document.getElementById('captureHint'),minLine=220,busy=false;
+    function syncWidth(){mirror.textContent=input.value||'';var w=Math.max(minLine,Math.ceil(mirror.getBoundingClientRect().width)+26);input.style.width=Math.min(w,Math.floor(window.innerWidth*.9))+'px';}
+    function startName(){var m=parseFloat(getComputedStyle(input).minWidth);if(m)minLine=m;showScreen('name');syncWidth();input.focus();}
+    input.addEventListener('input',function(){syncWidth();hint.classList.toggle('is-dim',input.value.trim().length>0);});
+    input.addEventListener('keydown',function(e){if(e.key!=='Enter'||busy||input.value.trim().length===0)return;e.preventDefault();sweepName();});
+    function makeBracketP(){var s=document.createElement('span');s.className='sweeper';s.innerHTML='<span class="s-br">[</span><span class="s-p">P</span><span class="s-br">]</span>';return s;}
+    function sweepName(){
+      busy=true;S.name=input.value.trim();
+      var r=input.getBoundingClientRect();input.style.width=r.width+'px';
+      var fly=document.createElement('span');fly.className='capture__flying';fly.textContent=S.name;field.appendChild(fly);
+      input.style.color='transparent';input.setAttribute('readonly','readonly');hint.classList.add('is-dim');
+      var sw=makeBracketP();field.appendChild(sw);void sw.offsetWidth;sw.classList.add('is-sweeping');
+      requestAnimationFrame(function(){requestAnimationFrame(function(){fly.classList.add('is-absorbed');});});
+      setTimeout(function(){if(fly.parentNode)fly.remove();if(sw.parentNode)sw.remove();input.value='';input.style.color='';input.removeAttribute('readonly');busy=false;buildChoice();},1320);
     }
 
-    /* ============ FASE 2 · La Gran Elección ============ */
-    var choicePrompt = document.getElementById('choicePrompt');
-    var choiceScreen = screens.choice;
-    var choiceHalves = choiceScreen.querySelectorAll('.choice-half');
-    var choiceLocked = false;
+    function firstName(){return S.name?S.name.split(/\s+/)[0]:'';}
 
-    function firstName() { return S.name ? S.name.split(/\s+/)[0] : ''; }
-    function buildChoice() {
-      choiceLocked = false;
-      choiceScreen.classList.remove('is-choosing');
-      Array.prototype.forEach.call(choiceHalves, function (h) { h.classList.remove('chosen'); });
-      choicePrompt.textContent = firstName() + ', en la arquitectura de su vida financiera, ¿hacia dónde le llama su instinto hoy?';
+    /* Fase 2 · Elección */
+    var choicePrompt=document.getElementById('choicePrompt'),choiceScreen=screens.choice,
+        choiceHalves=choiceScreen.querySelectorAll('.choice-half'),choiceLocked=false;
+    function buildChoice(){
+      choiceLocked=false;choiceScreen.classList.remove('is-choosing');
+      Array.prototype.forEach.call(choiceHalves,function(h){h.classList.remove('chosen');});
+      choicePrompt.textContent=firstName()+', en la arquitectura de su vida financiera, ¿hacia dónde le llama su instinto hoy?';
       showScreen('choice');
     }
-    Array.prototype.forEach.call(choiceHalves, function (h) {
-      h.addEventListener('click', function () {
-        if (choiceLocked) return; choiceLocked = true;
-        S.choice = h.getAttribute('data-choice');
-        choiceScreen.classList.add('is-choosing'); h.classList.add('chosen');
-        window.setTimeout(buildStress, 1000);
-      });
+    Array.prototype.forEach.call(choiceHalves,function(h){h.addEventListener('click',function(){if(choiceLocked)return;choiceLocked=true;S.choice=h.getAttribute('data-choice');choiceScreen.classList.add('is-choosing');h.classList.add('chosen');setTimeout(buildGame,1000);});});
+
+    /* Fase 3 · Prueba de Resistencia (juego) */
+    var pyramid=document.getElementById('pyramid'),
+        gamePrompt=document.getElementById('gamePrompt'),
+        gameTest=document.getElementById('gameTest'),
+        gameResult=document.getElementById('gameResult'),
+        gameCta=document.getElementById('gameCta'),
+        lvlEls=pyramid.querySelectorAll('.lvl'),
+        ORDER=['proteccion','salud','acumulacion','retiro'],
+        firmSet={},tested=false;
+
+    function buildGame(){
+      tested=false;firmSet={};
+      pyramid.classList.remove('tested','is-quaking');
+      Array.prototype.forEach.call(lvlEls,function(g){g.classList.remove('is-firm');g.setAttribute('aria-pressed','false');});
+      gameResult.textContent='';gameResult.classList.remove('show');
+      gameTest.hidden=false;gameCta.hidden=true;
+      gamePrompt.innerHTML=firstName()+', su patrimonio se sostiene en <b>4 niveles</b>. Toque los que hoy siente firmes… y póngalos a prueba.';
+      showScreen('game');
+    }
+
+    function toggleLevel(g){
+      if(tested)return;
+      var k=g.getAttribute('data-lvl');
+      firmSet[k]=!firmSet[k];
+      g.classList.toggle('is-firm',firmSet[k]);
+      g.setAttribute('aria-pressed',firmSet[k]?'true':'false');
+    }
+    Array.prototype.forEach.call(lvlEls,function(g){
+      g.addEventListener('click',function(){toggleLevel(g);});
+      g.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleLevel(g);}});
     });
 
-    /* ============ FASE 3 · Pregunta de estrés (dinámica) ============ */
-    var stressQ = document.getElementById('stressQ');
-    var stressOpts = document.getElementById('stressOpts');
-    var STRESS = {
-      refugio: {
-        q: 'Si un imprevisto de salud detuviera sus ingresos mañana, ¿por cuánto tiempo su refugio se mantendría a salvo?',
-        opts: ['Menos de 6 meses.', 'De 6 a 12 meses.', 'Está blindado de por vida.']
-      },
-      cumbre: {
-        q: 'Al llegar a su cumbre a los 65 años, ¿qué porcentaje de su nivel de vida actual tiene garantizado mes a mes?',
-        opts: ['Menos del 30%.', '50% promedio.', '100% garantizado.']
-      }
-    };
-    function buildStress() {
-      var data = STRESS[S.choice] || STRESS.refugio;
-      stressQ.textContent = data.q;
-      stressOpts.innerHTML = '';
-      var letters = ['A', 'B', 'C'];
-      data.opts.forEach(function (label, i) {
-        var b = document.createElement('button');
-        b.type = 'button'; b.className = 'opt';
-        b.innerHTML = '<span class="opt__k">' + letters[i] + '</span><span>' + label + '</span>';
-        b.addEventListener('click', function () {
-          S.stress = letters[i];
-          Array.prototype.forEach.call(stressOpts.children, function (c) { c.classList.remove('is-picked'); });
-          b.classList.add('is-picked');
-          window.setTimeout(runVerdict, 420);
-        });
-        stressOpts.appendChild(b);
-      });
-      showScreen('stress');
+    gameTest.addEventListener('click',function(){
+      if(tested)return;tested=true;
+      S.firm=ORDER.filter(function(k){return firmSet[k];});
+      S.weak=ORDER.filter(function(k){return !firmSet[k];});
+      Array.prototype.forEach.call(lvlEls,function(g){g.style.cursor='default';});
+
+      pyramid.classList.add('is-quaking');
+      setTimeout(function(){pyramid.classList.add('tested');},150);
+      setTimeout(function(){pyramid.classList.remove('is-quaking');},640);
+      setTimeout(function(){
+        gameResult.innerHTML=resultText(S.weak);
+        gameResult.classList.add('show');
+        gameTest.hidden=true;gameCta.hidden=false;
+        console.info('[PROSPECTA] Firmes:',S.firm,'· Débiles:',S.weak);
+      },950);
+    });
+
+    function resultText(weak){
+      if(weak.length===0) return 'Los 4 niveles resistieron. Muy pocos tienen su estructura así de firme — <b>vale la pena confirmarlo con números</b>.';
+      if(weak.indexOf('proteccion')>=0) return 'La <b>base cedió</b>… y con ella, todo lo que había construido encima.';
+      if(weak.indexOf('salud')>=0) return 'Un evento de <b>salud</b> abrió la grieta: lo que tanto le costó juntar quedó expuesto.';
+      if(weak.indexOf('acumulacion')>=0) return 'Sin <b>acumulación</b> firme, su retiro se quedó sin sostén.';
+      return 'Su cima quedó al aire: <b>el retiro no se sostiene solo</b>.';
     }
 
-    /* ============ FASE 4 · Veredicto de la Pirámide ============ */
-    var verdict = document.getElementById('verdict');
-    var pyramid = document.getElementById('pyramid');
-    var verdictMsg = document.getElementById('verdictMsg');
-    var VERDICT = {
-      refugio: { weak: 'retiro',     msg: 'Su enfoque en las bases es sólido, pero la proyección hacia su <b>retiro está estancada</b>. Requiere optimización.' },
-      cumbre:  { weak: 'proteccion', msg: 'Visión de crecimiento detectada, pero las <b>bases de protección patrimonial presentan fisuras</b>. Riesgo de colapso ante imprevistos.' }
-    };
-    function runVerdict() {
-      verdict.classList.remove('show-reveal');
-      pyramid.classList.remove('is-drawn');
-      showScreen('verdict');
+    gameCta.addEventListener('click',function(){showScreen('final');setTimeout(function(){document.getElementById('fPhone').focus();},300);});
 
-      window.setTimeout(function () {
-        var v = VERDICT[S.choice] || VERDICT.refugio;
-        // Estado de cada nivel + resaltar el débil
-        var order = ['proteccion', 'salud', 'acumulacion', 'retiro'];
-        Array.prototype.forEach.call(pyramid.querySelectorAll('.pyr-level'), function (g) {
-          var lvl = g.getAttribute('data-lvl');
-          var idx = order.indexOf(lvl);
-          g.classList.toggle('is-weak', lvl === v.weak);
-          g.classList.toggle('is-strong', lvl !== v.weak);
-          // dibujo escalonado de base → punta
-          g.style.animationDelay = (idx * 0.22) + 's';
-        });
-        verdictMsg.innerHTML = v.msg;
-        verdict.classList.add('show-reveal');
-        pyramid.classList.add('is-drawn');
-      }, 2000); // "Procesando…" 2s
-    }
-    document.getElementById('verdictCta').addEventListener('click', function () { showScreen('final'); setTimeout(function(){ document.getElementById('fPhone').focus(); }, 300); });
-
-    /* ============ FASE 5 · Captura final ============ */
-    var finalForm = document.getElementById('finalForm');
-    var fPhone = document.getElementById('fPhone');
-    var fEmail = document.getElementById('fEmail');
-    var finalDiv = document.getElementById('final');
-
-    function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
-    function validPhone(v) { return (v.replace(/\D/g, '').length >= 10); }
-
-    finalForm.addEventListener('submit', function (e) {
+    /* Fase 4 · Captura final */
+    var finalForm=document.getElementById('finalForm'),fPhone=document.getElementById('fPhone'),
+        fEmail=document.getElementById('fEmail'),finalDiv=document.getElementById('final');
+    function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}
+    function validPhone(v){return v.replace(/\D/g,'').length>=10;}
+    finalForm.addEventListener('submit',function(e){
       e.preventDefault();
-      var okP = validPhone(fPhone.value), okE = validEmail(fEmail.value.trim());
-      fPhone.classList.toggle('invalid', !okP);
-      fEmail.classList.toggle('invalid', !okE);
-      if (!okP || !okE) { (!okP ? fPhone : fEmail).focus(); return; }
-
-      S.phone = fPhone.value.trim(); S.email = fEmail.value.trim();
-      console.info('[PROSPECTA] Perfil completo:', S);
-
-      finalDiv.innerHTML =
-        '<div class="final__ok">' +
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9"/></svg>' +
-        '<h2 class="final__txt" style="font-weight:500;color:#fff;">Diagnóstico desbloqueado, ' + (firstName() || 'gracias') + '.</h2>' +
-        '<p class="final__txt">Su Pirámide Financiera y su sesión de cortesía han sido reservadas. Su asesor validará los detalles en breve.</p>' +
-        '</div>';
+      var okP=validPhone(fPhone.value),okE=validEmail(fEmail.value.trim());
+      fPhone.classList.toggle('invalid',!okP);fEmail.classList.toggle('invalid',!okE);
+      if(!okP||!okE){(!okP?fPhone:fEmail).focus();return;}
+      S.phone=fPhone.value.trim();S.email=fEmail.value.trim();
+      console.info('[PROSPECTA] Perfil completo:',S);
+      finalDiv.innerHTML='<div class="final__ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9"/></svg><h2 class="final__txt" style="font-weight:500;color:#fff;">Listo, '+(firstName()||'gracias')+'.</h2><p class="final__txt">Su plano y su sesión de cortesía quedaron reservados. Su asesor validará los detalles en breve.</p></div>';
     });
 
-    /* Reajuste del ancho de la línea al redimensionar */
-    var rt;
-    window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (!busy) syncWidth(); }, 120); });
+    var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){if(!busy)syncWidth();},120);});
   })();
   </script>
 

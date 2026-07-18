@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>PROSPECTA | Interfaz del Asesor</title>
-<meta name="description" content="Interfaz del Asesor — Estrategia de Bienestar y Optimización de Capital." />
+<meta name="description" content="PROSPECTA — Interfaz del Asesor." />
 <meta name="theme-color" content="#000000" />
 
 <!-- Tipografías modernas sans-serif (wordmark: Montserrat · texto: Inter) -->
@@ -24,10 +24,10 @@
     --steel-deep:   #6c7681; /* gris acero profundo */
     --carbon:       #26272b; /* gris carbón */
     --carbon-dark:  #17181b; /* gris carbón muy oscuro */
-    --carbon-panel: #1c1d21; /* fondo del panel del asesor */
+    --carbon-panel: #1c1d21; /* fondo revelado tras la cortina */
 
     /* Ritmo de la coreografía (JS lee estos tiempos vía CSS variables) */
-    --absorb-time:  850ms;
+    --absorb-time:  800ms;
     --curtain-time: 1150ms;
   }
 
@@ -47,111 +47,19 @@
   }
 
   /* ============================================================ */
-  /* CAPA DE FONDO — PANEL DEL ASESOR (queda detrás, se revela)     */
-  /* Fondo gris carbón muy oscuro y elegante.                      */
+  /* CAPA DE FONDO — se revela al abrir la cortina.                */
+  /* Gris carbón muy oscuro y elegante (vacío por ahora).          */
   /* ============================================================ */
-  .advisor {
+  .backdrop {
     position: fixed;
     inset: 0;
     z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: clamp(1.5rem, 5vw, 4rem);
     background:
-      radial-gradient(120% 90% at 50% 22%, #2c2d32 0%, var(--carbon-panel) 45%, var(--carbon-dark) 100%);
+      radial-gradient(120% 90% at 50% 30%, #2c2d32 0%, var(--carbon-panel) 45%, var(--carbon-dark) 100%);
   }
-
-  .advisor__inner {
-    max-width: 60rem;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: clamp(1rem, 2.4vh, 1.75rem);
-    /* Entrada suave: se anima cuando la cortina se abre */
-    opacity: 0;
-    transform: translateY(22px);
-    transition: opacity 900ms ease 350ms, transform 900ms cubic-bezier(0.22, 1, 0.36, 1) 350ms;
-  }
-  .stage.is-open .advisor__inner { opacity: 1; transform: translateY(0); }
-
-  .advisor__eyebrow {
-    font-size: clamp(0.6rem, 1.4vw, 0.72rem);
-    font-weight: 600;
-    letter-spacing: 0.42em;
-    text-transform: uppercase;
-    color: var(--steel);
-    padding-left: 0.42em; /* compensa el letter-spacing final */
-  }
-
-  .advisor__title {
-    font-family: 'Montserrat', 'Inter', sans-serif;
-    font-weight: 800;
-    line-height: 1.08;
-    letter-spacing: -0.015em;
-    font-size: clamp(1.7rem, 5.2vw, 3.5rem);
-    color: var(--white);
-    max-width: 20ch;
-    text-wrap: balance;
-  }
-
-  .advisor__subtitle {
-    font-size: clamp(0.95rem, 2.2vw, 1.2rem);
-    font-weight: 300;
-    line-height: 1.6;
-    color: var(--steel);
-    max-width: 46ch;
-  }
-
-  /* Botón central grande "Iniciar Diagnóstico" */
-  .advisor__cta {
-    margin-top: clamp(0.75rem, 2vh, 1.5rem);
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.85rem;
-    font-family: 'Inter', sans-serif;
-    font-size: clamp(1rem, 2.4vw, 1.2rem);
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    color: var(--white);
-    padding: clamp(0.9rem, 2vh, 1.15rem) clamp(2rem, 5vw, 3rem);
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: linear-gradient(145deg, #3a3d43 0%, var(--carbon) 55%, #202226 100%);
-    box-shadow:
-      0 14px 34px -12px rgba(0, 0, 0, 0.85),
-      inset 0 1px 0 rgba(255, 255, 255, 0.10);
-    cursor: pointer;
-    transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
-                box-shadow 300ms ease,
-                border-color 300ms ease,
-                background 300ms ease;
-  }
-  .advisor__cta:hover {
-    transform: translateY(-3px);
-    border-color: rgba(255, 255, 255, 0.35);
-    background: linear-gradient(145deg, #474b52 0%, #303237 55%, #26282c 100%);
-    box-shadow:
-      0 22px 46px -14px rgba(0, 0, 0, 0.9),
-      0 0 26px rgba(154, 164, 175, 0.28),   /* halo gris acero (nunca dorado) */
-      inset 0 1px 0 rgba(255, 255, 255, 0.16);
-  }
-  .advisor__cta:active { transform: translateY(-1px); }
-  .advisor__cta:focus-visible { outline: 2px solid var(--steel); outline-offset: 4px; }
-
-  .advisor__cta svg {
-    width: 1.15em;
-    height: 1.15em;
-    transition: transform 300ms ease;
-  }
-  .advisor__cta:hover svg { transform: translateX(5px); }
 
   /* ============================================================ */
-  /* CORTINA — dos mitades negras que cubren el panel del asesor    */
+  /* CORTINA — dos mitades negras que cubren el fondo.             */
   /* Al abrir, se separan hacia izquierda y derecha.               */
   /* ============================================================ */
   .curtain { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
@@ -181,11 +89,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 700ms ease;
   }
-  .stage.is-open .logo-layer { opacity: 0; pointer-events: none; }
+  .stage.is-open .logo-layer { pointer-events: none; }
 
-  /* Bloque de marca: recuadro + palabra, alineados en fila */
+  /* Bloque de marca: recuadro + palabra/firma, alineados en fila */
   .brand {
     display: flex;
     align-items: center;
@@ -194,8 +101,13 @@
     background: none;
     border: 0;
     cursor: pointer;
+    /* La "P" viaja hacia la izquierda JUNTO CON la cortina */
+    transition: transform var(--curtain-time) cubic-bezier(0.76, 0, 0.24, 1);
   }
   .brand:focus-visible { outline: 2px solid var(--steel); outline-offset: 14px; border-radius: 8px; }
+
+  /* Al abrir: el recuadro de la P se desliza fuera con la cortina */
+  .stage.is-open .brand { transform: translateX(-120vw); }
 
   /* --- Recuadro blanco con volumen 3D + brillo exterior --- */
   .brand__box {
@@ -245,10 +157,15 @@
     user-select: none;
   }
 
-  /* --- Palabra "ROSPECTA" en blanco, moderna --- */
+  /* --- Columna de texto: "ROSPECTA" + firma pegada debajo --- */
+  .brand__text {
+    position: relative;
+    display: inline-block;
+  }
+
+  /* "ROSPECTA" en blanco, moderna, alineada con la P */
   .brand__word {
     display: inline-flex;
-    overflow: hidden; /* al ser absorbidas, las letras desaparecen dentro */
     font-family: 'Montserrat', 'Inter', sans-serif;
     font-weight: 700;
     font-size: clamp(46px, 8vw, 82px);
@@ -257,75 +174,70 @@
     color: var(--white);
     white-space: nowrap;
   }
-  .brand__word span {
+
+  /* Firma pegada justo debajo de ROSPECTA (alineada a su borde izquierdo) */
+  .brand__signature {
+    position: absolute;
+    top: calc(100% + clamp(4px, 1.2vh, 12px));
+    left: 0;
+    display: inline-flex;
+    white-space: nowrap;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    font-size: clamp(0.62rem, 1.7vw, 0.95rem);
+    letter-spacing: 0.16em;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  .brand__signature b { font-weight: 600; color: rgba(255, 255, 255, 0.72); }
+
+  /* Cada letra (de ROSPECTA y de la firma) se anima por separado */
+  .brand__word span,
+  .brand__signature span {
     display: inline-block;
     transform-origin: left center;
     transition: transform var(--absorb-time) cubic-bezier(0.6, 0, 0.35, 1),
                 opacity calc(var(--absorb-time) * 0.7) ease;
   }
 
-  /* Firma inferior anclada: "by MACEVES y Consultores" */
-  .signature {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: max(1.4rem, env(safe-area-inset-bottom, 0));
-    z-index: 21;
-    text-align: center;
-    font-size: clamp(0.68rem, 1.7vw, 0.82rem);
-    font-weight: 300;
-    letter-spacing: 0.26em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.42);
-    transition: opacity 600ms ease;
-  }
-  .signature strong { font-weight: 500; color: rgba(255, 255, 255, 0.6); letter-spacing: 0.22em; }
-  .stage.is-open .signature { opacity: 0; }
-
   /* ============================================================ */
-  /* ESTADO "ABSORBIENDO" — las letras son tragadas por el recuadro */
+  /* ESTADO "ABSORBIENDO" — ROSPECTA y la firma son tragadas por P  */
   /* ============================================================ */
-  .stage.is-absorbing .brand__word span {
+  .stage.is-absorbing .brand__word span,
+  .stage.is-absorbing .brand__signature span {
     transform: translateX(var(--pull, -120px)) scaleX(0.05);
     opacity: 0;
   }
   /* El recuadro "traga": pequeño latido de succión */
-  .stage.is-absorbing .brand__box {
-    transform: scale(1.06);
-  }
+  .stage.is-absorbing .brand__box { transform: scale(1.06); }
 
   /* ============================================================ */
   /* RESPONSIVIDAD — orientación y tamaños                          */
   /* ============================================================ */
 
-  /* Móvil vertical muy estrecho: se reduce el wordmark para que    */
-  /* "PROSPECTA" completo quepa en una línea.                       */
+  /* Móvil vertical muy estrecho */
   @media (max-width: 380px) {
     .brand__word { font-size: 40px; }
     .brand__p    { font-size: 52px; }
     .brand__box  { width: 78px; height: 78px; }
+    .brand__signature { font-size: 0.58rem; letter-spacing: 0.12em; }
   }
 
-  /* Tablet / móvil en horizontal con poca altura: ajusta verticales */
+  /* Tablet / móvil en horizontal con poca altura */
   @media (orientation: landscape) and (max-height: 500px) {
     .brand__box  { width: clamp(70px, 14vh, 110px); height: clamp(70px, 14vh, 110px); }
     .brand__p    { font-size: clamp(46px, 9vh, 74px); }
     .brand__word { font-size: clamp(40px, 7.5vh, 66px); }
-    .advisor__title { font-size: clamp(1.5rem, 6vh, 2.6rem); }
   }
 
   /* ============================================================ */
   /* ACCESIBILIDAD — respeta "reducir movimiento"                   */
   /* ============================================================ */
   @media (prefers-reduced-motion: reduce) {
+    .brand,
     .brand__box,
     .brand__word span,
-    .curtain__half,
-    .advisor__inner,
-    .logo-layer,
-    .signature { transition-duration: 0.001ms !important; }
-    .advisor__cta { transition: none; }
-    .advisor__cta:hover { transform: none; }
+    .brand__signature span,
+    .curtain__half { transition-duration: 0.001ms !important; }
   }
 </style>
 </head>
@@ -336,50 +248,32 @@
        (sin clase) → Fase 1 · .is-absorbing → Fase 2 · .is-open → Fase 3 -->
   <div class="stage" id="stage">
 
-    <!-- ===================================================== -->
-    <!-- CAPA FONDO: PANEL DEL ASESOR (revelado tras la cortina) -->
-    <!-- ===================================================== -->
-    <main class="advisor" aria-hidden="true">
-      <div class="advisor__inner">
-        <p class="advisor__eyebrow">Interfaz del Asesor</p>
-        <h1 class="advisor__title">Estrategia de Bienestar y Optimización de Capital</h1>
-        <p class="advisor__subtitle">Diagnóstico de estabilidad financiera para negocios y personas.</p>
+    <!-- Fondo elegante revelado al abrir la cortina (sin contenido por ahora) -->
+    <div class="backdrop" aria-hidden="true"></div>
 
-        <button type="button" class="advisor__cta" id="startDiagnosis">
-          Iniciar Diagnóstico
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-        </button>
-      </div>
-    </main>
-
-    <!-- ===================================================== -->
-    <!-- CORTINA: dos mitades negras que se abren a los lados   -->
-    <!-- ===================================================== -->
+    <!-- CORTINA: dos mitades negras que se abren a los lados -->
     <div class="curtain" aria-hidden="true">
       <div class="curtain__half curtain__half--left"></div>
       <div class="curtain__half curtain__half--right"></div>
     </div>
 
-    <!-- ===================================================== -->
-    <!-- CAPA LOGO: recuadro 3D "P" + palabra "ROSPECTA"        -->
-    <!-- ===================================================== -->
+    <!-- CAPA LOGO: recuadro 3D "P" + palabra "ROSPECTA" + firma -->
     <div class="logo-layer">
-      <button type="button" class="brand" id="brand" aria-label="PROSPECTA — iniciar">
+      <button type="button" class="brand" id="brand" aria-label="PROSPECTA">
         <!-- Recuadro blanco 3D con la letra P -->
         <span class="brand__box">
           <span class="brand__p" aria-hidden="true">P</span>
         </span>
-        <!-- Resto de la palabra; cada letra se anima por separado -->
-        <span class="brand__word" id="word" aria-hidden="true">
-          <span>R</span><span>O</span><span>S</span><span>P</span><span>E</span><span>C</span><span>T</span><span>A</span>
+
+        <!-- Columna: ROSPECTA arriba, firma pegada debajo -->
+        <span class="brand__text">
+          <span class="brand__word" id="word" aria-hidden="true">
+            <span>R</span><span>O</span><span>S</span><span>P</span><span>E</span><span>C</span><span>T</span><span>A</span>
+          </span>
+          <span class="brand__signature" id="signature" aria-hidden="true" data-text="by M.ACEVES y Consultores"></span>
         </span>
       </button>
     </div>
-
-    <!-- Firma institucional anclada al fondo -->
-    <p class="signature">by <strong>MACEVES</strong> y Consultores</p>
 
   </div>
 
@@ -387,16 +281,17 @@
   (function () {
     'use strict';
 
-    var stage  = document.getElementById('stage');
-    var brand  = document.getElementById('brand');
-    var word   = document.getElementById('word');
-    var cta    = document.getElementById('startDiagnosis');
+    var stage     = document.getElementById('stage');
+    var brand     = document.getElementById('brand');
+    var word      = document.getElementById('word');
+    var signature = document.getElementById('signature');
 
     // Lee los tiempos definidos en CSS para mantener JS y CSS sincronizados.
     var css = getComputedStyle(document.documentElement);
-    var ABSORB  = parseTime(css.getPropertyValue('--absorb-time'), 850);
+    var ABSORB  = parseTime(css.getPropertyValue('--absorb-time'), 800);
     var CURTAIN = parseTime(css.getPropertyValue('--curtain-time'), 1150);
     var PAUSE   = 1000; // "un segundo después de la absorción"
+    var STEP    = 28;   // retardo escalonado entre letras (ms)
 
     function parseTime(v, fallback) {
       v = (v || '').trim();
@@ -406,55 +301,59 @@
       return fallback;
     }
 
+    // Construye la firma "by M.ACEVES y Consultores" letra por letra.
+    // Se resalta la marca (MACEVES) en negrita para lectura de marca.
+    (function buildSignature() {
+      var text = signature.getAttribute('data-text') || 'by M.ACEVES y Consultores';
+      var frag = document.createDocumentFragment();
+      Array.prototype.forEach.call(text, function (ch) {
+        var span = document.createElement('span');
+        span.textContent = (ch === ' ') ? '\u00A0' : ch;
+        frag.appendChild(span);
+      });
+      signature.appendChild(frag);
+    })();
+
     var running = false;
+
+    // Prepara el desplazamiento de cada letra de una línea hacia su borde
+    // izquierdo (el punto por donde entra al recuadro de la P).
+    function primeLine(container, startIndex) {
+      var containerLeft = container.getBoundingClientRect().left;
+      var spans = container.children;
+      for (var i = 0; i < spans.length; i++) {
+        var el = spans[i];
+        var pull = -(el.getBoundingClientRect().left - containerLeft) - el.offsetWidth;
+        el.style.setProperty('--pull', pull + 'px');
+        el.style.transitionDelay = ((startIndex + i) * STEP) + 'ms';
+      }
+      return spans.length;
+    }
 
     function runSequence() {
       if (running) return;
       running = true;
       brand.disabled = true;
 
-      // --- FASE 2: las letras de ROSPECTA se deslizan a la izquierda y
-      //     son "absorbidas" por el recuadro (escalonado, izquierda→derecha). ---
-      var letters = word.querySelectorAll('span');
-      var wordRect = word.getBoundingClientRect();
-
-      Array.prototype.forEach.call(letters, function (el, i) {
-        // Cada letra viaja hacia el recuadro (borde izquierdo de la palabra).
-        var pull = -(el.getBoundingClientRect().left - wordRect.left) - el.offsetWidth;
-        el.style.setProperty('--pull', pull + 'px');
-        // Escalonado: la letra más cercana al recuadro desaparece primero.
-        el.style.transitionDelay = (i * 55) + 'ms';
-      });
+      // --- FASE 2: ROSPECTA y la firma se deslizan a la izquierda y son
+      //     "absorbidas" por el recuadro (escalonado, izquierda→derecha). ---
+      var count = 0;
+      count += primeLine(word, count);
+      count += primeLine(signature, count);
 
       stage.classList.add('is-absorbing');
 
       // Duración real de la absorción (incluye el retardo de la última letra).
-      var absorbTotal = ABSORB + (letters.length * 55);
+      var absorbTotal = ABSORB + (count * STEP);
 
-      // --- FASE 3: un segundo después de la absorción, la pantalla negra
-      //     se abre como cortina revelando el Panel del Asesor. ---
+      // --- FASE 3: un segundo después, la pantalla negra se abre como
+      //     cortina y el recuadro de la P se va JUNTO con ella. ---
       window.setTimeout(function () {
         stage.classList.add('is-open');
-        // Al terminar la cortina, el panel queda accesible.
-        window.setTimeout(function () {
-          var advisor = document.querySelector('.advisor');
-          if (advisor) advisor.setAttribute('aria-hidden', 'false');
-          // Foco al CTA para accesibilidad de teclado.
-          if (cta) cta.focus({ preventScroll: true });
-        }, CURTAIN);
       }, absorbTotal + PAUSE);
     }
 
-    // Activación por clic o teclado sobre el recuadro/marca.
     brand.addEventListener('click', runSequence);
-
-    // Acción del CTA final (punto de enganche para el siguiente paso del flujo).
-    if (cta) {
-      cta.addEventListener('click', function () {
-        // Aquí se conectará el diagnóstico del asesor en una fase posterior.
-        console.info('[PROSPECTA] Iniciar Diagnóstico — listo para conectar el flujo.');
-      });
-    }
   })();
   </script>
 

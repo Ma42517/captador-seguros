@@ -1,1750 +1,460 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth">
+<html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Pre-Registro Inteligente | Diseña tu Plan a la Medida</title>
-<meta name="description" content="Formulario de pre-registro exprés para diseñar un plan de seguros personalizado en menos de 2 minutos." />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>PROSPECTA | Interfaz del Asesor</title>
+<meta name="description" content="Interfaz del Asesor — Estrategia de Bienestar y Optimización de Capital." />
+<meta name="theme-color" content="#000000" />
 
-<!-- Google Fonts: Inter -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-<!-- Tailwind CSS (CDN / JIT) -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        fontFamily: {
-          sans: ['Inter', 'system-ui', 'sans-serif'],
-        },
-        colors: {
-          navy: {
-            50:  '#eef2f7',
-            100: '#d7e0ec',
-            200: '#b3c4dc',
-            300: '#8ca4c2',
-            400: '#5f7fa3',
-            500: '#3d5f85',
-            600: '#2c4a6b',
-            700: '#1f3653',
-            800: '#152540',
-            900: '#0c1729',
-          },
-          gold: {
-            50:  '#fdf8ee',
-            100: '#faeecb',
-            300: '#f0cf85',
-            400: '#e8b859',
-            500: '#dca23a',
-            600: '#c1862a',
-            700: '#9c6a21',
-          },
-        },
-        boxShadow: {
-          premium: '0 20px 45px -10px rgba(12, 23, 41, 0.25)',
-        },
-      },
-    },
-  };
-</script>
+<!-- Tipografías modernas sans-serif (wordmark: Montserrat · texto: Inter) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet" />
 
 <style>
-  /* Pequeños detalles que Tailwind puro no cubre limpiamente */
-  body { font-family: 'Inter', system-ui, sans-serif; overflow-x: hidden; }
-
-  .field-input {
-    transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
-  }
-
-  .field-input:focus {
-    outline: none;
-  }
-
-  .field-error {
-    border-color: #dc2626 !important;
-  }
-
-  @keyframes fade-in-up {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .animate-in { animation: fade-in-up .45s ease both; }
-
-  @keyframes pop-check {
-    0%   { transform: scale(0); opacity: 0; }
-    60%  { transform: scale(1.15); opacity: 1; }
-    100% { transform: scale(1); }
-  }
-  .animate-pop { animation: pop-check .5s cubic-bezier(.34,1.56,.64,1) both; }
-
-  /* Barra de progreso suave */
-  #progressBar { transition: width .35s ease; }
-
   /* ============================================================ */
-  /* CAPA 2 — transición de opacidad para revelar el formulario     */
+  /* PALETA (solo negro, blanco, gris acero y gris carbón)         */
+  /* Prohibido el dorado.                                          */
   /* ============================================================ */
-  .funnel-overlay {
-    transition: opacity .6s ease;
+  :root {
+    --black:        #000000;
+    --white:        #ffffff;
+    --steel:        #9aa4af; /* gris acero */
+    --steel-deep:   #6c7681; /* gris acero profundo */
+    --carbon:       #26272b; /* gris carbón */
+    --carbon-dark:  #17181b; /* gris carbón muy oscuro */
+    --carbon-panel: #1c1d21; /* fondo del panel del asesor */
+
+    /* Ritmo de la coreografía (JS lee estos tiempos vía CSS variables) */
+    --absorb-time:  850ms;
+    --curtain-time: 1150ms;
   }
 
-  /* ============================================================ */
-  /* CAPA 1 — welcomeOverlay: concepto "Alianza que abre el       */
-  /* diagnóstico". Dos puertas de marca (50vw × 100vh cada una)    */
-  /* con sus logotipos reales, y un único botón circular central   */
-  /* que, al hacer clic, abre las puertas hacia los lados y revela  */
-  /* la Capa 2. Toda la coreografía de salida se dispara con una    */
-  /* sola clase de estado: ".is-opening".                          */
-  /* ============================================================ */
-  #institutionalOverlay {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: var(--black);
+    color: var(--white);
+    min-height: 100vh;
+    min-height: 100dvh;
     overflow: hidden;
-    background: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
-  /* --- Las dos puertas de marca --- */
-  .welcome-door {
-    position: absolute;
-    top: 0;
-    width: 50vw;
-    height: 100vh;
-    height: 100dvh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 900ms cubic-bezier(0.76, 0, 0.24, 1);
-    will-change: transform;
-  }
-  .welcome-door--left  { left: 0;  background: #ffffff; }
-  .welcome-door--right { right: 0; background: #0070c0; }
-
-  /* Logos: escala individual según la proporción real de cada     */
-  /* archivo (mcs 1:1 · smnyl 1.28:1) buscando equilibrio visual.  */
-  .welcome-logo { object-fit: contain; max-height: 60vh; }
-  .welcome-logo--left  { width: clamp(150px, 25vw, 320px); }
-  .welcome-logo--right { width: clamp(175px, 30vw, 380px); }
-
-  /* Anticipación sutil de "puertas" al pasar el cursor por el botón */
-  #institutionalOverlay:not(.is-opening):has(.welcome-start:hover) .welcome-door--left  { transform: translateX(-6px); }
-  #institutionalOverlay:not(.is-opening):has(.welcome-start:hover) .welcome-door--right { transform: translateX(6px); }
-
-  /* --- Firma institucional superior --- */
-  .welcome-signature {
-    position: absolute;
-    top: max(22px, 4vh);
-    left: 0;
-    right: 0;
-    z-index: 30;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    font-size: clamp(8px, 1.4vw, 12px);
-    font-weight: 700;
-    white-space: nowrap;
-    transition: opacity 400ms ease;
-    /* Entrada suave fade-in-down tras cargar la estructura principal */
-    animation: welcomeSignatureDown 600ms ease both;
-    animation-delay: 400ms;
-  }
-  /* Alineación asimétrica: "X" absolutamente centrada, textos hacia el eje */
-  .welcome-signature .sig-left  { flex: 1; text-align: right; padding-right: 26px; color: #0A3D62; }              /* azul corporativo sobre el lado blanco */
-  .welcome-signature .sig-right { flex: 1; text-align: left;  padding-left: 26px;  color: #000000 !important; }   /* negro sólido sobre el lado azul */
-  .welcome-signature .sig-x {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #000000;
-    font-weight: 800;
-  }
-
-  @keyframes welcomeSignatureDown {
-    from { opacity: 0; transform: translateY(-12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Al abrir las puertas, la firma se desvanece con su transición (no con la animación de entrada) */
-  #institutionalOverlay.is-opening .welcome-signature { animation: none; }
-
-  /* --- Centro: botón grande "Iniciar" (estático; se ilumina en hover) --- */
-  .welcome-center {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 40;
+  /* ============================================================ */
+  /* CAPA DE FONDO — PANEL DEL ASESOR (queda detrás, se revela)     */
+  /* Fondo gris carbón muy oscuro y elegante.                      */
+  /* ============================================================ */
+  .advisor {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 18px;
-    transition: opacity 400ms ease;
+    justify-content: center;
+    text-align: center;
+    padding: clamp(1.5rem, 5vw, 4rem);
+    background:
+      radial-gradient(120% 90% at 50% 22%, #2c2d32 0%, var(--carbon-panel) 45%, var(--carbon-dark) 100%);
   }
 
-  /* Botón "Iniciar": grande y prominente. Estático por defecto (las letras
-     no se mueven); solo se ilumina al pasar el cursor. */
-  .welcome-start {
+  .advisor__inner {
+    max-width: 60rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(1rem, 2.4vh, 1.75rem);
+    /* Entrada suave: se anima cuando la cortina se abre */
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 900ms ease 350ms, transform 900ms cubic-bezier(0.22, 1, 0.36, 1) 350ms;
+  }
+  .stage.is-open .advisor__inner { opacity: 1; transform: translateY(0); }
+
+  .advisor__eyebrow {
+    font-size: clamp(0.6rem, 1.4vw, 0.72rem);
+    font-weight: 600;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--steel);
+    padding-left: 0.42em; /* compensa el letter-spacing final */
+  }
+
+  .advisor__title {
+    font-family: 'Montserrat', 'Inter', sans-serif;
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    font-size: clamp(1.7rem, 5.2vw, 3.5rem);
+    color: var(--white);
+    max-width: 20ch;
+    text-wrap: balance;
+  }
+
+  .advisor__subtitle {
+    font-size: clamp(0.95rem, 2.2vw, 1.2rem);
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--steel);
+    max-width: 46ch;
+  }
+
+  /* Botón central grande "Iniciar Diagnóstico" */
+  .advisor__cta {
+    margin-top: clamp(0.75rem, 2vh, 1.5rem);
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 14px;
-    padding: 22px 52px;
-    border-radius: 9999px;
-    background: #152540; /* navy-800, azul marino corporativo */
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.55);
-    box-shadow: 0 20px 46px -12px rgba(12, 23, 41, 0.6);
-    font-size: clamp(1.35rem, 3.2vw, 1.9rem);
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    transition: box-shadow 300ms ease, background-color 300ms ease, border-color 300ms ease, transform 300ms ease;
-  }
-
-  /* Estado por defecto: botón tranquilo, sin animación. Al pasar el cursor
-     se "ilumina": el fondo aclara, aparece un halo de luz dorado y un
-     destello interior suave. */
-  .welcome-start:hover {
-    background: #1f3653; /* navy más claro: se enciende */
-    border-color: rgba(232, 184, 89, 0.9); /* borde dorado iluminado */
+    gap: 0.85rem;
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(1rem, 2.4vw, 1.2rem);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--white);
+    padding: clamp(0.9rem, 2vh, 1.15rem) clamp(2rem, 5vw, 3rem);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: linear-gradient(145deg, #3a3d43 0%, var(--carbon) 55%, #202226 100%);
     box-shadow:
-      0 0 22px rgba(232, 184, 89, 0.55),          /* halo de luz dorado */
-      0 0 46px rgba(232, 184, 89, 0.30),
-      0 24px 54px -10px rgba(12, 23, 41, 0.75);   /* sombra base */
-    transform: translateY(-2px);
+      0 14px 34px -12px rgba(0, 0, 0, 0.85),
+      inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    cursor: pointer;
+    transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 300ms ease,
+                border-color 300ms ease,
+                background 300ms ease;
   }
-  .welcome-start:focus-visible { outline: 3px solid #dca23a; outline-offset: 5px; }
-
-  /* Destello interior que aparece únicamente al pasar el cursor (glow radial) */
-  .welcome-start::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: radial-gradient(120% 140% at 50% 0%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 60%);
-    opacity: 0;
-    transition: opacity 300ms ease;
-    pointer-events: none;
+  .advisor__cta:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.35);
+    background: linear-gradient(145deg, #474b52 0%, #303237 55%, #26282c 100%);
+    box-shadow:
+      0 22px 46px -14px rgba(0, 0, 0, 0.9),
+      0 0 26px rgba(154, 164, 175, 0.28),   /* halo gris acero (nunca dorado) */
+      inset 0 1px 0 rgba(255, 255, 255, 0.16);
   }
-  .welcome-start:hover::after { opacity: 1; }
+  .advisor__cta:active { transform: translateY(-1px); }
+  .advisor__cta:focus-visible { outline: 2px solid var(--steel); outline-offset: 4px; }
 
-  /* Texto del botón (sin animación de ola) */
-  .welcome-start__text { display: inline-flex; }
-
-  /* Icono de flecha: acompaña al texto y se desplaza en hover */
-  .welcome-start__arrow {
-    display: inline-block;
-    font-size: 1.05em;
-    line-height: 1;
+  .advisor__cta svg {
+    width: 1.15em;
+    height: 1.15em;
     transition: transform 300ms ease;
   }
-  .welcome-start:hover .welcome-start__arrow { transform: translateX(6px); }
+  .advisor__cta:hover svg { transform: translateX(5px); }
 
-  /* --- Fondo de "ondas de agua" (.bg-wave-decorator) en la parte inferior --- */
-  .bg-wave-decorator {
+  /* ============================================================ */
+  /* CORTINA — dos mitades negras que cubren el panel del asesor    */
+  /* Al abrir, se separan hacia izquierda y derecha.               */
+  /* ============================================================ */
+  .curtain { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+
+  .curtain__half {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 30vh;
-    min-height: 150px;
-    z-index: 20;
-    overflow: hidden;
-    pointer-events: none;
-    transition: opacity 500ms ease;
-  }
-  .bg-wave-decorator .wave-track {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 200%;
+    top: 0;
+    width: 50.2vw; /* leve solape para evitar línea central */
     height: 100%;
-    display: flex;
+    background: var(--black);
+    will-change: transform;
+    transition: transform var(--curtain-time) cubic-bezier(0.76, 0, 0.24, 1);
   }
-  .bg-wave-decorator .wave-track svg { width: 50%; height: 100%; display: block; }
-  .bg-wave-decorator .wave-track--back  { opacity: 0.55; animation: waveDrift 16s linear infinite; }
-  .bg-wave-decorator .wave-track--front { animation: waveDrift 10s linear infinite; }
-  @keyframes waveDrift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .curtain__half--left  { left: 0;  transform: translateX(0); }
+  .curtain__half--right { right: 0; transform: translateX(0); }
+
+  .stage.is-open .curtain__half--left  { transform: translateX(-100%); }
+  .stage.is-open .curtain__half--right { transform: translateX(100%); }
 
   /* ============================================================ */
-  /* PANTALLA 2 — DASHBOARD DE SELECCIÓN (layout horizontal)      */
-  /* Se revela al abrir las puertas del Welcome Overlay. Menú de   */
-  /* dos vías pensado para tablet.                                 */
+  /* CAPA DEL LOGO — sobre la cortina (centrada en pantalla)        */
   /* ============================================================ */
-  #selectionDashboard { z-index: 500; transition: opacity 0.4s ease; }
-  /* Salida: al elegir un flujo, el dashboard se desvanece y revela */
-  /* el resto de la página (el diagnóstico existente) por debajo.   */
-  #selectionDashboard.is-leaving { opacity: 0; pointer-events: none; }
-
-  .dashboard-options {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    gap: 30px;
-  }
-
-  .dash-btn {
-    font-weight: bold;
-    border: none;
-    border-radius: 12px;
-    padding: 30px 40px;
-    font-size: 1.15rem;
-    min-width: 220px;
-    cursor: pointer;
-    box-shadow: 0 14px 32px -12px rgba(12, 23, 41, 0.35);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-  }
-  .dash-btn:hover { transform: scale(1.05); box-shadow: 0 20px 42px -12px rgba(12, 23, 41, 0.45); }
-  .dash-btn:focus-visible { outline: 3px solid #dca23a; outline-offset: 4px; }
-
-  /* Botón 1 — Flujo Exprés: Azul Rey, texto blanco */
-  .dash-btn--express { background: #0047AB; color: #ffffff; }
-
-  /* Botón 2 — Flujo Profundo: Azul Cielo, texto azul oscuro */
-  .dash-btn--full { background: #87CEEB; color: #0A2540; }
-
-  /* En pantallas muy pequeñas (teléfono) apilamos los botones */
-  @media (max-width: 600px) {
-    .dashboard-options { flex-direction: column; gap: 18px; }
-    .dash-btn { width: 100%; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .dash-btn { transition: none; }
-    .dash-btn:hover { transform: none; }
-  }
-
-  /* --- Coreografía de apertura (clic): una sola clase de estado --- */
-  #institutionalOverlay.is-opening .welcome-door--left  { transform: translateX(-100%); }
-  #institutionalOverlay.is-opening .welcome-door--right { transform: translateX(100%); }
-  #institutionalOverlay.is-opening .welcome-signature { opacity: 0; }
-  #institutionalOverlay.is-opening .welcome-center { opacity: 0; pointer-events: none; }
-  #institutionalOverlay.is-opening .bg-wave-decorator { opacity: 0; }
-
-  @media (max-width: 480px) {
-    .welcome-signature { letter-spacing: 0.14em; font-size: 8px; }
-  }
-
-  /* Accesibilidad: sin pulso continuo y apertura simplificada */
-  @media (prefers-reduced-motion: reduce) {
-    .bg-wave-decorator .wave-track { animation: none; }
-    .welcome-signature { animation: none; }
-    #institutionalOverlay { transition: opacity 400ms ease; }
-    #institutionalOverlay.is-opening { opacity: 0; }
-    #institutionalOverlay.is-opening .welcome-door--left,
-    #institutionalOverlay.is-opening .welcome-door--right { transform: none; }
-    #institutionalOverlay.is-opening .welcome-center { animation: none; opacity: 0; }
-  }
-
-  /* ============================================================ */
-  /* DIAGNÓSTICO PATRIMONIAL INTERACTIVO (post Welcome Overlay)    */
-  /* Reemplaza la antigua Capa 2 (gancho) y Capa 3 (formulario).   */
-  /* Sin ninguna relación con el Welcome Overlay.                  */
-  /* ============================================================ */
-  .dx-stage { display: none; }
-  .dx-stage.is-active { display: block; }
-  @media (prefers-reduced-motion: no-preference) {
-    .dx-stage.is-active { animation: dxStageIn 380ms cubic-bezier(0.22, 1, 0.36, 1) both; }
-  }
-  @keyframes dxStageIn {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  #dxProgressBar { transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1); }
-  @media (prefers-reduced-motion: reduce) { #dxProgressBar { transition: none; } }
-
-  .dx-input {
-    width: 100%;
-    border: 1px solid #d7e0ec;
-    background: #ffffff;
-    border-radius: 14px;
-    padding: 15px 17px;
-    font-size: 1rem;
-    color: #0c1729;
-    transition: border-color .2s ease, box-shadow .2s ease;
-  }
-  .dx-input::placeholder { color: #8ca4c2; }
-  .dx-input:focus { outline: none; border-color: #3d5f85; box-shadow: 0 0 0 4px rgba(61, 95, 133, 0.12); }
-  .dx-input.dx-invalid { border-color: #dc2626; box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.10); }
-
-  /* Tarjetas seleccionables (prioridades y respuestas Sí / No) */
-  .dx-choice {
-    position: relative;
+  .logo-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
     display: flex;
     align-items: center;
-    gap: 14px;
-    width: 100%;
-    text-align: left;
-    border: 1.5px solid #d7e0ec;
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 15px 17px;
+    justify-content: center;
+    transition: opacity 700ms ease;
+  }
+  .stage.is-open .logo-layer { opacity: 0; pointer-events: none; }
+
+  /* Bloque de marca: recuadro + palabra, alineados en fila */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.15rem, 1vw, 0.5rem);
+    padding: 0;
+    background: none;
+    border: 0;
     cursor: pointer;
-    color: #0c1729;
-    transition: border-color .2s ease, background-color .2s ease, transform .15s ease, box-shadow .2s ease;
   }
-  .dx-choice:hover { border-color: #8ca4c2; }
-  @media (prefers-reduced-motion: no-preference) {
-    .dx-choice:active { transform: scale(0.99); }
-  }
-  .dx-choice.is-selected {
-    border-color: #152540;
-    background: #f4f7fb;
-    box-shadow: 0 10px 24px -14px rgba(12, 23, 41, 0.45);
-  }
-  .dx-choice.is-disabled { opacity: .45; cursor: not-allowed; }
-  .dx-choice__icon {
+  .brand:focus-visible { outline: 2px solid var(--steel); outline-offset: 14px; border-radius: 8px; }
+
+  /* --- Recuadro blanco con volumen 3D + brillo exterior --- */
+  .brand__box {
+    position: relative;
     flex-shrink: 0;
-    width: 42px; height: 42px;
-    border-radius: 12px;
-    background: #eef2f7;
-    color: #1f3653;
-    display: flex; align-items: center; justify-content: center;
-    transition: background-color .2s ease, color .2s ease;
+    width: clamp(88px, 15vw, 148px);
+    height: clamp(88px, 15vw, 148px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: clamp(14px, 2.2vw, 22px);
+    background: linear-gradient(150deg, #ffffff 0%, #f2f4f7 40%, #d5dae0 100%);
+    box-shadow:
+      /* Brillo (glow) exterior elegante */
+      0 0 34px rgba(255, 255, 255, 0.30),
+      0 0 78px rgba(255, 255, 255, 0.12),
+      /* Sombra volumétrica de caída */
+      18px 22px 45px rgba(0, 0, 0, 0.85),
+      /* Luz interior superior-izquierda */
+      inset 3px 3px 7px rgba(255, 255, 255, 0.95),
+      /* Sombra interior inferior-derecha (volumen) */
+      inset -6px -6px 14px rgba(108, 118, 129, 0.55);
+    transition: transform var(--absorb-time) cubic-bezier(0.34, 1.4, 0.5, 1),
+                box-shadow 400ms ease;
   }
-  .dx-choice.is-selected .dx-choice__icon { background: #152540; color: #ffffff; }
-  .dx-choice__check {
-    margin-left: auto;
-    flex-shrink: 0;
-    width: 22px; height: 22px;
-    border-radius: 9999px;
-    border: 1.5px solid #b3c4dc;
-    display: flex; align-items: center; justify-content: center;
-    background: transparent;
-    transition: background-color .2s ease, border-color .2s ease;
+  .brand:hover .brand__box {
+    box-shadow:
+      0 0 44px rgba(255, 255, 255, 0.42),
+      0 0 96px rgba(255, 255, 255, 0.18),
+      18px 22px 45px rgba(0, 0, 0, 0.85),
+      inset 3px 3px 7px rgba(255, 255, 255, 0.95),
+      inset -6px -6px 14px rgba(108, 118, 129, 0.55);
   }
-  .dx-choice.is-selected .dx-choice__check { background: #152540; border-color: #152540; }
-  .dx-choice__check svg { opacity: 0; color: #fff; transition: opacity .2s ease; }
-  .dx-choice.is-selected .dx-choice__check svg { opacity: 1; }
 
-  /* Pastillas de prioridad principal */
-  .dx-pill {
-    border: 1.5px solid #d7e0ec;
-    background: #fff;
-    color: #1f3653;
-    border-radius: 9999px;
-    padding: 9px 16px;
-    font-size: .85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all .2s ease;
+  /* Letra P: gris acero/carbón intenso, con biselado (sombra interior) */
+  .brand__p {
+    font-family: 'Montserrat', 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: clamp(58px, 10vw, 100px);
+    line-height: 1;
+    color: var(--steel-deep);
+    /* Efecto biselado / grabado: luz abajo-derecha + sombra arriba-izquierda */
+    text-shadow:
+      -1px -1px 1px rgba(0, 0, 0, 0.55),
+      1px 1px 1px rgba(255, 255, 255, 0.85),
+      0 2px 3px rgba(0, 0, 0, 0.25);
+    user-select: none;
   }
-  .dx-pill.is-selected { background: #152540; border-color: #152540; color: #fff; }
 
-  /* Sliders de la calculadora */
-  .dx-range { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 9999px; background: #d7e0ec; outline: none; }
-  .dx-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 26px; height: 26px; border-radius: 9999px; background: #152540; border: 3px solid #fff; box-shadow: 0 3px 10px rgba(12, 23, 41, 0.35); cursor: pointer; }
-  .dx-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 9999px; background: #152540; border: 3px solid #fff; box-shadow: 0 3px 10px rgba(12, 23, 41, 0.35); cursor: pointer; }
-  .dx-range:focus-visible { box-shadow: 0 0 0 4px rgba(61, 95, 133, 0.18); }
+  /* --- Palabra "ROSPECTA" en blanco, moderna --- */
+  .brand__word {
+    display: inline-flex;
+    overflow: hidden; /* al ser absorbidas, las letras desaparecen dentro */
+    font-family: 'Montserrat', 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: clamp(46px, 8vw, 82px);
+    line-height: 1;
+    letter-spacing: 0.01em;
+    color: var(--white);
+    white-space: nowrap;
+  }
+  .brand__word span {
+    display: inline-block;
+    transform-origin: left center;
+    transition: transform var(--absorb-time) cubic-bezier(0.6, 0, 0.35, 1),
+                opacity calc(var(--absorb-time) * 0.7) ease;
+  }
 
-  .dx-bar-fill { transition: width 450ms cubic-bezier(0.22, 1, 0.36, 1); }
-  @media (prefers-reduced-motion: reduce) { .dx-bar-fill { transition: none; } }
+  /* Firma inferior anclada: "by MACEVES y Consultores" */
+  .signature {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: max(1.4rem, env(safe-area-inset-bottom, 0));
+    z-index: 21;
+    text-align: center;
+    font-size: clamp(0.68rem, 1.7vw, 0.82rem);
+    font-weight: 300;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.42);
+    transition: opacity 600ms ease;
+  }
+  .signature strong { font-weight: 500; color: rgba(255, 255, 255, 0.6); letter-spacing: 0.22em; }
+  .stage.is-open .signature { opacity: 0; }
 
-  /* Paneles laterales contextuales (aparecen segun la etapa activa) */
-  @media (prefers-reduced-motion: no-preference) {
-    .dx-aside-panel:not(.hidden) { animation: dxStageIn 400ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+  /* ============================================================ */
+  /* ESTADO "ABSORBIENDO" — las letras son tragadas por el recuadro */
+  /* ============================================================ */
+  .stage.is-absorbing .brand__word span {
+    transform: translateX(var(--pull, -120px)) scaleX(0.05);
+    opacity: 0;
+  }
+  /* El recuadro "traga": pequeño latido de succión */
+  .stage.is-absorbing .brand__box {
+    transform: scale(1.06);
   }
 
   /* ============================================================ */
-  /* BOTÓN "OLA": letras con escala secuencial (animation-delay)  */
+  /* RESPONSIVIDAD — orientación y tamaños                          */
   /* ============================================================ */
-  .dx-wave span { display: inline-block; will-change: transform; }
-  @media (prefers-reduced-motion: no-preference) {
-    .dx-wave span { animation: dxWave 1.8s ease-in-out infinite; }
+
+  /* Móvil vertical muy estrecho: se reduce el wordmark para que    */
+  /* "PROSPECTA" completo quepa en una línea.                       */
+  @media (max-width: 380px) {
+    .brand__word { font-size: 40px; }
+    .brand__p    { font-size: 52px; }
+    .brand__box  { width: 78px; height: 78px; }
   }
-  @keyframes dxWave {
-    0%, 55%, 100% { transform: translateY(0) scale(1); }
-    25%           { transform: translateY(-2px) scale(1.18); }
+
+  /* Tablet / móvil en horizontal con poca altura: ajusta verticales */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .brand__box  { width: clamp(70px, 14vh, 110px); height: clamp(70px, 14vh, 110px); }
+    .brand__p    { font-size: clamp(46px, 9vh, 74px); }
+    .brand__word { font-size: clamp(40px, 7.5vh, 66px); }
+    .advisor__title { font-size: clamp(1.5rem, 6vh, 2.6rem); }
   }
 
   /* ============================================================ */
-  /* FONDOS LÍQUIDOS decorativos en las esquinas inferiores        */
-  /* (sin texto, opacidad muy baja, rotación lenta infinita)       */
+  /* ACCESIBILIDAD — respeta "reducir movimiento"                   */
   /* ============================================================ */
-  .dx-liquid {
-    position: absolute;
-    bottom: -70px;
-    width: 340px;
-    height: 340px;
-    opacity: 0.05;
-    pointer-events: none;
-    z-index: 0;
-    color: #152540;
+  @media (prefers-reduced-motion: reduce) {
+    .brand__box,
+    .brand__word span,
+    .curtain__half,
+    .advisor__inner,
+    .logo-layer,
+    .signature { transition-duration: 0.001ms !important; }
+    .advisor__cta { transition: none; }
+    .advisor__cta:hover { transform: none; }
   }
-  .dx-liquid--left  { left: -80px; }
-  .dx-liquid--right { right: -80px; }
-  @media (prefers-reduced-motion: no-preference) {
-    .dx-liquid        { animation: dxLiquidSpin 42s linear infinite; }
-    .dx-liquid--right { animation-duration: 58s; animation-direction: reverse; }
-  }
-  @keyframes dxLiquidSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-  /* ============================================================ */
-  /* ILUSTRACIONES REACTIVAS DE PROTECCIÓN                         */
-  /* ============================================================ */
-  .dx-family { transition: filter .3s ease, opacity .3s ease, color .3s ease; }
-  .dx-family.is-off { filter: grayscale(1); opacity: 0.4; color: #8ca4c2; }
-  .dx-family.is-on  { filter: none; opacity: 1; color: #14b8a6; } /* turquesa */
-  .dx-cov, .dx-cov__icon, .dx-cov__badge { transition: opacity .3s ease, background-color .3s ease, color .3s ease; }
 </style>
 </head>
 
-<body class="bg-gray-50 text-navy-900 antialiased min-h-screen">
+<body>
 
-  <!-- ================================================================ -->
-  <!-- CAPA 1 — BIENVENIDA INSTITUCIONAL / "welcomeOverlay" (z-[9999])   -->
-  <!-- Concepto "Alianza que abre el diagnóstico": dos puertas de marca  -->
-  <!-- (50vw × 100vh) con los logos reales, firma institucional arriba   -->
-  <!-- y un único botón circular central. Al hacer clic, las puertas se  -->
-  <!-- abren hacia los lados y se revela la Capa 2. Toda la coreografía  -->
-  <!-- de salida se controla con la clase ".is-opening".                 -->
-  <!-- ================================================================ -->
-  <div id="institutionalOverlay" class="fixed inset-0 z-[9999]">
+  <!-- La escena completa. La clase del contenedor controla las fases:
+       (sin clase) → Fase 1 · .is-absorbing → Fase 2 · .is-open → Fase 3 -->
+  <div class="stage" id="stage">
 
-    <!-- Puerta izquierda: M. Aceves y Consultores S.C. -->
-    <div id="leftDoor" class="welcome-door welcome-door--left">
-      <img
-        src="logo-mcs.png"
-        alt="M. Aceves y Consultores S.C."
-        class="welcome-logo welcome-logo--left" />
-    </div>
+    <!-- ===================================================== -->
+    <!-- CAPA FONDO: PANEL DEL ASESOR (revelado tras la cortina) -->
+    <!-- ===================================================== -->
+    <main class="advisor" aria-hidden="true">
+      <div class="advisor__inner">
+        <p class="advisor__eyebrow">Interfaz del Asesor</p>
+        <h1 class="advisor__title">Estrategia de Bienestar y Optimización de Capital</h1>
+        <p class="advisor__subtitle">Diagnóstico de estabilidad financiera para negocios y personas.</p>
 
-    <!-- Puerta derecha: Seguros Monterrey New York Life -->
-    <div id="rightDoor" class="welcome-door welcome-door--right">
-      <img
-        src="logo-smnyl.png"
-        alt="Seguros Monterrey New York Life"
-        class="welcome-logo welcome-logo--right" />
-    </div>
-
-    <!-- Firma institucional de la alianza (alineación asimétrica) -->
-    <p class="welcome-signature">
-      <span class="sig-left">M. Aceves y Consultores</span>
-      <span class="sig-x">X</span>
-      <span class="sig-right">Seguros Monterrey New York Life</span>
-    </p>
-
-    <!-- Fondo de "ondas de agua" (dos capas que se desplazan en bucle) -->
-    <div class="bg-wave-decorator" aria-hidden="true">
-      <div class="wave-track wave-track--back">
-        <svg viewBox="0 0 1440 200" preserveAspectRatio="none"><path fill="rgba(21,37,64,0.16)" d="M0,96 C288,180 576,20 720,96 C864,172 1152,20 1440,96 L1440,200 L0,200 Z" /></svg>
-        <svg viewBox="0 0 1440 200" preserveAspectRatio="none"><path fill="rgba(21,37,64,0.16)" d="M0,96 C288,180 576,20 720,96 C864,172 1152,20 1440,96 L1440,200 L0,200 Z" /></svg>
+        <button type="button" class="advisor__cta" id="startDiagnosis">
+          Iniciar Diagnóstico
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </button>
       </div>
-      <div class="wave-track wave-track--front">
-        <svg viewBox="0 0 1440 200" preserveAspectRatio="none"><path fill="rgba(21,37,64,0.28)" d="M0,120 C288,60 576,190 720,120 C864,50 1152,190 1440,120 L1440,200 L0,200 Z" /></svg>
-        <svg viewBox="0 0 1440 200" preserveAspectRatio="none"><path fill="rgba(21,37,64,0.28)" d="M0,120 C288,60 576,190 720,120 C864,50 1152,190 1440,120 L1440,200 L0,200 Z" /></svg>
-      </div>
+    </main>
+
+    <!-- ===================================================== -->
+    <!-- CORTINA: dos mitades negras que se abren a los lados   -->
+    <!-- ===================================================== -->
+    <div class="curtain" aria-hidden="true">
+      <div class="curtain__half curtain__half--left"></div>
+      <div class="curtain__half curtain__half--right"></div>
     </div>
 
-    <!-- Centro de la experiencia: botón grande "Iniciar" (ola + latido) -->
-    <div class="welcome-center">
-      <button id="advanceBtn" type="button" class="welcome-start">
-        <span class="welcome-start__text">Iniciar</span>
-        <span class="welcome-start__arrow" aria-hidden="true">&#10148;</span>
+    <!-- ===================================================== -->
+    <!-- CAPA LOGO: recuadro 3D "P" + palabra "ROSPECTA"        -->
+    <!-- ===================================================== -->
+    <div class="logo-layer">
+      <button type="button" class="brand" id="brand" aria-label="PROSPECTA — iniciar">
+        <!-- Recuadro blanco 3D con la letra P -->
+        <span class="brand__box">
+          <span class="brand__p" aria-hidden="true">P</span>
+        </span>
+        <!-- Resto de la palabra; cada letra se anima por separado -->
+        <span class="brand__word" id="word" aria-hidden="true">
+          <span>R</span><span>O</span><span>S</span><span>P</span><span>E</span><span>C</span><span>T</span><span>A</span>
+        </span>
       </button>
     </div>
+
+    <!-- Firma institucional anclada al fondo -->
+    <p class="signature">by <strong>MACEVES</strong> y Consultores</p>
+
   </div>
-  <!-- FIN CAPA 1 -->
 
-  <!-- ================================================================ -->
-  <!-- PANTALLA 2 — DASHBOARD DE SELECCIÓN                              -->
-  <!-- Menú de dos vías (Flujo Exprés / Flujo Profundo). Se encuentra   -->
-  <!-- por debajo del Welcome Overlay (z-500 < z-9999) y queda a la      -->
-  <!-- vista cuando las puertas se abren. Interfaz visual únicamente:    -->
-  <!-- las rutas aún no están conectadas (Fase 1).                       -->
-  <!-- ================================================================ -->
-  <section id="selectionDashboard" class="fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-white to-navy-50 px-6">
-
-    <!-- Cabecera con los dos logos posicionados -->
-    <header class="absolute top-0 left-0 right-0 flex items-center justify-between px-6 sm:px-10 py-5">
-      <img src="logo-mcs.png" alt="M. Aceves y Consultores S.C." class="h-10 sm:h-12 w-auto object-contain" />
-      <img src="logo-smnyl.png" alt="Seguros Monterrey New York Life" class="h-9 sm:h-11 w-auto object-contain" />
-    </header>
-
-    <div class="text-center max-w-2xl">
-      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-navy-900">
-        ¿Cómo quieres comenzar?
-      </h1>
-      <p class="mt-3 text-sm sm:text-base text-navy-500">
-        Elige el tipo de experiencia que prefieres para tu diagnóstico patrimonial.
-      </p>
-
-      <!-- Menú de selección de dos vías (layout horizontal) -->
-      <div class="dashboard-options mt-10">
-        <button type="button" class="dash-btn dash-btn--express" data-flow="express">
-          Prospección rápida
-        </button>
-        <button type="button" class="dash-btn dash-btn--full" data-flow="full">
-          Asesoría completa
-        </button>
-      </div>
-    </div>
-  </section>
-  <!-- FIN PANTALLA 2 -->
-
-  <!-- ================================================================ -->
-  <!-- EXPERIENCIA POSTERIOR — DIAGNÓSTICO PATRIMONIAL INTERACTIVO       -->
-  <!-- (reemplaza la antigua Capa 2 "gancho" y Capa 3 "formulario").     -->
-  <!-- Flujo por etapas dentro de un único <form> conectado a Formspree. -->
-  <!-- Se revela automáticamente cuando el Welcome Overlay se oculta.    -->
-  <!-- ================================================================ -->
-  <main class="relative z-0 min-h-screen bg-slate-50 flex items-start xl:items-center justify-center px-4 py-8 sm:py-14 overflow-hidden">
-
-    <!-- Fondos líquidos decorativos (esquinas inferiores, sin texto) -->
-    <svg class="dx-liquid dx-liquid--left" viewBox="0 0 200 200" fill="currentColor" aria-hidden="true">
-      <path d="M45.6,-63.7C58.3,-55.6,66.7,-40.9,70.9,-25.3C75.1,-9.7,75.1,6.8,69.8,21.1C64.5,35.4,53.9,47.5,40.8,56.6C27.7,65.7,12.1,71.8,-3.9,76.1C-19.9,80.4,-39.8,82.9,-53.3,74.4C-66.8,65.9,-73.9,46.4,-77.1,27.7C-80.3,9,-79.6,-8.9,-73.1,-24.3C-66.6,-39.7,-54.3,-52.6,-40.4,-60.4C-26.5,-68.2,-11,-70.9,3.9,-76.2C18.8,-81.5,32.9,-71.8,45.6,-63.7Z" transform="translate(100 100)" />
-    </svg>
-    <svg class="dx-liquid dx-liquid--right" viewBox="0 0 200 200" fill="currentColor" aria-hidden="true">
-      <path d="M52.4,-68.1C67.1,-59.3,77.6,-43.5,80.8,-26.7C84,-9.9,79.9,7.9,72.3,23.9C64.7,39.9,53.6,54.1,39.4,63.5C25.2,72.9,7.9,77.5,-9.6,79.1C-27.1,80.7,-44.8,79.3,-57.6,70.1C-70.4,60.9,-78.3,43.9,-81.2,26.4C-84.1,8.9,-82,-9.1,-75.3,-24.9C-68.6,-40.7,-57.3,-54.3,-43.5,-63.3C-29.7,-72.3,-13.4,-76.7,2.6,-80.3C18.6,-83.9,37.7,-76.9,52.4,-68.1Z" transform="translate(100 100)" />
-    </svg>
-
-    <div class="relative z-10 w-full flex flex-col xl:flex-row xl:items-stretch xl:justify-center gap-6 xl:gap-7">
-
-      <!-- ===== Lateral IZQUIERDO (contextual por etapa) ===== -->
-      <aside id="dxAsideLeft" class="hidden xl:flex xl:flex-col xl:justify-center xl:w-60 xl:flex-shrink-0">
-        <!-- Sliders: gatillo de conciencia sobre la inflación -->
-        <div data-lateral="calc" class="dx-aside-panel hidden rounded-2xl border border-navy-100 bg-white p-5 shadow-sm">
-          <span class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gold-600">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
-            ¿Sabías qué?
-          </span>
-          <p class="mt-3 text-xs leading-relaxed text-navy-500">
-            En México, la inflación promedio anual devora entre el <strong class="text-navy-700">4% y 5%</strong> del valor de tu dinero.
-            Ahorrar en pesos nominales en cuentas bancarias comunes garantiza una pérdida de poder adquisitivo a largo plazo.
-          </p>
-        </div>
-
-        <!-- Protección: ilustración line-art de familia reactiva a dependientes -->
-        <div data-lateral="protection" class="dx-aside-panel hidden rounded-2xl border border-navy-100 bg-white p-6 shadow-sm text-center">
-          <svg id="dxFamilyArt" class="dx-family is-off w-40 h-40 mx-auto" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <!-- Adulto 1 -->
-            <circle cx="38" cy="34" r="11" />
-            <path d="M22 86 V70 a16 16 0 0 1 32 0 V86" />
-            <!-- Adulto 2 -->
-            <circle cx="82" cy="34" r="11" />
-            <path d="M66 86 V70 a16 16 0 0 1 32 0 V86" />
-            <!-- Hijo -->
-            <circle cx="60" cy="58" r="8" />
-            <path d="M48 96 V86 a12 12 0 0 1 24 0 V96" />
-          </svg>
-          <p class="mt-3 text-xs font-semibold text-navy-500">Quienes dependen de tu protección</p>
-        </div>
-      </aside>
-
-      <form id="preRegisterForm" action="https://formspree.io/f/meebywra" method="POST" novalidate class="w-full max-w-2xl xl:flex-shrink-0">
-
-      <!-- Cabecera: firma discreta + barra de progreso por etapas -->
-      <div class="mb-6 sm:mb-8">
-        <p class="text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-navy-400">
-          Diagnóstico patrimonial
-        </p>
-        <div id="dxProgressWrap" class="mt-4 hidden">
-          <div class="flex items-center justify-between text-[11px] font-medium text-navy-400 mb-1.5">
-            <span id="dxStepLabel">Tu situación actual</span>
-            <span id="dxStepCount">Paso 1 de 5</span>
-          </div>
-          <div class="h-1.5 w-full rounded-full bg-navy-100">
-            <div id="dxProgressBar" class="h-full rounded-full bg-gradient-to-r from-navy-700 to-navy-500" style="width:0%"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Contenedor principal del diagnóstico -->
-      <div class="bg-white rounded-2xl border border-navy-100 shadow-premium p-6 sm:p-10">
-
-        <!-- Zona de etapas -->
-        <div id="dxStages">
-
-          <!-- ===================== ETAPA: INTRODUCCIÓN ===================== -->
-          <section id="dxStageIntro" class="dx-stage is-active text-center" data-stage="intro">
-            <span class="inline-flex items-center gap-2 rounded-full bg-navy-800/5 border border-navy-800/10 px-4 py-1.5 text-[11px] font-semibold tracking-wide text-navy-700 uppercase">
-              <svg class="w-3.5 h-3.5 text-gold-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Herramienta de diagnóstico
-            </span>
-
-            <h1 class="mt-6 text-2xl sm:text-3xl md:text-4xl font-extrabold leading-tight tracking-tight text-navy-900">
-              Descubre qué tan preparada está hoy tu estrategia patrimonial.
-            </h1>
-            <p class="mt-4 text-navy-500 text-sm sm:text-base leading-relaxed max-w-lg mx-auto">
-              Un diagnóstico interactivo de aproximadamente 2 minutos que te ayuda a
-              identificar tus prioridades de retiro, protección y ahorro.
-            </p>
-
-            <!-- Indicador de las tres partes -->
-            <div class="mt-8 grid grid-cols-3 gap-3 sm:gap-4 text-left">
-              <div class="rounded-xl border border-navy-100 bg-navy-50/40 p-3 sm:p-4">
-                <span class="flex items-center justify-center w-7 h-7 rounded-full bg-navy-800 text-white text-xs font-bold">1</span>
-                <p class="mt-2 text-xs sm:text-sm font-semibold text-navy-800 leading-snug">Tu situación actual</p>
-              </div>
-              <div class="rounded-xl border border-navy-100 bg-navy-50/40 p-3 sm:p-4">
-                <span class="flex items-center justify-center w-7 h-7 rounded-full bg-navy-800 text-white text-xs font-bold">2</span>
-                <p class="mt-2 text-xs sm:text-sm font-semibold text-navy-800 leading-snug">Tus prioridades</p>
-              </div>
-              <div class="rounded-xl border border-navy-100 bg-navy-50/40 p-3 sm:p-4">
-                <span class="flex items-center justify-center w-7 h-7 rounded-full bg-navy-800 text-white text-xs font-bold">3</span>
-                <p class="mt-2 text-xs sm:text-sm font-semibold text-navy-800 leading-snug">Tu diagnóstico</p>
-              </div>
-            </div>
-
-            <button type="button" id="dxStartBtn"
-              class="mt-9 inline-flex items-center justify-center gap-2 rounded-full bg-navy-800 hover:bg-navy-900 active:scale-[.98] text-white font-semibold px-9 py-3.5 shadow-lg shadow-navy-900/20 transition-all duration-300">
-              <span id="dxStartLabel" class="dx-wave">Comenzar diagnóstico</span>
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
-          </section>
-
-          <!-- ===================== ETAPA 1: SITUACIÓN ACTUAL ===================== -->
-          <section id="dxStageInfo" class="dx-stage" data-stage="info">
-            <h2 class="text-xl sm:text-2xl font-bold text-navy-900">Tu situación actual</h2>
-            <p class="text-sm text-navy-400 mt-1 mb-6">Cuéntanos lo básico para personalizar tu diagnóstico.</p>
-
-            <div class="space-y-5">
-              <div>
-                <label for="dxFullName" class="block text-sm font-semibold text-navy-700 mb-2">Nombre completo</label>
-                <input type="text" id="dxFullName" name="fullName" autocomplete="name" class="dx-input" placeholder="Ej. Ana García López" />
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                  <label for="dxAge" class="block text-sm font-semibold text-navy-700 mb-2">Edad</label>
-                  <input type="number" id="dxAge" name="age" inputmode="numeric" min="18" max="99" class="dx-input" placeholder="35" />
-                </div>
-                <div>
-                  <label for="dxWhatsapp" class="block text-sm font-semibold text-navy-700 mb-2">WhatsApp</label>
-                  <input type="tel" id="dxWhatsapp" name="whatsapp" inputmode="tel" autocomplete="tel" class="dx-input" placeholder="55 1234 5678" />
-                </div>
-              </div>
-            </div>
-
-            <p class="dx-error hidden text-sm text-red-600 mt-4"></p>
-
-            <div class="mt-8 flex items-center justify-between gap-3">
-              <button type="button" class="dx-back text-sm font-semibold text-navy-500 hover:text-navy-900 transition-colors">Atrás</button>
-              <button type="button" class="dx-next inline-flex items-center gap-2 rounded-full bg-navy-800 hover:bg-navy-900 text-white font-semibold px-7 py-3 transition-all duration-200">
-                Continuar
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-              </button>
-            </div>
-          </section>
-
-          <!-- ===================== ETAPA 2: PRIORIDADES ===================== -->
-          <section id="dxStagePriorities" class="dx-stage" data-stage="priorities">
-            <h2 class="text-xl sm:text-2xl font-bold text-navy-900 dx-personalize" data-base="Tus prioridades">Tus prioridades</h2>
-            <p class="text-sm text-navy-400 mt-1 mb-6">Selecciona hasta <strong class="text-navy-700">3</strong> áreas que más te importan hoy.</p>
-
-            <div id="dxPriorityGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-
-            <div id="dxMainPriorityWrap" class="hidden mt-7">
-              <p class="text-sm font-semibold text-navy-700 mb-3">¿Cuál es tu prioridad principal?</p>
-              <div id="dxMainPriorityOptions" class="flex flex-wrap gap-2"></div>
-            </div>
-
-            <p class="dx-error hidden text-sm text-red-600 mt-4"></p>
-
-            <div class="mt-8 flex items-center justify-between gap-3">
-              <button type="button" class="dx-back text-sm font-semibold text-navy-500 hover:text-navy-900 transition-colors">Atrás</button>
-              <button type="button" class="dx-next inline-flex items-center gap-2 rounded-full bg-navy-800 hover:bg-navy-900 text-white font-semibold px-7 py-3 transition-all duration-200">
-                Continuar
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-              </button>
-            </div>
-          </section>
-
-          <!-- ===================== ETAPA 3: CALCULADORA DE RETIRO ===================== -->
-          <section id="dxStageCalc" class="dx-stage" data-stage="calc">
-            <h2 class="text-xl sm:text-2xl font-bold text-navy-900">Tu retiro</h2>
-            <p class="text-sm text-navy-400 mt-1 mb-6">Ajusta los valores; los resultados se actualizan al instante.</p>
-
-            <div class="space-y-7">
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <label for="dxRetirementAge" class="text-sm font-semibold text-navy-700">Edad deseada de retiro</label>
-                  <span id="dxRetirementAgeVal" class="text-sm font-bold text-navy-900">60 años</span>
-                </div>
-                <input type="range" id="dxRetirementAge" name="retirementAge" class="dx-range" min="50" max="80" step="1" value="60" />
-                <p id="dxRetAgeHint" class="mt-3 text-xs leading-relaxed rounded-lg bg-navy-50 border border-navy-100 px-3 py-2.5 text-navy-600"></p>
-              </div>
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <label for="dxMonthlyIncome" class="text-sm font-semibold text-navy-700">Ingreso mensual aproximado</label>
-                  <span id="dxMonthlyIncomeVal" class="text-sm font-bold text-navy-900">$25,000</span>
-                </div>
-                <input type="range" id="dxMonthlyIncome" name="monthlyIncome" class="dx-range" min="5000" max="200000" step="1000" value="25000" />
-              </div>
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <label for="dxMonthlySavings" class="text-sm font-semibold text-navy-700">Ahorro mensual actual para tu futuro</label>
-                  <span id="dxMonthlySavingsVal" class="text-sm font-bold text-navy-900">$3,000</span>
-                </div>
-                <input type="range" id="dxMonthlySavings" name="monthlySavings" class="dx-range" min="0" max="60000" step="500" value="3000" />
-                <p id="dxSavingsHint" class="mt-3 text-xs leading-relaxed rounded-lg bg-navy-50 border border-navy-100 px-3 py-2.5 text-navy-600"></p>
-              </div>
-            </div>
-
-            <!-- Resultados en tiempo real -->
-            <div class="mt-8 grid grid-cols-3 gap-3" aria-live="polite">
-              <div class="rounded-xl bg-navy-50/60 border border-navy-100 p-3 text-center">
-                <p class="text-[11px] text-navy-400 font-medium leading-tight">Años para tu retiro</p>
-                <p id="dxYearsOut" class="mt-1 text-lg sm:text-xl font-extrabold text-navy-900">—</p>
-              </div>
-              <div class="rounded-xl bg-navy-50/60 border border-navy-100 p-3 text-center">
-                <p class="text-[11px] text-navy-400 font-medium leading-tight">Ahorro mensual</p>
-                <p id="dxSavingsOut" class="mt-1 text-lg sm:text-xl font-extrabold text-navy-900">—</p>
-              </div>
-              <div class="rounded-xl bg-navy-50/60 border border-navy-100 p-3 text-center">
-                <p class="text-[11px] text-navy-400 font-medium leading-tight">Capital estimado</p>
-                <p id="dxCapitalOut" class="mt-1 text-lg sm:text-xl font-extrabold text-navy-900">—</p>
-              </div>
-            </div>
-
-            <!-- Comparación visual: ritmo actual vs escenario orientativo -->
-            <div class="mt-6 space-y-4">
-              <div>
-                <div class="flex items-center justify-between text-xs font-medium text-navy-500 mb-1.5">
-                  <span>Tu ritmo actual</span>
-                  <span id="dxBarCurrentVal">—</span>
-                </div>
-                <div class="h-3 w-full rounded-full bg-navy-100 overflow-hidden">
-                  <div id="dxBarCurrent" class="dx-bar-fill h-full rounded-full bg-navy-700" style="width:0%"></div>
-                </div>
-              </div>
-              <div>
-                <div class="flex items-center justify-between text-xs font-medium text-navy-500 mb-1.5">
-                  <span>Escenario orientativo</span>
-                  <span id="dxBarSuggestedVal">—</span>
-                </div>
-                <div class="h-3 w-full rounded-full bg-navy-100 overflow-hidden">
-                  <div id="dxBarSuggested" class="dx-bar-fill h-full rounded-full bg-gold-500" style="width:0%"></div>
-                </div>
-              </div>
-            </div>
-
-            <p id="dxCalcMessage" class="mt-5 text-sm font-medium text-navy-700"></p>
-            <p class="mt-2 text-[11px] leading-relaxed text-navy-400">
-              Simulación ilustrativa. Los resultados no representan una garantía de rendimiento ni una recomendación financiera.
-            </p>
-
-            <div class="mt-8 flex items-center justify-between gap-3">
-              <button type="button" class="dx-back text-sm font-semibold text-navy-500 hover:text-navy-900 transition-colors">Atrás</button>
-              <button type="button" class="dx-next inline-flex items-center gap-2 rounded-full bg-navy-800 hover:bg-navy-900 text-white font-semibold px-7 py-3 transition-all duration-200">
-                Continuar
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-              </button>
-            </div>
-          </section>
-
-          <!-- ===================== ETAPA 4: PROTECCIÓN ===================== -->
-          <section id="dxStageProtection" class="dx-stage" data-stage="protection">
-            <h2 class="text-xl sm:text-2xl font-bold text-navy-900 dx-personalize" data-base="Tu protección">Tu protección</h2>
-            <p class="text-sm text-navy-400 mt-1 mb-6">Cuatro preguntas rápidas sobre tu cobertura actual.</p>
-
-            <div class="space-y-6">
-              <div>
-                <label for="dxDependents" class="block text-sm font-semibold text-navy-700 mb-2">Dependientes económicos</label>
-                <input type="number" id="dxDependents" name="dependents" inputmode="numeric" min="0" max="20" value="0" class="dx-input" />
-              </div>
-
-              <div data-question="hasLifeInsurance">
-                <p class="text-sm font-semibold text-navy-700 mb-3">¿Actualmente cuentas con seguro de vida?</p>
-                <div class="grid grid-cols-2 gap-3 dx-yesno">
-                  <button type="button" class="dx-choice justify-center" data-value="Sí"><span class="font-semibold">Sí</span></button>
-                  <button type="button" class="dx-choice justify-center" data-value="No"><span class="font-semibold">No</span></button>
-                </div>
-              </div>
-
-              <div data-question="hasMedicalInsurance">
-                <p class="text-sm font-semibold text-navy-700 mb-3">¿Cuentas con seguro de gastos médicos?</p>
-                <div class="grid grid-cols-2 gap-3 dx-yesno">
-                  <button type="button" class="dx-choice justify-center" data-value="Sí"><span class="font-semibold">Sí</span></button>
-                  <button type="button" class="dx-choice justify-center" data-value="No"><span class="font-semibold">No</span></button>
-                </div>
-              </div>
-
-              <div data-question="hasRetirementPlan">
-                <p class="text-sm font-semibold text-navy-700 mb-3">¿Tienes actualmente un plan formal de retiro?</p>
-                <div class="grid grid-cols-2 gap-3 dx-yesno">
-                  <button type="button" class="dx-choice justify-center" data-value="Sí"><span class="font-semibold">Sí</span></button>
-                  <button type="button" class="dx-choice justify-center" data-value="No"><span class="font-semibold">No</span></button>
-                </div>
-              </div>
-            </div>
-
-            <p class="dx-error hidden text-sm text-red-600 mt-4"></p>
-
-            <div class="mt-8 flex items-center justify-between gap-3">
-              <button type="button" class="dx-back text-sm font-semibold text-navy-500 hover:text-navy-900 transition-colors">Atrás</button>
-              <button type="button" class="dx-next inline-flex items-center gap-2 rounded-full bg-navy-800 hover:bg-navy-900 text-white font-semibold px-7 py-3 transition-all duration-200">
-                Ver mi diagnóstico
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-              </button>
-            </div>
-          </section>
-
-          <!-- ===================== ETAPA 5: RESULTADO ===================== -->
-          <section id="dxStageResult" class="dx-stage" data-stage="result">
-            <h2 class="text-xl sm:text-2xl font-bold text-navy-900 dx-personalize" data-base="Tu diagnóstico inicial">Tu diagnóstico inicial</h2>
-            <p class="text-sm text-navy-400 mt-1 mb-6">Basado únicamente en la información que compartiste.</p>
-
-            <ul id="dxSummary" class="space-y-2.5 text-sm text-navy-700"></ul>
-
-            <!-- Diagnóstico por áreas: 3 barras de progreso -->
-            <div class="mt-8 rounded-xl border border-navy-100 bg-navy-50/50 p-5 space-y-5">
-              <p class="text-[11px] font-semibold uppercase tracking-[0.15em] text-navy-500">Tu diagnóstico por área</p>
-
-              <div>
-                <div class="flex items-center justify-between text-sm font-semibold text-navy-700 mb-1.5">
-                  <span>Resiliencia en Salud</span>
-                  <span id="dxBarHealthVal" class="text-navy-900">—</span>
-                </div>
-                <div class="h-3 w-full rounded-full bg-navy-100 overflow-hidden">
-                  <div id="dxBarHealth" class="dx-bar-fill h-full rounded-full bg-navy-300" style="width:0%"></div>
-                </div>
-              </div>
-
-              <div>
-                <div class="flex items-center justify-between text-sm font-semibold text-navy-700 mb-1.5">
-                  <span>Protección Familiar</span>
-                  <span id="dxBarFamilyVal" class="text-navy-900">—</span>
-                </div>
-                <div class="h-3 w-full rounded-full bg-navy-100 overflow-hidden">
-                  <div id="dxBarFamily" class="dx-bar-fill h-full rounded-full bg-navy-300" style="width:0%"></div>
-                </div>
-              </div>
-
-              <div>
-                <div class="flex items-center justify-between text-sm font-semibold text-navy-700 mb-1.5">
-                  <span>Acumulación Inteligente</span>
-                  <span id="dxBarAccVal" class="text-navy-900">—</span>
-                </div>
-                <div class="h-3 w-full rounded-full bg-navy-100 overflow-hidden">
-                  <div id="dxBarAcc" class="dx-bar-fill h-full rounded-full bg-navy-300" style="width:0%"></div>
-                </div>
-              </div>
-
-              <p class="text-[11px] leading-relaxed text-navy-400">
-                Indicador orientativo interno de esta herramienta. No constituye una evaluación financiera certificada.
-              </p>
-            </div>
-
-            <p class="mt-5 text-[11px] leading-relaxed text-navy-400">
-              El objetivo es identificar áreas que pueden revisarse durante una asesoría personalizada.
-            </p>
-
-            <p class="dx-error hidden text-sm text-red-600 mt-4"></p>
-
-            <div class="mt-8 flex items-center justify-between gap-3">
-              <button type="button" class="dx-back text-sm font-semibold text-navy-500 hover:text-navy-900 transition-colors">Atrás</button>
-              <button type="button" id="dxSubmitBtn" class="inline-flex items-center gap-2 rounded-full bg-navy-800 hover:bg-navy-900 text-white font-semibold px-8 py-3.5 shadow-lg shadow-navy-900/20 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed">
-                <span id="dxSubmitLabel">Enviar mi diagnóstico</span>
-                <svg id="dxSubmitIcon" class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
-              </button>
-            </div>
-          </section>
-
-        </div>
-        <!-- FIN #dxStages -->
-
-        <!-- ===================== VISTA: CONFIRMACIÓN (HOOK EN FRÍO) ===================== -->
-        <div id="dxSuccess" class="hidden text-center">
-
-          <!-- Mensaje de éxito -->
-          <div class="mx-auto w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center animate-pop">
-            <svg class="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h2 class="mt-5 text-xl sm:text-2xl font-bold text-navy-900">¡Listo, <span id="dxSuccessName">amigo(a)</span>!</h2>
-
-          <!-- Tarjeta central de alerta patrimonial (borde ámbar) -->
-          <div class="mt-6 rounded-2xl border-2 border-amber-400 bg-amber-50 p-5 text-left max-w-lg mx-auto">
-            <p class="text-sm font-semibold text-amber-800 leading-relaxed">
-              <span class="mr-1">⚠️</span> Alerta Patrimonial: Tu dinero está expuesto. Al ritmo actual, tu estrategia se encuentra
-              vulnerable ante la devaluación acumulada en México.
-            </p>
-          </div>
-
-          <!-- Copy de cierre -->
-          <p class="mt-6 text-sm text-navy-500 max-w-lg mx-auto leading-relaxed">
-            Tu Diagnóstico Inicial ha sido registrado con éxito. Te contactaré en las próximas
-            <strong class="text-navy-700">24 horas por WhatsApp</strong> para agendar una sesión express de 10 minutos
-            y entregarte tu plan de rescate financiero.
-          </p>
-        </div>
-      </div>
-
-      <p class="mt-5 text-center text-[11px] text-navy-300 flex items-center justify-center gap-1.5">
-        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 10-8 0v2" /></svg>
-        Conexión protegida &middot; Tus datos no se comparten con terceros
-      </p>
-
-      <!-- Campos ocultos: valores calculados y selecciones para Formspree -->
-      <input type="hidden" name="priorities" id="dxHiddenPriorities" />
-      <input type="hidden" name="mainPriority" id="dxHiddenMainPriority" />
-      <input type="hidden" name="hasLifeInsurance" id="dxHiddenLife" />
-      <input type="hidden" name="hasMedicalInsurance" id="dxHiddenMedical" />
-      <input type="hidden" name="hasRetirementPlan" id="dxHiddenRetirePlan" />
-      <input type="hidden" name="yearsToRetirement" id="dxHiddenYears" />
-      <input type="hidden" name="estimatedCapital" id="dxHiddenCapital" />
-      <input type="hidden" name="preparednessLevel" id="dxHiddenLevel" />
-      <input type="hidden" name="scoreSalud" id="dxHiddenHealth" />
-      <input type="hidden" name="scoreProteccionFamiliar" id="dxHiddenFamily" />
-      <input type="hidden" name="scoreAcumulacion" id="dxHiddenAcc" />
-      <input type="hidden" name="submittedAt" id="dxHiddenSubmittedAt" />
-      </form>
-
-      <!-- ===== Lateral DERECHO (contextual por etapa) ===== -->
-      <aside id="dxAsideRight" class="hidden xl:flex xl:flex-col xl:justify-center xl:w-60 xl:flex-shrink-0">
-        <!-- Datos básicos: micro-sello de seguridad discreto -->
-        <div data-lateral="info" class="dx-aside-panel hidden flex items-start gap-3 rounded-2xl border border-navy-100 bg-white/70 p-4 shadow-sm">
-          <svg class="w-5 h-5 flex-shrink-0 text-navy-300 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 0h10.5a2.25 2.25 0 012.25 2.25v6a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18.75v-6a2.25 2.25 0 012.25-2.25z" /></svg>
-          <p class="text-[11px] leading-relaxed text-navy-400">
-            Tus datos están protegidos bajo la Ley Federal de Protección de Datos Personales. Conexión 100% cifrada.
-          </p>
-        </div>
-
-        <!-- Sliders: el blindaje en UDIs / USD -->
-        <div data-lateral="calc" class="dx-aside-panel hidden rounded-2xl border border-navy-800 bg-navy-800 text-white p-5 shadow-sm">
-          <span class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gold-300">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            Monedas de Protección
-          </span>
-          <p class="mt-3 text-xs leading-relaxed text-navy-100">
-            Las estrategias de Seguros Monterrey New York Life utilizan <strong>UDIs</strong> (Unidades de Inversión)
-            y <strong>Dólares</strong> para garantizar que tu dinero mantenga su valor real y crezca por encima de la inflación con el paso de los años.
-          </p>
-        </div>
-
-        <!-- Protección: 3 iconos de cobertura reactivos a las respuestas Sí/No -->
-        <div data-lateral="protection" class="dx-aside-panel hidden rounded-2xl border border-navy-100 bg-white p-5 shadow-sm">
-          <p class="text-[10px] font-bold uppercase tracking-widest text-navy-400">Tu cobertura actual</p>
-          <div class="mt-4 space-y-3">
-            <!-- Salud (gastos médicos) -->
-            <div id="dxCovMedical" class="dx-cov flex items-center gap-2.5 opacity-40">
-              <span class="dx-cov__icon w-9 h-9 rounded-xl bg-navy-50 text-navy-400 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
-              </span>
-              <span class="text-xs font-semibold text-navy-600 flex-1">Salud</span>
-              <span class="dx-cov__badge w-5 h-5 rounded-full bg-navy-100 text-navy-400 flex items-center justify-center flex-shrink-0">
-                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 0h10.5a2.25 2.25 0 012.25 2.25v6a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18.75v-6a2.25 2.25 0 012.25-2.25z" /></svg>
-              </span>
-            </div>
-            <!-- Vida (escudo) -->
-            <div id="dxCovLife" class="dx-cov flex items-center gap-2.5 opacity-40">
-              <span class="dx-cov__icon w-9 h-9 rounded-xl bg-navy-50 text-navy-400 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
-              </span>
-              <span class="text-xs font-semibold text-navy-600 flex-1">Vida</span>
-              <span class="dx-cov__badge w-5 h-5 rounded-full bg-navy-100 text-navy-400 flex items-center justify-center flex-shrink-0">
-                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 0h10.5a2.25 2.25 0 012.25 2.25v6a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18.75v-6a2.25 2.25 0 012.25-2.25z" /></svg>
-              </span>
-            </div>
-            <!-- Retiro (reloj de arena) -->
-            <div id="dxCovRetire" class="dx-cov flex items-center gap-2.5 opacity-40">
-              <span class="dx-cov__icon w-9 h-9 rounded-xl bg-navy-50 text-navy-400 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              </span>
-              <span class="text-xs font-semibold text-navy-600 flex-1">Retiro</span>
-              <span class="dx-cov__badge w-5 h-5 rounded-full bg-navy-100 text-navy-400 flex items-center justify-center flex-shrink-0">
-                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 0h10.5a2.25 2.25 0 012.25 2.25v6a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18.75v-6a2.25 2.25 0 012.25-2.25z" /></svg>
-              </span>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-    </div>
-  </main>
-
-  <!-- ============================================================ -->
-  <!-- LÓGICA DEL DIAGNÓSTICO PATRIMONIAL Y FORMSPREE               -->
-  <!-- Módulos separados conceptualmente: navegación entre etapas,   -->
-  <!-- validación, calculadora de retiro, cálculo del nivel de       -->
-  <!-- preparación, construcción del resumen y envío a Formspree.    -->
-  <!-- No toca ni referencia nada del Welcome Overlay (Capa 1).      -->
-  <!-- ============================================================ -->
   <script>
   (function () {
     'use strict';
 
-    // Tasa anual ILUSTRATIVA y configurable (no es rendimiento garantizado).
-    const ANNUAL_RATE = 0.06;
+    var stage  = document.getElementById('stage');
+    var brand  = document.getElementById('brand');
+    var word   = document.getElementById('word');
+    var cta    = document.getElementById('startDiagnosis');
 
-    // Definición de las áreas de prioridad (etiqueta + icono SVG limpio).
-    const PRIORITIES = [
-      { key: 'Retiro',              label: 'Retiro',              icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
-      { key: 'Protección Familiar', label: 'Protección Familiar', icon: 'M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z' },
-      { key: 'Gastos Médicos',      label: 'Gastos Médicos',      icon: 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z' },
-      { key: 'Ahorro',              label: 'Ahorro',              icon: 'M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-      { key: 'Patrimonio',          label: 'Patrimonio',          icon: 'M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21' },
-    ];
+    // Lee los tiempos definidos en CSS para mantener JS y CSS sincronizados.
+    var css = getComputedStyle(document.documentElement);
+    var ABSORB  = parseTime(css.getPropertyValue('--absorb-time'), 850);
+    var CURTAIN = parseTime(css.getPropertyValue('--curtain-time'), 1150);
+    var PAUSE   = 1000; // "un segundo después de la absorción"
 
-    const MAX_PRIORITIES = 3;
-
-    document.addEventListener('DOMContentLoaded', init);
-
-    function init() {
-      const form = document.getElementById('preRegisterForm');
-      if (!form) return;
-
-      // ------------------------------------------------------------
-      // Referencias del DOM
-      // ------------------------------------------------------------
-      const stagesWrap = document.getElementById('dxStages');
-      const successView = document.getElementById('dxSuccess');
-      const successName = document.getElementById('dxSuccessName');
-      const progressWrap = document.getElementById('dxProgressWrap');
-      const progressBar = document.getElementById('dxProgressBar');
-      const stepLabel = document.getElementById('dxStepLabel');
-      const stepCount = document.getElementById('dxStepCount');
-
-      const stageEls = {
-        intro: document.getElementById('dxStageIntro'),
-        info: document.getElementById('dxStageInfo'),
-        priorities: document.getElementById('dxStagePriorities'),
-        calc: document.getElementById('dxStageCalc'),
-        protection: document.getElementById('dxStageProtection'),
-        result: document.getElementById('dxStageResult'),
-      };
-
-      // Orden del flujo + metadatos de la barra de progreso.
-      const FLOW = ['intro', 'info', 'priorities', 'calc', 'protection', 'result'];
-      const STEP_META = {
-        info:       { label: 'Tu situación actual', n: 1 },
-        priorities: { label: 'Tus prioridades',     n: 2 },
-        calc:       { label: 'Tu retiro',           n: 3 },
-        protection: { label: 'Tu protección',       n: 4 },
-        result:     { label: 'Tu diagnóstico',      n: 5 },
-      };
-      const TOTAL_STEPS = 5;
-
-      // Campos de texto
-      const inFullName = document.getElementById('dxFullName');
-      const inAge = document.getElementById('dxAge');
-      const inWhatsapp = document.getElementById('dxWhatsapp');
-      const inDependents = document.getElementById('dxDependents');
-
-      // Calculadora
-      const rRetAge = document.getElementById('dxRetirementAge');
-      const rIncome = document.getElementById('dxMonthlyIncome');
-      const rSavings = document.getElementById('dxMonthlySavings');
-      const outRetAge = document.getElementById('dxRetirementAgeVal');
-      const outIncome = document.getElementById('dxMonthlyIncomeVal');
-      const outSavings = document.getElementById('dxMonthlySavingsVal');
-      const outYears = document.getElementById('dxYearsOut');
-      const outSavingsBox = document.getElementById('dxSavingsOut');
-      const outCapital = document.getElementById('dxCapitalOut');
-      const barCurrent = document.getElementById('dxBarCurrent');
-      const barSuggested = document.getElementById('dxBarSuggested');
-      const barCurrentVal = document.getElementById('dxBarCurrentVal');
-      const barSuggestedVal = document.getElementById('dxBarSuggestedVal');
-      const calcMessage = document.getElementById('dxCalcMessage');
-
-      // Hidden
-      const hidPriorities = document.getElementById('dxHiddenPriorities');
-      const hidMain = document.getElementById('dxHiddenMainPriority');
-      const hidLife = document.getElementById('dxHiddenLife');
-      const hidMedical = document.getElementById('dxHiddenMedical');
-      const hidRetirePlan = document.getElementById('dxHiddenRetirePlan');
-      const hidYears = document.getElementById('dxHiddenYears');
-      const hidCapital = document.getElementById('dxHiddenCapital');
-      const hidLevel = document.getElementById('dxHiddenLevel');
-      const hidHealth = document.getElementById('dxHiddenHealth');
-      const hidFamily = document.getElementById('dxHiddenFamily');
-      const hidAcc = document.getElementById('dxHiddenAcc');
-      const hidSubmittedAt = document.getElementById('dxHiddenSubmittedAt');
-
-      // Envío
-      const submitBtn = document.getElementById('dxSubmitBtn');
-      const submitLabel = document.getElementById('dxSubmitLabel');
-      const submitIcon = document.getElementById('dxSubmitIcon');
-
-      // Estado
-      const state = {
-        priorities: [],
-        mainPriority: '',
-        answers: { hasLifeInsurance: '', hasMedicalInsurance: '', hasRetirementPlan: '' },
-      };
-      let currentStage = 'intro';
-
-      // ------------------------------------------------------------
-      // Utilidades
-      // ------------------------------------------------------------
-      function money(n) { return '$' + Math.round(n).toLocaleString('es-MX'); }
-      function digits(s) { return (s || '').replace(/\D/g, ''); }
-      function stageError(stageKey, msg) {
-        const el = stageEls[stageKey].querySelector('.dx-error');
-        if (!el) return;
-        if (msg) { el.textContent = msg; el.classList.remove('hidden'); }
-        else { el.textContent = ''; el.classList.add('hidden'); }
-      }
-
-      // ------------------------------------------------------------
-      // 1) NAVEGACIÓN ENTRE ETAPAS
-      // ------------------------------------------------------------
-      // Paneles laterales contextuales: se muestra solo el que coincide con la etapa.
-      const asidePanels = document.querySelectorAll('.dx-aside-panel');
-      function updateLaterals(stageKey) {
-        Array.prototype.forEach.call(asidePanels, function (panel) {
-          panel.classList.toggle('hidden', panel.dataset.lateral !== stageKey);
-        });
-      }
-
-      function goTo(stageKey) {
-        Object.keys(stageEls).forEach((k) => stageEls[k].classList.toggle('is-active', k === stageKey));
-        currentStage = stageKey;
-
-        const meta = STEP_META[stageKey];
-        if (meta) {
-          progressWrap.classList.remove('hidden');
-          progressBar.style.width = Math.round((meta.n / TOTAL_STEPS) * 100) + '%';
-          stepLabel.textContent = meta.label;
-          stepCount.textContent = 'Paso ' + meta.n + ' de ' + TOTAL_STEPS;
-        } else {
-          progressWrap.classList.add('hidden');
-        }
-
-        updateLaterals(stageKey);
-        if (stageKey === 'protection') updateProtectionIllustration();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
-      function nextFrom(stageKey) {
-        if (!validateStage(stageKey)) return;
-        if (stageKey === 'protection') buildResult(); // preparar resumen antes de mostrarlo
-        const idx = FLOW.indexOf(stageKey);
-        const next = FLOW[Math.min(idx + 1, FLOW.length - 1)];
-        goTo(next);
-      }
-      function backFrom(stageKey) {
-        const idx = FLOW.indexOf(stageKey);
-        goTo(FLOW[Math.max(idx - 1, 0)]);
-      }
-
-      document.getElementById('dxStartBtn').addEventListener('click', function () { goTo('info'); });
-      Array.prototype.forEach.call(document.querySelectorAll('.dx-next'), function (btn) {
-        btn.addEventListener('click', function () { nextFrom(btn.closest('.dx-stage').dataset.stage); });
-      });
-
-      // ------------------------------------------------------------
-      // BOTÓN "OLA": divide la etiqueta en <span> indexados con
-      // animation-delay secuencial (efecto de ola continua).
-      // ------------------------------------------------------------
-      (function buildWaveButton() {
-        const label = document.getElementById('dxStartLabel');
-        if (!label) return;
-        const text = label.textContent;
-        label.textContent = '';
-        Array.prototype.forEach.call(text, function (ch, i) {
-          const span = document.createElement('span');
-          span.textContent = ch === ' ' ? '\u00A0' : ch;
-          span.style.animationDelay = (i * 0.06) + 's';
-          label.appendChild(span);
-        });
-      })();
-
-      // ------------------------------------------------------------
-      // HIPER-PERSONALIZACIÓN: primer nombre concatenado en los
-      // encabezados de las etapas siguientes ("Tus prioridades, Carlos").
-      // ------------------------------------------------------------
-      const personalizeEls = document.querySelectorAll('.dx-personalize');
-      function applyPersonalization() {
-        const first = (inFullName.value.trim().split(/\s+/)[0] || '').trim();
-        Array.prototype.forEach.call(personalizeEls, function (el) {
-          const base = el.dataset.base || el.textContent;
-          el.textContent = first ? base + ', ' + first : base;
-        });
-      }
-      inFullName.addEventListener('input', applyPersonalization);
-      inFullName.addEventListener('blur', applyPersonalization);
-      Array.prototype.forEach.call(document.querySelectorAll('.dx-back'), function (btn) {
-        btn.addEventListener('click', function () { backFrom(btn.closest('.dx-stage').dataset.stage); });
-      });
-
-      // Evitar envío nativo accidental (Enter) durante el flujo.
-      form.addEventListener('submit', function (e) { e.preventDefault(); });
-
-      // ------------------------------------------------------------
-      // 2) VALIDACIÓN POR ETAPA
-      // ------------------------------------------------------------
-      function markInvalid(el, invalid) { if (el) el.classList.toggle('dx-invalid', !!invalid); }
-
-      function validateStage(stageKey) {
-        if (stageKey === 'info') {
-          const nameOk = inFullName.value.trim().length >= 3;
-          const ageNum = Number(inAge.value);
-          const ageOk = Number.isInteger(ageNum) && ageNum >= 18 && ageNum <= 99;
-          const waOk = digits(inWhatsapp.value).length >= 10;
-          markInvalid(inFullName, !nameOk);
-          markInvalid(inAge, !ageOk);
-          markInvalid(inWhatsapp, !waOk);
-          if (!nameOk || !ageOk || !waOk) {
-            stageError('info', 'Revisa tus datos: nombre completo, edad (18-99) y WhatsApp con lada (10 dígitos).');
-            return false;
-          }
-          stageError('info', '');
-          syncRetirementAgeFloor();
-          return true;
-        }
-        if (stageKey === 'priorities') {
-          if (state.priorities.length === 0) { stageError('priorities', 'Selecciona al menos una prioridad.'); return false; }
-          if (!state.mainPriority) { stageError('priorities', 'Indica cuál es tu prioridad principal.'); return false; }
-          stageError('priorities', '');
-          return true;
-        }
-        if (stageKey === 'calc') {
-          // Los sliders siempre tienen valores válidos; solo aseguramos coherencia.
-          stageError('calc', '');
-          return true;
-        }
-        if (stageKey === 'protection') {
-          const a = state.answers;
-          if (!a.hasLifeInsurance || !a.hasMedicalInsurance || !a.hasRetirementPlan) {
-            stageError('protection', 'Responde las tres preguntas de cobertura.');
-            return false;
-          }
-          stageError('protection', '');
-          return true;
-        }
-        return true;
-      }
-
-      // ------------------------------------------------------------
-      // 3) PRIORIDADES (máximo 3 + prioridad principal)
-      // ------------------------------------------------------------
-      const grid = document.getElementById('dxPriorityGrid');
-      const mainWrap = document.getElementById('dxMainPriorityWrap');
-      const mainOptions = document.getElementById('dxMainPriorityOptions');
-
-      PRIORITIES.forEach(function (p) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'dx-choice';
-        btn.dataset.priority = p.key;
-        btn.setAttribute('aria-pressed', 'false');
-        btn.innerHTML =
-          '<span class="dx-choice__icon"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="' + p.icon + '" /></svg></span>' +
-          '<span class="font-semibold text-sm">' + p.label + '</span>' +
-          '<span class="dx-choice__check"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></span>';
-        btn.addEventListener('click', function () { togglePriority(p.key); });
-        grid.appendChild(btn);
-      });
-
-      function togglePriority(key) {
-        const idx = state.priorities.indexOf(key);
-        if (idx >= 0) {
-          state.priorities.splice(idx, 1);
-          if (state.mainPriority === key) state.mainPriority = '';
-        } else {
-          if (state.priorities.length >= MAX_PRIORITIES) return; // límite de 3
-          state.priorities.push(key);
-        }
-        renderPriorities();
-        stageError('priorities', '');
-      }
-
-      function renderPriorities() {
-        Array.prototype.forEach.call(grid.children, function (btn) {
-          const selected = state.priorities.indexOf(btn.dataset.priority) >= 0;
-          btn.classList.toggle('is-selected', selected);
-          btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
-          const full = state.priorities.length >= MAX_PRIORITIES && !selected;
-          btn.classList.toggle('is-disabled', full);
-        });
-
-        // Selector de prioridad principal (solo entre las elegidas)
-        if (state.priorities.length > 0) {
-          mainWrap.classList.remove('hidden');
-          mainOptions.innerHTML = '';
-          state.priorities.forEach(function (key) {
-            const pill = document.createElement('button');
-            pill.type = 'button';
-            pill.className = 'dx-pill' + (state.mainPriority === key ? ' is-selected' : '');
-            pill.textContent = key;
-            pill.addEventListener('click', function () {
-              state.mainPriority = key;
-              renderPriorities();
-              stageError('priorities', '');
-            });
-            mainOptions.appendChild(pill);
-          });
-        } else {
-          mainWrap.classList.add('hidden');
-          state.mainPriority = '';
-        }
-      }
-
-      // ------------------------------------------------------------
-      // 4) CALCULADORA DE RETIRO (simulación ilustrativa)
-      // ------------------------------------------------------------
-      // Valor futuro de aportaciones mensuales constantes a una tasa dada.
-      function futureValue(monthly, years) {
-        const n = years * 12;
-        const r = ANNUAL_RATE / 12;
-        if (n <= 0) return 0;
-        if (r === 0) return monthly * n;
-        return monthly * ((Math.pow(1 + r, n) - 1) / r);
-      }
-
-      // La edad de retiro no puede ser menor o igual a la edad actual.
-      function syncRetirementAgeFloor() {
-        const age = Number(inAge.value) || 0;
-        const floor = Math.max(Number(rRetAge.min), age + 1);
-        if (Number(rRetAge.value) < floor) rRetAge.value = Math.min(floor, Number(rRetAge.max));
-        rRetAge.min = String(floor);
-        renderCalc();
-      }
-
-      function currentCalc() {
-        const age = Number(inAge.value) || 0;
-        const retAge = Number(rRetAge.value);
-        const income = Number(rIncome.value);
-        const savings = Number(rSavings.value);
-        const years = Math.max(0, retAge - age);
-        const currentCapital = futureValue(savings, years);
-        const suggestedSavings = Math.max(savings, income * 0.15); // escenario orientativo: ~15% del ingreso
-        const suggestedCapital = futureValue(suggestedSavings, years);
-        return { age: age, retAge: retAge, income: income, savings: savings, years: years, currentCapital: currentCapital, suggestedCapital: suggestedCapital };
-      }
-
-      function renderCalc() {
-        const c = currentCalc();
-        outRetAge.textContent = c.retAge + ' años';
-        outIncome.textContent = money(c.income);
-        outSavings.textContent = money(c.savings);
-        outYears.textContent = c.years;
-        outSavingsBox.textContent = money(c.savings);
-        outCapital.textContent = money(c.currentCapital);
-
-        const max = Math.max(c.currentCapital, c.suggestedCapital, 1);
-        barCurrent.style.width = (c.currentCapital / max * 100) + '%';
-        barSuggested.style.width = (c.suggestedCapital / max * 100) + '%';
-        barCurrentVal.textContent = money(c.currentCapital);
-        barSuggestedVal.textContent = money(c.suggestedCapital);
-
-        if (c.suggestedCapital > c.currentCapital * 1.02) {
-          calcMessage.textContent = 'Existe oportunidad de fortalecer tu estrategia actual.';
-          calcMessage.className = 'mt-5 text-sm font-semibold text-navy-800';
-        } else {
-          calcMessage.textContent = 'Tu ritmo de ahorro actual es sólido y consistente.';
-          calcMessage.className = 'mt-5 text-sm font-semibold text-emerald-700';
-        }
-
-        // Textos empáticos dinámicos bajo los sliders (UI reactiva).
-        const retHint = document.getElementById('dxRetAgeHint');
-        if (retHint) {
-          retHint.textContent = c.retAge < 60
-            ? 'Retiro Joven: Buscar un retiro temprano es ideal, pero requiere duplicar la velocidad de acumulación. Cada año cuenta.'
-            : 'Contexto de Retiro: En México, las afores tradicionales suelen cubrir solo una fracción de tu último sueldo. Blindar tu estrategia asegura tu calidad de vida.';
-        }
-        const savHint = document.getElementById('dxSavingsHint');
-        if (savHint) {
-          savHint.textContent = c.savings <= 3500
-            ? '🌱 Excelente primer paso: Lo más difícil es romper la inercia. Indexar esto a herramientas estructuradas mantendrá su valor real.'
-            : '🚀 Aceleración Patrimonial: Tienes una capacidad de previsión sólida. Estás pavimentando un camino seguro para tus metas futuras.';
-        }
-      }
-
-      [rRetAge, rIncome, rSavings].forEach(function (el) {
-        el.addEventListener('input', renderCalc);
-      });
-
-      // ------------------------------------------------------------
-      // 5) PROTECCIÓN (respuestas Sí / No como tarjetas)
-      // ------------------------------------------------------------
-      Array.prototype.forEach.call(document.querySelectorAll('.dx-yesno'), function (group) {
-        const question = group.closest('[data-question]').dataset.question;
-        Array.prototype.forEach.call(group.querySelectorAll('.dx-choice'), function (btn) {
-          btn.setAttribute('aria-pressed', 'false');
-          btn.addEventListener('click', function () {
-            state.answers[question] = btn.dataset.value;
-            Array.prototype.forEach.call(group.querySelectorAll('.dx-choice'), function (b) {
-              const on = b === btn;
-              b.classList.toggle('is-selected', on);
-              b.setAttribute('aria-pressed', on ? 'true' : 'false');
-            });
-            stageError('protection', '');
-            updateProtectionIllustration();
-          });
-        });
-      });
-
-      // --- Ilustraciones reactivas del lateral de Protección ---
-      const CHECK_SVG = '<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>';
-      const LOCK_SVG  = '<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 0h10.5a2.25 2.25 0 012.25 2.25v6a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18.75v-6a2.25 2.25 0 012.25-2.25z" /></svg>';
-
-      function setCoverageIcon(rowId, answer) {
-        const row = document.getElementById(rowId);
-        if (!row) return;
-        const icon = row.querySelector('.dx-cov__icon');
-        const badge = row.querySelector('.dx-cov__badge');
-        if (answer === 'Sí') {
-          // Iluminado + checkmark verde
-          row.classList.remove('opacity-40');
-          icon.className = 'dx-cov__icon w-9 h-9 rounded-xl bg-teal-50 text-teal-500 flex items-center justify-center flex-shrink-0';
-          badge.className = 'dx-cov__badge w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0';
-          badge.innerHTML = CHECK_SVG;
-        } else {
-          // "No" o sin responder: atenuado + candado gris
-          row.classList.add('opacity-40');
-          icon.className = 'dx-cov__icon w-9 h-9 rounded-xl bg-navy-50 text-navy-400 flex items-center justify-center flex-shrink-0';
-          badge.className = 'dx-cov__badge w-5 h-5 rounded-full bg-navy-100 text-navy-400 flex items-center justify-center flex-shrink-0';
-          badge.innerHTML = LOCK_SVG;
-        }
-      }
-
-      function updateProtectionIllustration() {
-        // Familia: iluminada en turquesa si hay dependientes, en gris si no.
-        const dep = Math.max(0, Number(inDependents.value) || 0);
-        const art = document.getElementById('dxFamilyArt');
-        if (art) {
-          art.classList.toggle('is-on', dep > 0);
-          art.classList.toggle('is-off', dep === 0);
-        }
-        // Iconos de cobertura segun respuestas booleanas.
-        setCoverageIcon('dxCovMedical', state.answers.hasMedicalInsurance);
-        setCoverageIcon('dxCovLife', state.answers.hasLifeInsurance);
-        setCoverageIcon('dxCovRetire', state.answers.hasRetirementPlan);
-      }
-
-      inDependents.addEventListener('input', updateProtectionIllustration);
-
-      // ------------------------------------------------------------
-      // 6) DIAGNÓSTICO POR ÁREAS (3 barras, reglas simples y transparentes)
-      // ------------------------------------------------------------
-      // Herramienta orientativa interna de la experiencia. No es una
-      // evaluación financiera certificada. Cada barra 0-100.
-      function computeDiagnosisBars(d) {
-        // Resiliencia en Salud: depende de la cobertura de gastos médicos.
-        const health = d.hasMedicalInsurance === 'Sí' ? 100 : 10;
-
-        // Protección Familiar: cobertura de vida ponderada por dependientes.
-        let family;
-        if (d.dependents > 0) family = d.hasLifeInsurance === 'Sí' ? 100 : 10;
-        else family = d.hasLifeInsurance === 'Sí' ? 100 : 55; // sin dependientes, menor urgencia
-
-        // Acumulación Inteligente: ahorro activo + plan formal de retiro.
-        let acc = 0;
-        if (d.savings > 0) acc += 45;
-        if (d.hasRetirementPlan === 'Sí') acc += 55;
-
-        return {
-          health: Math.max(0, Math.min(100, health)),
-          family: Math.max(0, Math.min(100, family)),
-          acc: Math.max(0, Math.min(100, acc)),
-        };
-      }
-
-      // Color de barra según el nivel: rojo / naranja / verde.
-      function barColorClass(v) {
-        if (v < 34) return 'bg-red-500';
-        if (v < 67) return 'bg-amber-500';
-        return 'bg-emerald-500';
-      }
-
-      function paintBar(fillId, valId, v) {
-        const fill = document.getElementById(fillId);
-        const val = document.getElementById(valId);
-        if (fill) { fill.className = 'dx-bar-fill h-full rounded-full ' + barColorClass(v); fill.style.width = v + '%'; }
-        if (val) { val.textContent = v + '%'; }
-      }
-
-      // ------------------------------------------------------------
-      // 7) CONSTRUCCIÓN DEL RESUMEN + escritura de campos ocultos
-      // ------------------------------------------------------------
-      function buildResult() {
-        const c = currentCalc();
-        const dependents = Math.max(0, Number(inDependents.value) || 0);
-        const data = {
-          savings: c.savings,
-          dependents: dependents,
-          hasLifeInsurance: state.answers.hasLifeInsurance,
-          hasMedicalInsurance: state.answers.hasMedicalInsurance,
-          hasRetirementPlan: state.answers.hasRetirementPlan,
-          mainPriority: state.mainPriority,
-        };
-        const bars = computeDiagnosisBars(data);
-
-        // Resumen dinámico
-        const summary = document.getElementById('dxSummary');
-        const lines = [];
-        if (state.mainPriority) lines.push('Tu prioridad principal es <strong>' + state.mainPriority + '</strong>.');
-        if (state.priorities.length > 1) lines.push('También te interesan: ' + state.priorities.filter(function (p) { return p !== state.mainPriority; }).join(', ') + '.');
-        lines.push('Te gustaría retirarte a los <strong>' + c.retAge + ' años</strong> (faltan ' + c.years + ' años).');
-        lines.push('Actualmente destinas <strong>' + money(c.savings) + '</strong> mensuales a tu futuro.');
-        lines.push('Tienes <strong>' + dependents + '</strong> dependiente(s) económico(s).');
-        summary.innerHTML = lines.map(function (t) {
-          return '<li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-navy-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75" /></svg><span>' + t + '</span></li>';
-        }).join('');
-
-        // Pintar las 3 barras de diagnóstico (ancho % + color)
-        paintBar('dxBarHealth', 'dxBarHealthVal', bars.health);
-        paintBar('dxBarFamily', 'dxBarFamilyVal', bars.family);
-        paintBar('dxBarAcc', 'dxBarAccVal', bars.acc);
-
-        // Escribir campos ocultos para Formspree
-        hidPriorities.value = state.priorities.join(', ');
-        hidMain.value = state.mainPriority;
-        hidLife.value = state.answers.hasLifeInsurance;
-        hidMedical.value = state.answers.hasMedicalInsurance;
-        hidRetirePlan.value = state.answers.hasRetirementPlan;
-        hidYears.value = String(c.years);
-        hidCapital.value = String(Math.round(c.currentCapital));
-        hidHealth.value = String(bars.health);
-        hidFamily.value = String(bars.family);
-        hidAcc.value = String(bars.acc);
-        hidLevel.value = String(Math.round((bars.health + bars.family + bars.acc) / 3));
-      }
-
-      // ------------------------------------------------------------
-      // 8) ENVÍO A FORMSPREE (solicitud real al endpoint existente)
-      // ------------------------------------------------------------
-      function setSubmitting(isLoading) {
-        submitBtn.disabled = isLoading;
-        submitLabel.textContent = isLoading ? 'Enviando...' : 'Enviar mi diagnóstico';
-        submitIcon.classList.toggle('animate-spin', isLoading);
-      }
-
-      submitBtn.addEventListener('click', async function () {
-        // Sello de tiempo del envío
-        hidSubmittedAt.value = new Date().toISOString();
-        setSubmitting(true);
-        try {
-          const response = await fetch(form.action, {
-            method: form.method || 'POST',
-            body: new FormData(form),
-            headers: { Accept: 'application/json' },
-          });
-          if (!response.ok) throw new Error('Formspree respondió con un error.');
-          showSuccess();
-        } catch (err) {
-          console.error('[Diagnóstico] Envío por AJAX falló, se usa envío nativo de respaldo:', err);
-          // Red de seguridad: garantizamos que el formulario llegue a Formspree.
-          form.submit();
-        } finally {
-          setSubmitting(false);
-        }
-      });
-
-      function showSuccess() {
-        const nombre = inFullName.value.trim();
-        successName.textContent = nombre ? nombre.split(' ')[0] : 'amigo(a)';
-        stagesWrap.classList.add('hidden');
-        progressWrap.classList.add('hidden');
-        updateLaterals('success'); // ninguna coincidencia -> oculta todos los laterales
-        successView.classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
-      // ------------------------------------------------------------
-      // Inicialización de vistas dinámicas
-      // ------------------------------------------------------------
-      applyPersonalization();
-      renderPriorities();
-      renderCalc();
+    function parseTime(v, fallback) {
+      v = (v || '').trim();
+      if (!v) return fallback;
+      if (v.indexOf('ms') !== -1) return parseFloat(v);
+      if (v.indexOf('s') !== -1) return parseFloat(v) * 1000;
+      return fallback;
     }
-  })();
-  </script>
 
-  <!-- ============================================================ -->
-  <!-- LÓGICA EXCLUSIVA DEL WELCOME OVERLAY (Capa 1) — INTACTA        -->
-  <!-- Solo controla la apertura de puertas de la primera pantalla.  -->
-  <!-- ============================================================ -->
-  <script>
-  (function () {
-    'use strict';
+    var running = false;
 
-    document.addEventListener('DOMContentLoaded', function () {
+    function runSequence() {
+      if (running) return;
+      running = true;
+      brand.disabled = true;
 
-      // ---------- Evento 1: Capa 1 → Capa 2 (apertura de puertas) ----------
-      const institutionalOverlay = document.getElementById('institutionalOverlay');
-      const advanceBtn = document.getElementById('advanceBtn');
-      const leftDoor = document.getElementById('leftDoor'); // puerta principal para transitionend
+      // --- FASE 2: las letras de ROSPECTA se deslizan a la izquierda y
+      //     son "absorbidas" por el recuadro (escalonado, izquierda→derecha). ---
+      var letters = word.querySelectorAll('span');
+      var wordRect = word.getBoundingClientRect();
 
-      if (institutionalOverlay && advanceBtn) {
-        advanceBtn.addEventListener('click', function () {
-          // Evita doble ejecución si ya está abriéndose.
-          if (institutionalOverlay.classList.contains('is-opening')) return;
-
-          // 0) Se deshabilita el botón de inmediato para evitar doble clic.
-          advanceBtn.disabled = true;
-
-          // 1) En el MISMO frame se activa una única clase de estado. El
-          //    CSS coordina toda la coreografía: las puertas se deslizan
-          //    hacia afuera, el botón se comprime y desaparece, y la firma
-          //    + etiqueta se desvanecen simultáneamente. Sin setTimeout
-          //    por elemento; una sola clase controla todo.
-          institutionalOverlay.classList.add('is-opening');
-
-          // 2) Cuando termina de verdad la transición de las puertas
-          //    (transitionend sobre la puerta principal), se oculta el
-          //    overlay con "hidden" (display: none), revelando la Capa 2.
-          //    Un temporizador de respaldo cubre el caso de que el evento
-          //    no se dispare (p. ej. reduced-motion o pestaña inactiva).
-          let finished = false;
-          const finish = function () {
-            if (finished) return;
-            finished = true;
-            institutionalOverlay.classList.add('hidden');
-          };
-
-          if (leftDoor) {
-            leftDoor.addEventListener('transitionend', function (event) {
-              if (event.propertyName === 'transform') finish();
-            });
-          }
-          window.setTimeout(finish, 1100); // respaldo (> 900ms de la transición)
-        });
-      }
-    });
-  })();
-  </script>
-
-  <!-- ============================================================ -->
-  <!-- NAVEGACIÓN DE LA PANTALLA 2 (DASHBOARD DE SELECCIÓN)          -->
-  <!-- "Asesoría completa" (Flujo Profundo) enlaza con el resto de la -->
-  <!-- página: oculta el dashboard y revela el diagnóstico completo.  -->
-  <!-- "Prospección rápida" (Flujo Exprés) queda preparado, pero su   -->
-  <!-- ruta aún no está conectada (se construirá en una fase futura). -->
-  <!-- ============================================================ -->
-  <script>
-  (function () {
-    'use strict';
-
-    document.addEventListener('DOMContentLoaded', function () {
-      const dashboard = document.getElementById('selectionDashboard');
-      if (!dashboard) return;
-
-      const buttons = dashboard.querySelectorAll('.dash-btn');
-
-      // Revela el resto de la página (diagnóstico) ocultando el dashboard.
-      function revealMainExperience() {
-        dashboard.classList.add('is-leaving');           // fundido de salida (opacidad)
-        window.setTimeout(function () {
-          dashboard.classList.add('hidden');              // se retira del layout
-        }, 420);                                          // > 400ms de la transición CSS
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
-      Array.prototype.forEach.call(buttons, function (btn) {
-        btn.addEventListener('click', function () {
-          const flow = btn.dataset.flow;
-
-          if (flow === 'full') {
-            // "Asesoría completa" → conecta con todo el resto de la página (diagnóstico completo).
-            revealMainExperience();
-          } else if (flow === 'express') {
-            // Flujo Exprés "Prospección rápida": ruta pendiente (fase futura).
-            // Por ahora sin acción para no romper la experiencia.
-            console.info('[Dashboard] "Prospección rápida" aún no está conectada.');
-          }
-        });
+      Array.prototype.forEach.call(letters, function (el, i) {
+        // Cada letra viaja hacia el recuadro (borde izquierdo de la palabra).
+        var pull = -(el.getBoundingClientRect().left - wordRect.left) - el.offsetWidth;
+        el.style.setProperty('--pull', pull + 'px');
+        // Escalonado: la letra más cercana al recuadro desaparece primero.
+        el.style.transitionDelay = (i * 55) + 'ms';
       });
-    });
+
+      stage.classList.add('is-absorbing');
+
+      // Duración real de la absorción (incluye el retardo de la última letra).
+      var absorbTotal = ABSORB + (letters.length * 55);
+
+      // --- FASE 3: un segundo después de la absorción, la pantalla negra
+      //     se abre como cortina revelando el Panel del Asesor. ---
+      window.setTimeout(function () {
+        stage.classList.add('is-open');
+        // Al terminar la cortina, el panel queda accesible.
+        window.setTimeout(function () {
+          var advisor = document.querySelector('.advisor');
+          if (advisor) advisor.setAttribute('aria-hidden', 'false');
+          // Foco al CTA para accesibilidad de teclado.
+          if (cta) cta.focus({ preventScroll: true });
+        }, CURTAIN);
+      }, absorbTotal + PAUSE);
+    }
+
+    // Activación por clic o teclado sobre el recuadro/marca.
+    brand.addEventListener('click', runSequence);
+
+    // Acción del CTA final (punto de enganche para el siguiente paso del flujo).
+    if (cta) {
+      cta.addEventListener('click', function () {
+        // Aquí se conectará el diagnóstico del asesor en una fase posterior.
+        console.info('[PROSPECTA] Iniciar Diagnóstico — listo para conectar el flujo.');
+      });
+    }
   })();
   </script>
 

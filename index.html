@@ -7,10 +7,10 @@
 <meta name="description" content="PROSPECTA — Interfaz del Asesor." />
 <meta name="theme-color" content="#000000" />
 
-<!-- Tipografías: Montserrat/Inter (marca y UI ejecutiva) + Great Vibes (firma) -->
+<!-- Tipografías: Montserrat/Inter (marca y UI ejecutiva) + Playfair Display italic (entrada elegante y legible) -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@200;300;400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Montserrat:wght@500;600;700;800&family=Playfair+Display:ital,wght@1,500;1,600&display=swap" rel="stylesheet" />
 
 <style>
   /* ============================================================ */
@@ -24,6 +24,8 @@
     --silver:       #b0bec5; /* plata */
     --steel-cyan:   #74b9cc; /* azul acero / cyan muy sutil (2ª pregunta) */
     --carbon:       #26272b;
+
+    --min-line:     clamp(180px, 45vw, 300px); /* ancho mínimo de la línea */
 
     /* Ritmo de la coreografía del intro (JS lee estos tiempos) */
     --absorb-time:  800ms;
@@ -46,7 +48,7 @@
   }
 
   /* ============================================================ */
-  /* CAPA DE FONDO — negro absoluto (#000000), revelado al abrir.  */
+  /* CAPA DE FONDO — negro absoluto (#000000), lienzo impecable.   */
   /* ============================================================ */
   .backdrop {
     position: fixed;
@@ -57,7 +59,6 @@
 
   /* ============================================================ */
   /* PANEL DEL ASESOR · CAPTURA DE DATOS (SPA ultra-lujo)          */
-  /* Vive bajo la cortina (z-2) y emerge cuando la cortina abre.   */
   /* ============================================================ */
   .advisor {
     position: fixed;
@@ -77,15 +78,18 @@
     transition-delay: var(--curtain-time);
   }
 
+  /* Contenedor de captura: SIEMPRE perfectamente centrado */
   .capture {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
     gap: clamp(2rem, 7vh, 3.75rem);
     width: 100%;
     max-width: 46rem;
+    margin: 0 auto;
     transform: translateY(20px);
     transition: transform 1000ms cubic-bezier(0.22, 1, 0.36, 1);
   }
@@ -111,13 +115,15 @@
     transform: translateY(-8px);
   }
 
-  /* --- Campo de firma dinámico (línea inferior que crece) --- */
+  /* --- Campo de firma dinámico: ocupa el ancho completo y centra ---
+     Así el input (y su línea) crece desde el CENTRO exacto de la
+     pantalla, sin desplazarse hacia la izquierda. */
   .capture__field {
     position: relative;
-    display: inline-flex;
+    display: flex;
     justify-content: center;
     align-items: flex-end;
-    /* overflow visible: la 'P' y el nombre pueden salir del campo */
+    width: 100%;
   }
 
   /* Espejo oculto que mide el ancho real del texto en tiempo real */
@@ -130,19 +136,23 @@
     top: 0;
   }
 
-  /* El input y el espejo comparten EXACTAMENTE la misma tipografía */
+  /* El input, el espejo y el clon comparten EXACTAMENTE la misma
+     tipografía: Playfair Display en itálica (elegante y legible). */
   .capture__input,
-  .capture__mirror {
-    font-family: 'Great Vibes', 'Dancing Script', cursive;
-    font-size: clamp(2.4rem, 9vw, 4.25rem);
-    line-height: 1.15;
-    letter-spacing: 0.01em;
-    padding: 0 0.18em 0.12em;
+  .capture__mirror,
+  .capture__flying {
+    font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(2rem, 7.2vw, 3.7rem);
+    line-height: 1.2;
+    letter-spacing: 0.005em;
+    padding: 0 0.2em 0.1em;
   }
 
   .capture__input {
-    width: var(--min-line, 220px);
-    min-width: var(--min-line, 220px);
+    width: var(--min-line);
+    min-width: var(--min-line);
     max-width: 90vw;
     text-align: center;
     color: var(--white);
@@ -150,8 +160,7 @@
     border: none;
     border-bottom: 2px solid var(--silver);
     caret-color: var(--white);
-    /* La línea (borde inferior) crece/contrae de forma fluida; el color transiciona */
-    transition: width 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    transition: width 300ms cubic-bezier(0.22, 1, 0.36, 1),
                 border-color 700ms ease,
                 box-shadow 700ms ease;
   }
@@ -164,7 +173,7 @@
     box-shadow: 0 3px 16px -8px rgba(116, 185, 204, 0.65);
   }
 
-  /* Pista discreta (sustituye al botón: se avanza con Enter) */
+  /* Pista discreta (se avanza con Enter) */
   .capture__hint {
     font-family: 'Inter', sans-serif;
     font-weight: 300;
@@ -190,13 +199,10 @@
     z-index: 2;
     white-space: nowrap;
     pointer-events: none;
-    font-family: 'Great Vibes', 'Dancing Script', cursive;
-    font-size: clamp(2.4rem, 9vw, 4.25rem);
-    line-height: 1.15;
     color: var(--white);
     transform: translate(-50%, -50%);
-    transition: transform 470ms cubic-bezier(0.6, 0, 0.35, 1) 320ms,
-                opacity 400ms ease 320ms;
+    transition: transform 520ms cubic-bezier(0.6, 0, 0.35, 1) 350ms,
+                opacity 440ms ease 350ms;
   }
   .capture__flying.is-absorbed {
     transform: translate(-50%, -50%) translateX(-46vw) scale(0.16);
@@ -215,44 +221,50 @@
     font-size: clamp(3rem, 11vw, 5.25rem);
     line-height: 1;
     color: #aeb7c0;
+    /* 3D en gris acero + glow sutil (text-shadow) */
     text-shadow:
       1px 1px 0 #8b939c,
       2px 2px 0 #79818b,
       3px 3px 0 #676f79,
       4px 4px 8px rgba(0, 0, 0, 0.55),
-      0 0 22px rgba(174, 183, 192, 0.55); /* glow sutil */
-    /* Entra desde la derecha (48vw), cruza el centro y sale por la izquierda */
+      0 0 22px rgba(174, 183, 192, 0.55);
+    will-change: transform, box-shadow;
+    /* Entra desde la derecha (48vw), cruza el centro y sale por la izquierda.
+       Más lenta y fluida: 1s ease-in-out. */
     transform: translate(-50%, -50%) translateX(48vw);
-    transition: transform 780ms cubic-bezier(0.7, 0, 0.25, 1);
+    transition: transform 1000ms ease-in-out;
   }
-  .capture-p.is-flying { transform: translate(-50%, -50%) translateX(-64vw); }
+  .capture-p.is-flying {
+    transform: translate(-50%, -50%) translateX(-64vw);
+    /* Estela de cometa: cola luminosa hacia atrás (derecha) que se
+       desvanece cuando la 'P' se detiene. */
+    animation: cometTrail 1000ms ease-in-out forwards;
+  }
+  @keyframes cometTrail {
+    0%   { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+    16%  { box-shadow: 70px 0 55px 6px rgba(255, 255, 255, 0.38),
+                       150px 0 95px 2px rgba(176, 190, 197, 0.24); }
+    62%  { box-shadow: 60px 0 50px 6px rgba(255, 255, 255, 0.30),
+                       125px 0 85px 2px rgba(176, 190, 197, 0.18); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+  }
 
   /* ============================================================ */
-  /* CORTINA — dos mitades negras que se abren a los lados.        */
-  /* Costura plata sutil en el borde interior (visible sobre negro)*/
+  /* CORTINA — dos mitades negras (SIN costura/línea central).     */
   /* ============================================================ */
   .curtain { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
   .curtain__half {
     position: absolute;
     top: 0;
-    width: 50.2vw;
+    width: 50.5vw; /* solape amplio: ninguna rendija visible en el centro */
     height: 100%;
     background: var(--black);
+    border: 0;
     will-change: transform;
     transition: transform var(--curtain-time) cubic-bezier(0.76, 0, 0.24, 1);
   }
   .curtain__half--left  { left: 0;  transform: translateX(0); }
   .curtain__half--right { right: 0; transform: translateX(0); }
-  .curtain__half--left::after,
-  .curtain__half--right::before {
-    content: "";
-    position: absolute;
-    top: 0; bottom: 0;
-    width: 1px;
-    background: linear-gradient(to bottom, transparent, rgba(176, 190, 197, 0.28), transparent);
-  }
-  .curtain__half--left::after  { right: 0; }
-  .curtain__half--right::before { left: 0; }
   .stage.is-open .curtain__half--left  { transform: translateX(-100%); }
   .stage.is-open .curtain__half--right { transform: translateX(100%); }
 
@@ -310,16 +322,28 @@
       inset -6px -6px 14px rgba(108, 118, 129, 0.55);
   }
 
+  /* Letra 'P' del logo: 3D realista en relieve (múltiples capas de
+     text-shadow con luz blanca arriba-izquierda + extrusión gris que
+     se oscurece hacia abajo-derecha + sombra de contacto). */
   .brand__p {
     font-family: 'Montserrat', 'Inter', sans-serif;
     font-weight: 800;
     font-size: clamp(58px, 10vw, 100px);
     line-height: 1;
-    color: var(--steel-deep);
+    color: #767e88;
     text-shadow:
-      -1px -1px 1px rgba(0, 0, 0, 0.55),
-      1px 1px 1px rgba(255, 255, 255, 0.85),
-      0 2px 3px rgba(0, 0, 0, 0.25);
+      /* Reflejo de luz (borde superior-izquierdo) */
+      -1px -1px 0 rgba(255, 255, 255, 0.95),
+      -2px -2px 2px rgba(255, 255, 255, 0.55),
+      /* Extrusión escalonada (cuerpo del relieve) hacia abajo-derecha */
+      1px 1px 0 #6a727c,
+      2px 2px 0 #5f666f,
+      3px 3px 0 #545b64,
+      4px 4px 0 #494f58,
+      5px 5px 0 #3e444c,
+      /* Sombra de contacto proyectada sobre el cuadro blanco */
+      6px 7px 8px rgba(0, 0, 0, 0.45),
+      8px 10px 16px rgba(0, 0, 0, 0.30);
     user-select: none;
   }
 
@@ -376,7 +400,7 @@
     .brand__word { font-size: clamp(40px, 7.5vh, 66px); }
     .capture { gap: clamp(1.25rem, 5vh, 2rem); }
     .capture__question { font-size: clamp(1.15rem, 6vh, 1.9rem); }
-    .capture__input, .capture__mirror, .capture__flying { font-size: clamp(2rem, 12vh, 3.2rem); }
+    .capture__input, .capture__mirror, .capture__flying { font-size: clamp(1.9rem, 11vh, 3rem); }
   }
 
   /* ============================================================ */
@@ -386,6 +410,7 @@
     .brand, .brand__box, .brand__word span, .brand__signature span,
     .curtain__half, .advisor, .capture,
     .capture-p, .capture__flying, .capture__input { transition-duration: 0.001ms !important; }
+    .capture-p.is-flying { animation: none; }
   }
 </style>
 </head>
@@ -396,7 +421,7 @@
        (sin clase) → Fase 1 · .is-absorbing → Fase 2 · .is-open → Fase 3 -->
   <div class="stage" id="stage">
 
-    <!-- Fondo negro revelado al abrir la cortina -->
+    <!-- Fondo negro impecable revelado al abrir la cortina -->
     <div class="backdrop" aria-hidden="true"></div>
 
     <!-- ===================================================== -->
@@ -424,7 +449,7 @@
       </div>
     </section>
 
-    <!-- CORTINA -->
+    <!-- CORTINA (sin línea central) -->
     <div class="curtain" aria-hidden="true">
       <div class="curtain__half curtain__half--left"></div>
       <div class="curtain__half curtain__half--right"></div>
@@ -458,8 +483,6 @@
     window.PROSPECTA = window.PROSPECTA || {};
     window.PROSPECTA.advisorState = advisorState;
 
-    /* Preguntas del flujo (extensible). lineColor define el color de   */
-    /* la línea de captura una vez que se muestra esa pregunta.         */
     var QUESTIONS = [
       { key: 'nombre',   label: 'Su nombre, por favor',        lineColor: 'silver' },
       { key: 'negocio',  label: '¿A qué se dedica su negocio?', lineColor: 'cyan'   }
@@ -471,7 +494,6 @@
     var word      = document.getElementById('word');
     var signature = document.getElementById('signature');
 
-    var advisor   = document.getElementById('advisor');
     var question  = document.getElementById('captureQuestion');
     var field     = document.getElementById('captureField');
     var input     = document.getElementById('captureInput');
@@ -540,16 +562,12 @@
     /* ============================================================ */
     /* CAPTURA DE DATOS · firma dinámica + "magia de la P"           */
     /* ============================================================ */
-
-    // Ancho mínimo de la línea (leído del CSS al iniciar).
     var minLine = 220;
 
-    // Ajusta el ancho del input (y por tanto de la línea) al texto real.
     function syncWidth() {
       mirror.textContent = input.value || '';
       var textW = mirror.getBoundingClientRect().width;
-      var target = Math.max(minLine, Math.ceil(textW) + 24); // +espacio para el cursor
-      // Límite superior responsivo (no exceder el viewport)
+      var target = Math.max(minLine, Math.ceil(textW) + 26); // +espacio para el cursor
       var cap = Math.floor(window.innerWidth * 0.9);
       input.style.width = Math.min(target, cap) + 'px';
     }
@@ -560,7 +578,6 @@
     }
 
     function startCapture() {
-      // Fija el mínimo real de la línea a partir del layout renderizado.
       var declaredMin = parseFloat(getComputedStyle(input).minWidth);
       if (declaredMin && !isNaN(declaredMin)) minLine = declaredMin;
       syncWidth();
@@ -570,7 +587,6 @@
 
     input.addEventListener('input', function () {
       syncWidth();
-      // La pista se atenúa mientras el usuario escribe.
       hint.classList.toggle('is-dim', input.value.trim().length > 0);
     });
 
@@ -583,9 +599,9 @@
       runPMagic();
     });
 
-    /* La "magia de la P": la P entra desde la derecha, pasa sobre el
-       nombre en cursiva y se lo lleva hacia la izquierda (absorción),
-       mientras la pregunta cambia (fade) y la línea se reinicia. */
+    /* La "magia de la P": entra desde la derecha (más lenta y fluida),
+       deja una estela de cometa, pasa sobre el nombre en itálica y se lo
+       lleva a la izquierda; la pregunta cambia y la línea se reinicia. */
     function runPMagic() {
       transitioning = true;
 
@@ -602,7 +618,7 @@
       var rect = input.getBoundingClientRect();
       input.style.width = rect.width + 'px';
 
-      // Clon "en vuelo" del nombre escrito (misma cursiva).
+      // Clon "en vuelo" del texto escrito (misma itálica).
       var flying = document.createElement('span');
       flying.className = 'capture__flying';
       flying.textContent = value;
@@ -613,18 +629,17 @@
       input.setAttribute('readonly', 'readonly');
       hint.classList.add('is-dim');
 
-      // Invoca dinámicamente la 'P' 3D que entra desde la derecha.
+      // Invoca dinámicamente la 'P' 3D que entra desde la derecha con estela.
       var pLogo = document.createElement('span');
       pLogo.className = 'capture-p';
       pLogo.textContent = 'P';
       field.appendChild(pLogo);
 
-      // Fuerza reflow para que la transición arranque desde el estado inicial.
-      void pLogo.offsetWidth;
-      pLogo.classList.add('is-flying');          // la P cruza hacia la izquierda
+      void pLogo.offsetWidth; // fuerza reflow (estado inicial de la transición)
+      pLogo.classList.add('is-flying');
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
-          flying.classList.add('is-absorbed');   // el nombre es absorbido
+          flying.classList.add('is-absorbed');
         });
       });
 
@@ -635,19 +650,18 @@
         } else {
           swapQuestion('Gracias, ' + firstName(advisorState.nombre) + '.');
         }
-      }, 200);
+      }, 250);
 
-      // La línea se vacía, se contrae al mínimo y cambia de color.
+      // La línea se vacía, se contrae al mínimo (centrada) y cambia de color.
       window.setTimeout(function () {
         input.value = '';
         input.style.color = '';
         input.removeAttribute('readonly');
-        syncWidth(); // contrae la línea al mínimo (transición de width)
-
+        syncWidth();
         if (next) {
           field.setAttribute('data-line', next.lineColor === 'cyan' ? 'cyan' : 'silver');
         }
-      }, 800);
+      }, 900);
 
       // Limpieza y reposicionamiento del cursor para la nueva respuesta.
       window.setTimeout(function () {
@@ -661,10 +675,9 @@
           input.focus();
           placeCaret();
         } else {
-          // Última pregunta respondida: listo para la siguiente sección.
           finishCapture();
         }
-      }, 1050);
+      }, 1200);
     }
 
     function swapQuestion(text) {
@@ -681,15 +694,12 @@
     }
 
     function finishCapture() {
-      // Punto de enganche para la Fase 2 del diagnóstico (aún por construir).
-      // Aquí quedan disponibles todas las respuestas en advisorState.answers.
       hint.classList.add('is-dim');
       input.setAttribute('readonly', 'readonly');
       transitioning = false;
       console.info('[PROSPECTA] Captura completa:', advisorState.answers);
     }
 
-    // Recalcula el ancho de la línea si cambia el tamaño de la ventana.
     var resizeTimer;
     window.addEventListener('resize', function () {
       clearTimeout(resizeTimer);

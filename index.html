@@ -7,7 +7,7 @@
 <meta name="description" content="PROSPECTA — Interfaz del Asesor." />
 <meta name="theme-color" content="#000000" />
 
-<!-- Tipografías: Montserrat/Inter (marca y UI) + Playfair Display italic (entrada elegante) -->
+<!-- Tipografías: Montserrat (marca) + Inter (UI) + Playfair Display italic (entrada) -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Montserrat:wght@600;700;800;900&family=Playfair+Display:ital,wght@1,500;1,600&display=swap" rel="stylesheet" />
@@ -21,12 +21,17 @@
     --white:        #ffffff;
     --silver:       #b0bec5;
     --steel-cyan:   #74b9cc;
-    --carbon:       #0f1115; /* gris carbón ultra oscuro (Fase 3) */
+    --carbon:       #0f1115;
 
-    --logo-size:    clamp(94px, 13.5vw, 148px);
-    --gap:          clamp(10px, 1.8vw, 22px);
+    /* La 'P' y 'ROSPECTA' comparten EXACTAMENTE este tamaño y peso */
+    --logo-font:    clamp(40px, 6.6vw, 66px);
+    --frame-w:      clamp(3px, 0.42vw, 5px);   /* grosor de línea del marco */
+    --frame-py:     clamp(5px, 0.9vw, 10px);   /* aire arriba/abajo de la P */
+    --frame-pl:     clamp(9px, 1.3vw, 15px);   /* aire a la izquierda */
+    --frame-pr:     clamp(2px, 0.3vw, 4px);    /* aire mínimo a la derecha (lado abierto) */
+    --kern:         2px;                        /* kerning marco → 'R' (mínimo) */
+
     --min-line:     clamp(180px, 45vw, 300px);
-
     --curtain-time: 900ms;
   }
 
@@ -37,67 +42,33 @@
     font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
     background: var(--black);
     color: var(--white);
-    min-height: 100vh;
-    min-height: 100dvh;
+    min-height: 100vh; min-height: 100dvh;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   /* ============================================================ */
-  /* LOGO 3D (recuadro cerrado + 'P') — relieve metálico sutil     */
+  /* LOGO ARMÓNICO — marco abierto (líneas blancas, sin lado der.) */
   /* Reutilizable: se clona como "barredor" en la Fase 3.          */
   /* ============================================================ */
   .logo-mark {
-    position: absolute;
-    top: 50%; left: 50%;
-    width: var(--logo-size);
-    height: var(--logo-size);
-    transform: translate(-50%, -50%);
-    z-index: 3;
-    transition: transform 0.45s cubic-bezier(0.55, 0, 0.2, 1);
-  }
-
-  .logo-frame {
-    position: absolute;
-    inset: 0;
-    border-radius: clamp(10px, 1.6vw, 16px);
-    background: linear-gradient(145deg, #f6f8fa 0%, #d4dadf 44%, #b4bcc5 74%, #d0d6dc 100%);
-    box-shadow:
-      0 14px 32px rgba(0, 0, 0, 0.55),          /* profundidad */
-      0 2px 5px rgba(0, 0, 0, 0.4),
-      inset 0 1px 1px rgba(255, 255, 255, 0.95), /* luz superior */
-      inset 0 -2px 3px rgba(0, 0, 0, 0.28);      /* sombra inferior */
-  }
-  .logo-inner {
-    position: absolute;
-    inset: clamp(9px, 1.5vw, 13px);
-    border-radius: clamp(5px, 0.9vw, 9px);
-    background: var(--black);
-    box-shadow:
-      inset 0 2px 6px rgba(0, 0, 0, 0.9),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.05),
-      inset 0 -1px 1px rgba(255, 255, 255, 0.08);
-  }
-  .logo-p {
-    position: absolute;
-    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1;
+    border: var(--frame-w) solid var(--white);
+    border-right: none;          /* marco ABIERTO a la derecha */
+    border-radius: 0;            /* esquinas en ángulo recto */
+    background: transparent;
+    padding: var(--frame-py) var(--frame-pr) var(--frame-py) var(--frame-pl);
+    z-index: 3;
+  }
+  .logo-p {
     font-family: 'Montserrat', sans-serif;
     font-weight: 800;
-    font-size: calc(var(--logo-size) * 0.5);
+    font-size: var(--logo-font);
     line-height: 1;
-    color: #eef1f4;
-    /* Relieve metálico sutil (no inflado) */
-    text-shadow:
-      0 1px 0 #c2c9d0,
-      0 2px 0 #aab2bb,
-      0 3px 1px #98a0a9,
-      0 4px 7px rgba(0, 0, 0, 0.6),
-      0 0 2px rgba(255, 255, 255, 0.3);
+    color: var(--white);
     user-select: none;
   }
 
@@ -127,27 +98,17 @@
   .stage.is-open .capture { transform: translateY(0); transition-delay: var(--curtain-time); }
 
   .capture__question {
-    font-family: 'Inter', sans-serif;
-    font-weight: 300;
+    font-family: 'Inter', sans-serif; font-weight: 300;
     font-size: clamp(1.3rem, 4.4vw, 2.35rem);
-    line-height: 1.35;
-    letter-spacing: 0.015em;
-    color: #eef1f4;
-    max-width: 20ch;
-    text-wrap: balance;
+    line-height: 1.35; letter-spacing: 0.015em;
+    color: #eef1f4; max-width: 20ch; text-wrap: balance;
     transition: opacity 320ms ease, transform 320ms ease;
   }
   .capture__question.is-hiding { opacity: 0; transform: translateY(-8px); }
 
-  .capture__field {
-    position: relative;
-    display: flex; justify-content: center; align-items: flex-end;
-    width: 100%;
-  }
-  .capture__mirror {
-    position: absolute; visibility: hidden; white-space: pre; pointer-events: none;
-    left: -9999px; top: 0;
-  }
+  .capture__field { position: relative; display: flex; justify-content: center; align-items: flex-end; width: 100%; }
+  .capture__mirror { position: absolute; visibility: hidden; white-space: pre; pointer-events: none; left: -9999px; top: 0; }
+
   .capture__input, .capture__mirror, .capture__flying {
     font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
     font-style: italic; font-weight: 500;
@@ -161,10 +122,9 @@
     background: transparent; border: none;
     border-bottom: 2px solid var(--silver);
     caret-color: var(--white);
-    transition: width 300ms cubic-bezier(0.22, 1, 0.36, 1),
-                border-color 700ms ease, box-shadow 700ms ease;
+    transition: width 300ms cubic-bezier(0.22, 1, 0.36, 1), border-color 700ms ease, box-shadow 700ms ease;
   }
-  .capture__input:focus { outline: none; } /* sin borde azul de focus */
+  .capture__input:focus { outline: none; }
   .capture__field[data-line="cyan"] .capture__input {
     border-bottom-color: var(--steel-cyan);
     caret-color: var(--steel-cyan);
@@ -181,38 +141,35 @@
   .capture__hint.is-dim { opacity: 0; }
   .capture__hint kbd { font-family: inherit; letter-spacing: normal; padding: 0 0.25em; color: rgba(176, 190, 197, 0.6); }
 
-  /* Clon "en vuelo" del nombre (lo absorbe el barredor) */
   .capture__flying {
     position: absolute; left: 50%; top: 50%; z-index: 2;
     white-space: nowrap; pointer-events: none; color: var(--white);
     transform: translate(-50%, -50%);
-    transition: transform 500ms cubic-bezier(0.6, 0, 0.35, 1) 300ms,
-                opacity 420ms ease 300ms;
+    transition: transform 500ms cubic-bezier(0.6, 0, 0.35, 1) 300ms, opacity 420ms ease 300ms;
   }
   .capture__flying.is-absorbed { transform: translate(-50%, -50%) translateX(-46vw) scale(0.14); opacity: 0; }
 
-  /* BARREDOR: el mismo logo 3D, cruzando de derecha a izquierda con estela */
+  /* BARREDOR: el MISMO logo (marco abierto + P) cruzando con estela */
   .sweeper {
     position: absolute; left: 50%; top: 50%;
-    width: var(--logo-size); height: var(--logo-size);
     z-index: 5; pointer-events: none;
     transform: translate(-50%, -50%) translateX(54vw);
     transition: transform 850ms ease-in-out;
     will-change: transform, box-shadow;
   }
   .sweeper.is-sweeping {
-    transform: translate(-50%, -50%) translateX(-68vw);
+    transform: translate(-50%, -50%) translateX(-70vw);
     animation: sweepTrail 850ms ease-in-out forwards;
   }
   @keyframes sweepTrail {
     0%   { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
-    18%  { box-shadow: 85px 0 60px 6px rgba(255, 255, 255, 0.30), 175px 0 115px 3px rgba(184, 192, 200, 0.20); }
-    60%  { box-shadow: 72px 0 55px 6px rgba(255, 255, 255, 0.24), 145px 0 100px 3px rgba(184, 192, 200, 0.15); }
+    18%  { box-shadow: 85px 0 60px 5px rgba(255, 255, 255, 0.30), 175px 0 115px 2px rgba(184, 192, 200, 0.18); }
+    60%  { box-shadow: 72px 0 55px 5px rgba(255, 255, 255, 0.24), 145px 0 100px 2px rgba(184, 192, 200, 0.14); }
     100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
   }
 
   /* ============================================================ */
-  /* FASE 2 · CORTINA — dos mitades negras, sin línea central      */
+  /* FASE 2 · CORTINA                                             */
   /* ============================================================ */
   .curtain { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
   .curtain__half {
@@ -226,74 +183,67 @@
   .stage.is-open .curtain__half--right { transform: translateX(100%); }
 
   /* ============================================================ */
-  /* FASE 1 · CAPA DEL LOGO — logo 3D centrado + textos a la derecha */
+  /* FASE 1 · CAPA DEL LOGO — bloque completo en centro absoluto   */
   /* ============================================================ */
-  .logo-layer { position: fixed; inset: 0; z-index: 20; transition: opacity 500ms ease; }
+  .logo-layer { position: fixed; inset: 0; z-index: 20; transition: opacity 450ms ease; }
   .stage.is-open .logo-layer { opacity: 0; pointer-events: none; }
 
   .brand {
-    position: absolute; inset: 0;
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex; align-items: baseline;   /* misma línea base P ↔ ROSPECTA */
     cursor: pointer; background: none; border: 0; padding: 0;
   }
-  .brand:focus-visible .logo-frame { outline: 2px solid var(--steel-cyan); outline-offset: 10px; }
+  .brand:focus-visible .logo-mark { outline: 2px solid var(--steel-cyan); outline-offset: 8px; }
 
-  /* Textos agrupados a la derecha del logo (z bajo: se ocultan detrás) */
+  /* El marco sale disparado a la izquierda tras tragarse los textos */
+  .brand .logo-mark { transition: transform 0.4s cubic-bezier(0.55, 0, 0.2, 1); }
+  .stage.is-leaving .logo-mark { transform: translateX(-115vw); }
+
+  /* Textos (ROSPECTA + firma) · z bajo: se ocultan tras el marco */
   .brand-text {
-    position: absolute; top: 50%; left: 50%;
-    margin-left: calc(var(--logo-size) / 2 + var(--gap));
-    transform: translateY(-50%);
+    display: flex; flex-direction: column; align-items: flex-start;
+    margin-left: var(--kern);
     z-index: 1;
     text-align: left;
-    transition: transform 0.45s cubic-bezier(0.7, 0, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.7, 0, 0.2, 1);
   }
-  .stage.is-absorbing .brand-text { transform: translate(var(--pull, -340px), -50%); }
+  .stage.is-absorbing .brand-text { transform: translateX(var(--pull, -340px)); }
 
   .brand-word {
-    display: block;
     font-family: 'Montserrat', 'Inter', sans-serif;
-    font-weight: 800;
-    font-size: clamp(38px, 6.6vw, 64px);
+    font-weight: 800;                 /* mismo peso que la 'P' */
+    font-size: var(--logo-font);      /* mismo tamaño que la 'P' */
     line-height: 1;
     letter-spacing: 0.01em;
     color: var(--white);
     white-space: nowrap;
   }
   .brand-sign {
-    display: block;
-    margin-top: clamp(4px, 0.9vh, 9px);
+    margin-top: clamp(5px, 1vh, 10px);
     font-family: 'Inter', sans-serif;
-    font-weight: 200;
+    font-weight: 300;
     font-size: clamp(0.6rem, 1.5vw, 0.82rem);
-    letter-spacing: 0.22em;
-    color: rgba(176, 190, 197, 0.4);
+    letter-spacing: 0.16em;
+    color: rgba(176, 190, 197, 0.5);
     white-space: nowrap;
   }
 
-  /* Máscara oclusora: oculta los textos al deslizarse (invisible sobre negro) */
-  .logo-backing {
-    position: absolute; top: 0; bottom: 0; left: 0;
-    width: calc(50% + var(--logo-size) / 2);
-    background: var(--black);
-    z-index: 2;
-  }
-
-  /* El logo se va volando a la izquierda tras tragarse los textos */
-  .stage.is-leaving .logo-mark { transform: translate(-50%, -50%) translateX(-115vw); }
+  /* Máscara oclusora (negra, invisible sobre negro): oculta los textos */
+  .logo-backing { position: absolute; top: -100vh; height: 300vh; background: var(--black); z-index: 2; }
 
   /* ============================================================ */
-  /* RESPONSIVIDAD                                                 */
+  /* RESPONSIVIDAD                                                */
   /* ============================================================ */
-  @media (max-width: 380px) { .brand-word { font-size: 34px; } }
   @media (orientation: landscape) and (max-height: 500px) {
-    :root { --logo-size: clamp(76px, 15vh, 122px); }
-    .brand-word { font-size: clamp(32px, 7vh, 56px); }
+    :root { --logo-font: clamp(32px, 7vh, 54px); }
     .capture { gap: clamp(1.25rem, 5vh, 2rem); }
     .capture__question { font-size: clamp(1.15rem, 6vh, 1.9rem); }
     .capture__input, .capture__mirror, .capture__flying { font-size: clamp(1.9rem, 11vh, 3rem); }
   }
 
   /* ============================================================ */
-  /* ACCESIBILIDAD — respeta "reducir movimiento"                  */
+  /* ACCESIBILIDAD                                                */
   /* ============================================================ */
   @media (prefers-reduced-motion: reduce) {
     .logo-mark, .brand-text, .curtain__half, .advisor, .capture, .logo-layer,
@@ -335,20 +285,16 @@
     <div class="logo-layer" id="logoLayer">
       <button type="button" class="brand" id="brand" aria-label="PROSPECTA — iniciar">
 
-        <!-- Textos agrupados (z bajo) -->
-        <span class="brand-text" id="brandText" aria-hidden="true">
-          <span class="brand-word">ROSPECTA</span>
-          <span class="brand-sign">by M.aceves y consultores</span>
-        </span>
+        <!-- Marco abierto + 'P' (z alto) -->
+        <span class="logo-mark" id="logoMark"><span class="logo-p">P</span></span>
 
         <!-- Máscara oclusora (z medio) -->
-        <span class="logo-backing" aria-hidden="true"></span>
+        <span class="logo-backing" id="logoBacking" aria-hidden="true"></span>
 
-        <!-- Logo 3D (z alto), centro absoluto -->
-        <span class="logo-mark" id="logoMark">
-          <span class="logo-frame"></span>
-          <span class="logo-inner"></span>
-          <span class="logo-p">P</span>
+        <!-- Textos: ROSPECTA + firma (z bajo) -->
+        <span class="brand-text" id="brandText">
+          <span class="brand-word">ROSPECTA</span>
+          <span class="brand-sign">by M.aceves y consultores</span>
         </span>
 
       </button>
@@ -374,6 +320,7 @@
     var brand     = document.getElementById('brand');
     var brandText = document.getElementById('brandText');
     var logoMark  = document.getElementById('logoMark');
+    var backing   = document.getElementById('logoBacking');
 
     var question = document.getElementById('captureQuestion');
     var field    = document.getElementById('captureField');
@@ -383,9 +330,7 @@
 
     var css = getComputedStyle(document.documentElement);
     var CURTAIN = parseTime(css.getPropertyValue('--curtain-time'), 900);
-
-    var TEXT_SLIDE = 450; // deslizamiento de textos (rápido)
-    var LOGO_OFF   = 450; // el logo sale de pantalla (rápido)
+    var TEXT_SLIDE = 400, LOGO_OFF = 400;
 
     function parseTime(v, fallback) {
       v = (v || '').trim();
@@ -395,8 +340,16 @@
       return fallback;
     }
 
+    /* La máscara negra cubre desde muy a la izquierda hasta el borde
+       derecho del marco (invisible sobre negro; oculta los textos). */
+    function updateMask() {
+      var w = logoMark.offsetWidth;
+      backing.style.left = '-100vw';
+      backing.style.width = 'calc(100vw + ' + w + 'px)';
+    }
+
     /* ============================================================ */
-    /* FASE 1 → 2 · textos detrás del logo → logo sale → cortina    */
+    /* FASE 1 → 2 · textos tras el marco → marco sale → cortina     */
     /* ============================================================ */
     var introRunning = false;
     function runIntro() {
@@ -404,28 +357,21 @@
       introRunning = true;
       brand.disabled = true;
 
-      // Paso 1: los textos se deslizan a la izquierda y se ocultan tras el logo.
-      var textRect = brandText.getBoundingClientRect();
-      var logoRect = logoMark.getBoundingClientRect();
-      var pull = (logoRect.right - textRect.right) - 14; // borde derecho del texto pasa el logo
+      updateMask();
+      var pull = logoMark.getBoundingClientRect().right - brandText.getBoundingClientRect().right - 12;
       brandText.style.setProperty('--pull', pull + 'px');
+
       stage.classList.add('is-absorbing');
-
-      // Paso 2: en cuanto los textos quedan ocultos, el logo sale volando a la izquierda.
-      window.setTimeout(function () {
-        stage.classList.add('is-leaving');
-      }, TEXT_SLIDE + 40);
-
-      // Paso 3: apenas el logo sale, se abre la cortina y se revela la Fase 3.
+      window.setTimeout(function () { stage.classList.add('is-leaving'); }, TEXT_SLIDE + 30);
       window.setTimeout(function () {
         stage.classList.add('is-open');
         window.setTimeout(startCapture, CURTAIN + 120);
-      }, TEXT_SLIDE + 40 + LOGO_OFF);
+      }, TEXT_SLIDE + 30 + LOGO_OFF);
     }
     brand.addEventListener('click', runIntro);
 
     /* ============================================================ */
-    /* FASE 3 · Captura: firma dinámica + barredor (logo 3D)        */
+    /* FASE 3 · Captura: firma dinámica + barredor (mismo logo)     */
     /* ============================================================ */
     var minLine = 220;
 
@@ -436,16 +382,11 @@
       var cap = Math.floor(window.innerWidth * 0.9);
       input.style.width = Math.min(target, cap) + 'px';
     }
-    function placeCaret() {
-      var len = input.value.length;
-      try { input.setSelectionRange(len, len); } catch (e) {}
-    }
+    function placeCaret() { var len = input.value.length; try { input.setSelectionRange(len, len); } catch (e) {} }
     function startCapture() {
       var declaredMin = parseFloat(getComputedStyle(input).minWidth);
       if (declaredMin && !isNaN(declaredMin)) minLine = declaredMin;
-      syncWidth();
-      input.focus();
-      placeCaret();
+      syncWidth(); input.focus(); placeCaret();
     }
 
     input.addEventListener('input', function () {
@@ -457,8 +398,7 @@
     input.addEventListener('keydown', function (e) {
       if (e.key !== 'Enter') return;
       e.preventDefault();
-      if (transitioning) return;
-      if (input.value.trim().length === 0) return;
+      if (transitioning || input.value.trim().length === 0) return;
       runSweeper();
     });
 
@@ -477,7 +417,6 @@
       var rect = input.getBoundingClientRect();
       input.style.width = rect.width + 'px';
 
-      // Clon del nombre "en vuelo"
       var flying = document.createElement('span');
       flying.className = 'capture__flying';
       flying.textContent = value;
@@ -487,11 +426,11 @@
       input.setAttribute('readonly', 'readonly');
       hint.classList.add('is-dim');
 
-      // Barredor = clon del MISMO logo 3D, disparado desde la derecha con estela.
+      // Barredor = clon EXACTO del mismo logo (marco abierto + P).
       var sweeper = logoMark.cloneNode(true);
       sweeper.removeAttribute('id');
       sweeper.classList.remove('logo-mark');
-      sweeper.classList.add('sweeper');
+      sweeper.classList.add('logo-mark', 'sweeper'); // conserva estilos del marco + posiciona
       field.appendChild(sweeper);
 
       void sweeper.offsetWidth;
@@ -500,22 +439,19 @@
         requestAnimationFrame(function () { flying.classList.add('is-absorbed'); });
       });
 
-      // La pregunta cambia fluidamente al mismo tiempo.
       window.setTimeout(function () {
         if (next) swapQuestion(next.label);
         else swapQuestion('Gracias, ' + firstName(advisorState.nombre) + '.');
       }, 220);
 
-      // La línea se vacía, se contrae al mínimo (centrada) y cambia de color.
       window.setTimeout(function () {
         input.value = '';
         input.style.color = '';
         input.removeAttribute('readonly');
-        syncWidth();
+        syncWidth(); // la línea se encoge de regreso a su mínimo (centrada)
         if (next) field.setAttribute('data-line', next.lineColor === 'cyan' ? 'cyan' : 'silver');
       }, 820);
 
-      // Limpieza y reposicionamiento del cursor.
       window.setTimeout(function () {
         if (flying.parentNode) flying.parentNode.removeChild(flying);
         if (sweeper.parentNode) sweeper.parentNode.removeChild(sweeper);
@@ -523,11 +459,8 @@
           qIndex++;
           hint.classList.remove('is-dim');
           transitioning = false;
-          input.focus();
-          placeCaret();
-        } else {
-          finishCapture();
-        }
+          input.focus(); placeCaret();
+        } else { finishCapture(); }
       }, 1000);
     }
 
@@ -546,11 +479,19 @@
       console.info('[PROSPECTA] Captura completa:', advisorState.answers);
     }
 
+    /* Recalcular máscara/ancho al cambiar el tamaño de ventana */
     var resizeTimer;
     window.addEventListener('resize', function () {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function () { if (!transitioning) syncWidth(); }, 120);
+      resizeTimer = setTimeout(function () {
+        if (!introRunning) updateMask();
+        if (!transitioning) syncWidth();
+      }, 120);
     });
+
+    // Ajuste inicial de la máscara cuando las fuentes ya midieron el marco.
+    window.addEventListener('load', updateMask);
+    updateMask();
   })();
   </script>
 
